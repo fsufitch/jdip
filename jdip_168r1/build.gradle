@@ -11,6 +11,25 @@ repositories {
 
 dependencies {
 
+    def batikVersion = '1.6'
+    def batikGroup = 'batik'
+    compile group: batikGroup, name: 'batik-util', version: batikVersion
+    compile group: batikGroup, name: 'batik-bridge', version: batikVersion
+    compile group: batikGroup, name: 'batik-svg-dom', version: batikVersion
+    compile group: batikGroup, name: 'batik-svg-dom', version: batikVersion
+    compile group: batikGroup, name: 'batik-ext', version: batikVersion
+    compile group: batikGroup, name: 'batik-swing', version: batikVersion
+    compile group: batikGroup, name: 'batik-transcoder', version: batikVersion
+    compile group: batikGroup, name: 'batik-parser', version: batikVersion
+    compile group: batikGroup, name: 'batik-gvt', version: batikVersion
+    compile group: batikGroup, name: 'batik-dom', version: batikVersion
+    compile group: batikGroup, name: 'batik-css', version: batikVersion
+    compile group: batikGroup, name: 'batik-script', version: batikVersion
+    compile group: batikGroup, name: 'batik-xml', version: batikVersion
+    compile group: batikGroup, name: 'batik-extension', version: batikVersion
+    runtime group: batikGroup, name: 'batik-awt-util', version: batikVersion
+
+
     // Add all the jar dependencies from the lib folder.
     compile fileTree(dir: 'lib', include: ['*.jar'])
 
