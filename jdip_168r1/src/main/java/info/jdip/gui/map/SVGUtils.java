@@ -22,7 +22,6 @@
 //
 package info.jdip.gui.map;
 
-import com.dautelle.util.TypeFormat;
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.dom.util.XLinkSupport;
 import org.apache.batik.swing.JSVGCanvas;
@@ -270,7 +269,7 @@ public class SVGUtils {
      * <li>Province (checks all short names via getShortNames())
      * </ul>
      */
-    public static void tagFinderSVG(Map<String,Node> map, List<String> lookList, Node root) {
+    public static void tagFinderSVG(Map<String, Node> map, List<String> lookList, Node root) {
         tagFinderSVG(map, lookList, root, false);
     }// tagFinderSVG
 
@@ -360,11 +359,11 @@ public class SVGUtils {
             if (obj == null) {
                 iter.remove();
             } else {
-                    if (nodeValue.equalsIgnoreCase(obj)) {
-                        map.put(obj, parentNode);
-                        iter.remove();
-                        return;
-                    }
+                if (nodeValue.equalsIgnoreCase(obj)) {
+                    map.put(obj, parentNode);
+                    iter.remove();
+                    return;
+                }
             }
         }
     }// nodeChecker()
@@ -458,7 +457,8 @@ public class SVGUtils {
      */
     private static StringBuffer floatToSB(float v) {
         StringBuffer sb = new StringBuffer(8);
-        TypeFormat.format(v, FLOAT_PRECISION, sb);
+        //Local is here to force dot as a separator
+        sb.append(String.format(java.util.Locale.US, "%.1f", v));
         final int s = sb.length();
         if (sb.charAt(s - 1) == '0' && sb.charAt(s - 2) == '.') {
             sb.delete(s - 2, s);
