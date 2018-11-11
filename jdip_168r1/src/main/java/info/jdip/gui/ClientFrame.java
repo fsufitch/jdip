@@ -1014,7 +1014,7 @@ public class ClientFrame extends JFrame {
 
         // set variant path if given
         if (argVariantPath.isSet()) {
-            variantDirPath = argVariantPath.getFile();
+            variantDirPath = argVariantPath.getValue();
         }
 
         // set flags

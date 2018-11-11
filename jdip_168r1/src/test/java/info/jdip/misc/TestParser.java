@@ -204,7 +204,7 @@ public class TestParser {
         cl.parse(args);
 
         // Start the parser
-        new TestParser(argInputFile.getFile(), logOpt.isTrue());
+        new TestParser(argInputFile.getValue(), logOpt.isTrue());
     }// main()
 
     /**
