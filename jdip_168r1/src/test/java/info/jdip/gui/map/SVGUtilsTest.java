@@ -1,4 +1,4 @@
-package dip.gui.map;
+package info.jdip.gui.map;
 
 import org.junit.jupiter.api.Test;
 
