@@ -65,7 +65,7 @@ public class DislodgedParser {
     public static final String DISLODGED_SPLIT_REGEX = "\\s+or\\s+";
     /**
      * capture groups: 1:power, 2:unit, 3:unit location (may be multi-word, needs to be trim()'d)<br>
-     * NOTE: this may span >1 line; it ends with the period ('.')<br>
+     * NOTE: this may span &gt;1 line; it ends with the period ('.')<br>
      * Lines are trimmed prior to parsing.<br>
      * "in" or "over" used (Wing units are "over" provinces; armies/fleets "in")<br>
      */

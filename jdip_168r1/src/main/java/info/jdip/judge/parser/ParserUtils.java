@@ -26,7 +26,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 /**
- * Utilities & Constants used by the parser classes
+ * Utilities &amp; Constants used by the parser classes
  */
 public class ParserUtils {
     /**

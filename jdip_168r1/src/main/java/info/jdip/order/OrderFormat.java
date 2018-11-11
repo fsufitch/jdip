@@ -67,9 +67,9 @@ import java.util.StringTokenizer;
  * text in TRUE may be displayed. Note that the following expressions
  * {field:?:FALSE} and {field:?TRUE:} are valid; the former will
  * display an empty value when <code>true</code>, and the latter
- * an empty value when <code>false</code></li>. Nested statements are
+ * an empty value when <code>false</code>. Nested statements are
  * will cause an error. However, keywords may be present in a true
- * or false clause, but only by themselves.
+ * or false clause, but only by themselves.</li>
  * </ul>
  * <p>
  * Keywords (these do not modify fields or methods)

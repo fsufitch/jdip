@@ -47,8 +47,8 @@ import java.util.StringTokenizer;
  *
  * Formatted Insertion:
  * ===================
- * {date:name,<specifier>}
- * {decimal:name,<specifier>}
+ * {date:name,&lt;specifier&gt;}
+ * {decimal:name,&lt;specifier&gt;}
  *
  * specifiers are optional; locale-specific formatting used.
  *
@@ -56,7 +56,7 @@ import java.util.StringTokenizer;
  * =====
  * {for:name
  *
- * &#64;&#64;name&#64; 	<== insert name[position]
+ * &#64;&#64;name&#64; 	&lt;== insert name[position]
  * }
  *
  *

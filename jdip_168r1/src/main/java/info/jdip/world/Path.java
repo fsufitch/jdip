@@ -235,7 +235,7 @@ public class Path {
      * Otherwise, all possible unique paths are returned, subject to
      * the evaluation constraints of the FAPEvaluator.
      * <p>
-     * This is typically very fast. For standard map, gas->lvp takes about
+     * This is typically very fast. For standard map, gas-&gt;lvp takes about
      * 0.155 ms on a P4/3.0ghz; 10 unique paths are found. More specific
      * FAPEvaluator methods (e.g., that look for a Fleet) will be faster.
      */
@@ -447,7 +447,7 @@ public class Path {
     }// getConvoyRoute()
 
     /**
-     * Find if a true convoy route exists between src & dest; all fleets must
+     * Find if a true convoy route exists between src &amp; dest; all fleets must
      * have:
      * <ol>
      * <li>a Convoy order, with convoy src/dest matching the src/dest given</li>
@@ -461,7 +461,7 @@ public class Path {
     }// isLegalConvoyRoute()
 
     /**
-     * Returns the true convoy route between src & dest; all fleets must
+     * Returns the true convoy route between src &amp; dest; all fleets must
      * have:
      * <ol>
      * <li>a Convoy order, with convoy src/dest matching the src/dest given</li>
@@ -495,8 +495,8 @@ public class Path {
      * <code>path 1: a-b-c</code><br>
      * <code>path 2: a-d-c</code><br>
      * if a or c is invalid, path will fail (false) returned.
-     * if b OR d is invalid (but a & c are good), path will succeed, since an alternate path exists.
-     * This will return true unless both b & d are invalid
+     * if b OR d is invalid (but a &amp; c are good), path will succeed, since an alternate path exists.
+     * This will return true unless both b &amp; d are invalid
      * <p>
      *
      * <h3>Returns:</h3>
@@ -628,7 +628,7 @@ public class Path {
     }// findPathBreadthFirst()
 
     /**
-     * Find shortest distance between src & dest.
+     * Find shortest distance between src &amp; dest.
      * Note that this uses 'touching' adjacency, and that
      * the cost of movement between any adjacent province
      * is the same.

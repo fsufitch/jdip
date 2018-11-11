@@ -557,7 +557,7 @@ public class ClientMenu {
     }// setViewRenderItemsEnabled()
 
     /**
-     * Set the View->Names-> menu option to "None", or whatever was set in
+     * Set the View-&gt;Names-&gt; menu option to "None", or whatever was set in
      * Preferences. This is needed after loading a new game because the map
      * does not show names.
      */

@@ -554,11 +554,11 @@ public class Province implements java.io.Serializable, Comparable<Province> {
          * convoyable coast regions. Convoyable coasts require a single
          * or multi-coast region with a defined land coast.
          * <code>
-         * <p>
+         *
          * land / single / north / south / west / east
-         * <p>
+         *
          * x = true; - = false; ? = true or false
-         * <p>
+         *
          * L S N S W E
          * ===========================================
          * - - ? ? ? ? 	INVALID		(a)		where at least one ? is true

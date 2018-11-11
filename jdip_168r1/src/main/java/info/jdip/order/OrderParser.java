@@ -63,42 +63,42 @@ import static org.slf4j.LoggerFactory.getLogger;
  * <p>
  * <pre>
  * 	HOLD:
- * 	<power>: <type> <s-prov> h
+ * 	&lt;power&gt;: &lt;type&gt; &lt;s-prov&gt; h
  *
  * 	MOVE, RETREAT:
- * 	<power>: <type> <s-prov> m <d-prov>
- * 	<power>: m <s-prov> (to) <d-prov>
+ * 	&lt;power&gt;: &lt;type&gt; &lt;s-prov&gt; m &lt;d-prov&gt;
+ * 	&lt;power&gt;: m &lt;s-prov&gt; (to) &lt;d-prov&gt;
  *
  * 	SUPPORT:
- * 	<power>: <type> <s-prov> s <type> <s-prov>
- * 	<power>: <type> <s-prov> s <type> <s-prov> m <d-prov>
+ * 	&lt;power&gt;: &lt;type&gt; &lt;s-prov&gt; s &lt;type&gt; &lt;s-prov&gt;
+ * 	&lt;power&gt;: &lt;type&gt; &lt;s-prov&gt; s &lt;type&gt; &lt;s-prov&gt; m &lt;d-prov&gt;
  *
  * 	CONVOY:
- * 	<power>: <type> <s-prov> c <type> <s-prov> m <d-prov>
+ * 	&lt;power&gt;: &lt;type&gt; &lt;s-prov&gt; c &lt;type&gt; &lt;s-prov&gt; m &lt;d-prov&gt;
  *
  * 	DISBAND:
- * 	<power>: <type> <s-prov> d
+ * 	&lt;power&gt;: &lt;type&gt; &lt;s-prov&gt; d
  *
  * 	BUILD:
- * 	<power>: <build> <type> <s-prov>
+ * 	&lt;power&gt;: &lt;build&gt; &lt;type&gt; &lt;s-prov&gt;
  *
  * 	REMOVE:
- * 	<power>: <remove> <type> <s-prov>
+ * 	&lt;power&gt;: &lt;remove&gt; &lt;type&gt; &lt;s-prov&gt;
  *
  *
  * 	Where:
  *
- * 	<type> = "army", "a", "fleet", "f" or <empty>
- * 	<s-prov> = Source province.
- * 	<d-prov> = Destination province.
- * 	<power> = Power name or abbreviation of two or more characters.
- * 	<holds> = "h", "hold", "holds", "stand", "stands".
- * 	<moves> = "-", "->", "=>", "m", "move", "moves", "move to", "moves to".
- * 	<support> = "s", "support", "supports".
- * 	<convoy> = "c", "convoy", "convoys".
- * 	<disband> = "d", "disband".
- * 	<build> = "b", "build"
- * 	<remove> = "r", "remove"
+ * 	&lt;type&gt; = "army", "a", "fleet", "f" or &lt;empty&gt;
+ * 	&lt;s-prov&gt; = Source province.
+ * 	&lt;d-prov&gt; = Destination province.
+ * 	&lt;power&gt; = Power name or abbreviation of two or more characters.
+ * 	&lt;holds&gt; = "h", "hold", "holds", "stand", "stands".
+ * 	&lt;moves&gt; = "-", "-&gt;", "=&gt;", "m", "move", "moves", "move to", "moves to".
+ * 	&lt;support&gt; = "s", "support", "supports".
+ * 	&lt;convoy&gt; = "c", "convoy", "convoys".
+ * 	&lt;disband&gt; = "d", "disband".
+ * 	&lt;build&gt; = "b", "build"
+ * 	&lt;remove&gt; = "r", "remove"
  *
  * 	</pre>
  */

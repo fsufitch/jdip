@@ -78,7 +78,7 @@ public class StatusBarUtils {
      * <p>
      * Displays Province information.
      * <p>
-     * Clears status bar if location & appendText is null
+     * Clears status bar if location &amp; appendText is null
      */
     public void displayProvinceInfo(Location loc, String appendText) {
         if (loc == null) {

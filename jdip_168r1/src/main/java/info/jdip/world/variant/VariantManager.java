@@ -395,7 +395,7 @@ public class VariantManager {
 
     /**
      * Finds Variant with the given name, or null if no Variant is found.
-     * Attempts to find the version specified. Versions must be > 0.0f or
+     * Attempts to find the version specified. Versions must be &gt; 0.0f or
      * the version constants VERSION_NEWEST or VERSION_OLDEST.
      * <p>
      * Note: Name is <b>not</b> case-sensitive.
@@ -412,7 +412,7 @@ public class VariantManager {
 
     /**
      * Finds SymbolPack with the given name, or null if no SymbolPack is found.
-     * Attempts to find the version specified. Versions must be > 0.0f or
+     * Attempts to find the version specified. Versions must be &gt; 0.0f or
      * the version constants VERSION_NEWEST or VERSION_OLDEST.
      * <p>
      * Note: Name is <b>not</b> case-sensitive.

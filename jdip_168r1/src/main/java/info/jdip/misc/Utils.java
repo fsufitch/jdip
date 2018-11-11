@@ -1131,7 +1131,7 @@ public class Utils {
     /**
      * Constructs a formatted text field that only allows valid URI characters.
      * These are defined as ASCII alphanumerics (a-z, A-Z, 0-9), plus many
-     * additional characters, including: ;,/,?,:,@,&,=,+,$,,,-,_,.,!,~,*,',|,%
+     * additional characters, including: ;,/,?,:,@,&amp;,=,+,$,,,-,_,.,!,~,*,',|,%
      */
     public static JTextField createURITextField(int cols) {
         JTextField jtf = new JTextField(cols);

@@ -311,7 +311,7 @@ public class TextViewer extends HeaderDialog {
      * clipboard. This method should NOT return null.
      * <p>
      * By default, this method will search for unicode arrow \u2192
-     * and replace it with "->".
+     * and replace it with "-&gt;".
      */
     protected String filterExportedText(String in) {
         return Utils.replaceAll(in, "\u2192", "->");

@@ -449,12 +449,12 @@ public class Support extends Order {
      * To determine this, we must analyze the move against this support.
      * a) if we are dislodged, (via move.evaluate()), then support is cut, becomes FAILURE
      * b) if the move COULD have enough strength to dislodge this unit, become UNCERTAIN
-     * move.attackMax > support.defense_certain
+     * move.attackMax &gt; support.defense_certain
      * note that we do not count self-support (cannot self-dislodge)
      * although we could cut support, that is NOT our perogative. Move.evaluate()
      * must dislodge this support.
      * c) if the move NEVER could have enough strength to dislodge this unit, SUCCESS
-     * move.attackMax <= support.defense_certain
+     * move.attackMax &lt;= support.defense_certain
      * note that we do not count self-support (cannot self-dislodge)
      * 2) if attack is from own unit (power): SUCCESS; support not cut
      * 3) otherwise, support is cut, if an attack exists, or support suceeds,
@@ -473,7 +473,7 @@ public class Support extends Order {
      *
      *
      * NOTE: for multiple attacks:
-     * FAILURE >> UNCERTAIN >> SUCCESS
+     * FAILURE &gt;&gt; UNCERTAIN &gt;&gt; SUCCESS
      *
      * only 2.c.3.b.3, 2.b.1.b result in UNCERTAIN success results.
      * </pre>

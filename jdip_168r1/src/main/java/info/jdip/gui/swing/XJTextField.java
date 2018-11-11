@@ -32,7 +32,7 @@ import java.awt.*;
 /**
  * eXtended JTextField.
  * <p>
- * Converts unicode arrows (\u2192) to "->" arrows,
+ * Converts unicode arrows (\u2192) to "-&gt;" arrows,
  * if the component font is not Unicode-aware.
  */
 public class XJTextField extends JTextField {

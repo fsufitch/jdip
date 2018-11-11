@@ -529,7 +529,7 @@ public class Position implements java.io.Serializable {
     }// clone()
 
     /**
-     * Deep clone of everything *except* dislodged & non-dislodged units;
+     * Deep clone of everything *except* dislodged &amp; non-dislodged units;
      * (e.g., SC ownership, Power Info, etc.)
      */
     public Position cloneExceptUnits() {

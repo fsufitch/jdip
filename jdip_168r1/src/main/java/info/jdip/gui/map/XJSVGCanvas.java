@@ -66,11 +66,11 @@ public class XJSVGCanvas extends JSVGCanvas {
      */
     private int blockIncrement = 30;
     /**
-     * Minimum scale value (if > 0.0)
+     * Minimum scale value (if &gt; 0.0)
      */
     private double minScale = 0.0f;
     /**
-     * Maximum scale value (if > 0.0)
+     * Maximum scale value (if &gt; 0.0)
      */
     private double maxScale = 0.0f;
     private final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();

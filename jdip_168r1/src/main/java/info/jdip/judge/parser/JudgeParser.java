@@ -151,7 +151,7 @@ public class JudgeParser {
     }
 
     /**
-     * For Listings, this is null. For Histories, this is the text after parsing game & player
+     * For Listings, this is null. For Histories, this is the text after parsing game &amp; player
      * information but PRIOR to parsing Date: lines and turns. It is useful for some judges,
      * where it will contain starting positions.
      */

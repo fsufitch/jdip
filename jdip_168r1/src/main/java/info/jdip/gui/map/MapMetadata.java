@@ -412,7 +412,7 @@ public class MapMetadata {
 
     /**
      * Gets the adjusted radius for an order. This is a convenience method.
-     * It is equivalent to calling <code>getOrderParamFloat(<order>, ATT_DELTA_RADIUS)</code> and
+     * It is equivalent to calling <code>getOrderParamFloat(&lt;order&gt;, ATT_DELTA_RADIUS)</code> and
      * passing that value into <code>SymbolSize.getRadius()</code>.
      * <p>
      * symbolName is typically a Unit symbol name (e.g., "Wing", "Army", "DislodgedFleet", etc.).<br>

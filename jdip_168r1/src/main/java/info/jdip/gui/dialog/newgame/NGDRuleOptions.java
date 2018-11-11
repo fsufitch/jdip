@@ -128,7 +128,7 @@ public class NGDRuleOptions extends JPanel implements NewGameDialog.NGDTabPane {
 
 
     /**
-     * Enables & Disables controls on this panel
+     * Enables &amp; Disables controls on this panel
      */
     public void setEnabled(boolean value) {
         optionList.setEnabled(value);

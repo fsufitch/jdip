@@ -296,7 +296,7 @@ public final class Coast implements java.io.Serializable {
      * coalesces preceding spaces (before parenthesis), so
      * "stp(sc)", "stp( sc)", "stp(.s.c.)", "stp (sc)", and "stp    (sc)" all would become "stp/sc"
      * coast depends upon FIRST character
-     * stp(qoieru)    ==> invalid!
+     * stp(qoieru)    ==&gt; invalid!
      * 	</pre>
      * <p>
      * An OrderException is thrown if the coast is not recognized. The OrderException will contain

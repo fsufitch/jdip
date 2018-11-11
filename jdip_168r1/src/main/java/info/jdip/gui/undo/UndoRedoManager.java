@@ -152,7 +152,7 @@ public class UndoRedoManager extends UndoManager {
     }// setClientFrame()
 
     /**
-     * Refreshes the menu items, enabling & adding action names as appropriate.
+     * Refreshes the menu items, enabling &amp; adding action names as appropriate.
      * This is mode-aware; undo/redo is only available when in MODE_EDIT and
      * MODE_ORDER.
      */

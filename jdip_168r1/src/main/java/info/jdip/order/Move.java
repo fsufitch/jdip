@@ -437,8 +437,8 @@ public class Move extends Order {
      * <p>
      * This will only throw an OrderException if there is an Explicit
      * convoy path that is bad (doesn't contain src and dest in route,
-     * or doesn't form a route from src->dest), or if there is no
-     * implicit theoretical route from src->dest.
+     * or doesn't form a route from src-&gt;dest), or if there is no
+     * implicit theoretical route from src-&gt;dest.
      * <p>
      * An implicit route is assumed if no explicit route has been set.
      */
@@ -520,6 +520,7 @@ public class Move extends Order {
      * <li>Moves involving armies without theoretical convoy routes
      * always verify successfully.</li>
      * <li>Moves with theoretical convoy routes are evaluated as such:</li>
+     * <li>
      * <ul>
      * <li>Moves with explicit convoy routes or "convoy-preferred" moves
      * (isViaConvoy() is true) are evaluated to make sure there is
@@ -534,6 +535,7 @@ public class Move extends Order {
      * route <b>and</b> one of the Fleets in that route is of the
      * same Power as the Move order we are evaluating.</li>
      * </ul>
+     * </li>
      * </ul>
      * <p>
      * <b>Legal</b> convoy routes are defined as a possible (or "theoretical")
@@ -721,7 +723,7 @@ public class Move extends Order {
      * the head-to-head flag of OrderState is set. A Head-To-Head move is
      * defined as:
      * <pre>
-     * 	 	A->B and B->A, where neither B nor A is convoyed.
+     * 	 	A-&gt;B and B-&gt;A, where neither B nor A is convoyed.
      * 	</pre>
      * Note that head-to-head determination may not be complete until
      * verification is complete, as it depends upon whether this and/or an
@@ -800,7 +802,7 @@ public class Move extends Order {
      *
      * evaluation of Move orders. The algorithm is as follows:
      * ======================================================
-     * 1) calculate support of this move (certain & uncertain)
+     * 1) calculate support of this move (certain &amp; uncertain)
      *
      * 2) if this is a convoyed move, evaluate convoy route
      * a) if convoy route fails, move fails
@@ -819,10 +821,10 @@ public class Move extends Order {
      * 3) compare attack_certain (of this move) to attack_max of all other attacks,
      * and defense_max of destination.
      * a) if another Move order to destination succeeded, then FAILURE
-     * b) if attack_certain > *all* of the defenders' (attack_max && defense_max)
+     * b) if attack_certain &gt; *all* of the defenders' (attack_max &amp;&amp; defense_max)
      * SUCCESS, unless defender is of the same power, in which case FAILURE
      * if SUCCESS, defender (if present) is dislodged
-     * c) if attack_max <= *any* of the defenders' attack_certain or defense_certain
+     * c) if attack_max &lt;= *any* of the defenders' attack_certain or defense_certain
      * FAILURE (since there would be no way to overcome this difference,
      * regardless of support!)
      * this is a "BOUNCE" [note: this is a key point]
@@ -851,7 +853,7 @@ public class Move extends Order {
      * c) if destination move UNCERTAIN, unit is "maybe" dislodged, unless self;
      * if self, we remain uncertain
      * 2)	if we are not stronger  (equal-strength)
-     * a) we fail, ONLY if we are 'definately' not stronger (atk.max < def.certain)
+     * a) we fail, ONLY if we are 'definately' not stronger (atk.max &lt; def.certain)
      * b) if destination move SUCCESS, we succeed
      * c) if destination move UNCERTAIN, we remain uncertain.
      * c) unit is a head-to-head MOVE order
@@ -870,17 +872,17 @@ public class Move extends Order {
      * if comparing against a head-to-head battle, where a unit may be dislodged, remain
      * uncertain until we know if the unit is dislodged; if unit dislodged by head-to-head
      * player, it cannot affect other battles
-     * A->B
-     * B->A
-     * D->B	(and dislodges B)	: no change
+     * A-&gt;B
+     * B-&gt;A
+     * D-&gt;B	(and dislodges B)	: no change
      * HOWEVER,
-     * A->B, B->A, C->A, and A dislodges B (head to head), C can move to A.
+     * A-&gt;B, B-&gt;A, C-&gt;A, and A dislodges B (head to head), C can move to A.
      * B does not standoff C because it was dislodged by A in a head-to-head battle.
      *
      * This is seen in DATC cases 5.A and 7.H (if no "by convoy" is used).
-     * 1) isHeadToHead() && EvalState == UNCERTAIN *or* head-to-head part unevaluated:
+     * 1) isHeadToHead() &amp;&amp; EvalState == UNCERTAIN *or* head-to-head part unevaluated:
      * UNCERTAIN result.
-     * 2) isHeadToHead() && EvalState == FAILURE:
+     * 2) isHeadToHead() &amp;&amp; EvalState == FAILURE:
      * if disloger == head-to-head, then ignore (do nothing)
      * 3) otherwise, process normally.
      *

@@ -202,11 +202,11 @@ public class Unit implements java.io.Serializable {
          * AS WELL AS the standard English names. So, for
          * English names (and all other languages):
          * <pre>
-         * 		null -> Type.UNDEFINED
-         * 		'f' or 'fleet' -> Type.FLEET
-         * 		'a' or 'army' -> Type.ARMY
-         * 		'w' or 'wing' -> Type.WING
-         * 		any other -> null
+         * 		null -&gt; Type.UNDEFINED
+         * 		'f' or 'fleet' -&gt; Type.FLEET
+         * 		'a' or 'army' -&gt; Type.ARMY
+         * 		'w' or 'wing' -&gt; Type.WING
+         * 		any other -&gt; null
          * 	</pre>
          */
         public static Unit.Type parse(String text) {
