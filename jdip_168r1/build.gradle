@@ -34,6 +34,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.l2fprod.common/l2fprod-common-directorychooser
     compile group: 'com.l2fprod.common', name: 'l2fprod-common-directorychooser', version: '6.9.1'
+    // https://mvnrepository.com/artifact/javax.help/javahelp
+    compile group: 'javax.help', name: 'javahelp', version: '2.0.05'
+
 
 
     // Add all the jar dependencies from the lib folder.
