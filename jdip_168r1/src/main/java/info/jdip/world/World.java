@@ -82,7 +82,9 @@ public class World implements Serializable {
 
     /**
      * Reads a World object from a file.
+     * @deprecated this method uses an old and unmaintained library
      */
+    @Deprecated
     public static World open(File file)
             throws IOException {
         JSX.ObjectReader in = null;
@@ -105,7 +107,9 @@ public class World implements Serializable {
 
     /**
      * Saves a World object to a file.
+     * @deprecated this method uses an old and unmaintained library
      */
+    @Deprecated
     public static void save(File file, World world)
             throws IOException {
 
@@ -135,6 +139,7 @@ public class World implements Serializable {
      * Sets any special per-power state information that is not associated with
      * a particular TurnState. This may be set to null.
      */
+    @Deprecated
     public void setPowerState(Power power, Object state) {
         nonTurnData.put(power, state);
     }// setPowerState()
@@ -143,6 +148,7 @@ public class World implements Serializable {
      * Gets any special per-power state information that is not associated with
      * a particular TurnState. This may return null.
      */
+    @Deprecated
     public Object getPowerState(Power power) {
         return nonTurnData.get(power);
     }// getPowerState()
@@ -150,6 +156,7 @@ public class World implements Serializable {
     /**
      * Get the Global state object. This may return null.
      */
+    @Deprecated
     public Object getGlobalState() {
         return nonTurnData.get(KEY_GLOBAL_DATA);
     }// getGlobalState()
@@ -157,6 +164,7 @@ public class World implements Serializable {
     /**
      * Set the Global state object. This may be set to null.
      */
+    @Deprecated
     public void setGlobalState(Object state) {
         nonTurnData.put(KEY_GLOBAL_DATA, state);
     }// setGlobalState()
@@ -378,14 +386,18 @@ public class World implements Serializable {
 
     /**
      * Gets the UndoRedo manager that was saved. Null if none was saved.
+     * @deprecated this cannot be loaded/stored in a useful way
      */
+    @Deprecated
     public UndoRedoManager getUndoRedoManager() {
         return (UndoRedoManager) nonTurnData.get(KEY_UNDOREDOMANAGER);
     }// getUndoRedoManager()
 
     /**
      * Sets the UndoRedo manager to be saved. This may be set to null.
+     * @deprecated this cannot be loaded/stored in a useful way
      */
+    @Deprecated
     public void setUndoRedoManager(UndoRedoManager urm) {
         nonTurnData.put(KEY_UNDOREDOMANAGER, urm);
     }// setGlobalState()
