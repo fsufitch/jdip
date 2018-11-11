@@ -32,6 +32,9 @@ dependencies {
     // https://mvnrepository.com/artifact/com.github.w1tebear/jcmdline
     compile group: 'com.github.w1tebear', name: 'jcmdline', version: '2.0.1'
 
+    // https://mvnrepository.com/artifact/com.l2fprod.common/l2fprod-common-directorychooser
+    compile group: 'com.l2fprod.common', name: 'l2fprod-common-directorychooser', version: '6.9.1'
+
 
     // Add all the jar dependencies from the lib folder.
     compile fileTree(dir: 'lib', include: ['*.jar'])
