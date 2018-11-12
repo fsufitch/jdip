@@ -360,6 +360,8 @@ public class Phase implements java.io.Serializable, Comparable {
      * Represents seasons
      * <p>
      * SeasonType constants should be used, rather than creating new SeasonType objects.
+     *
+     * TODO: this should be an Enum
      */
     public static class SeasonType implements Serializable, Comparable {
         // always-accepted english constants for SeasonTypes
@@ -559,6 +561,8 @@ public class Phase implements java.io.Serializable, Comparable {
      * PhaseTypes represent game phases. For example, MOVEMENT or RETREAT phases.
      * <p>
      * PhaseType constants should be used instead of creating new PhaseType objects.
+     *
+     * TODO: this should be an Enum
      */
     public static class PhaseType implements Serializable, Comparable {
         // always-accepted english constants for phase types

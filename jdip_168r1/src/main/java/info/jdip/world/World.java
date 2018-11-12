@@ -59,17 +59,31 @@ import java.util.zip.GZIPOutputStream;
 public class World implements Serializable {
     // constants for non-turn-data lookup
     private static final String KEY_GLOBAL_DATA = "_global_data_";
-    private static final String KEY_VICTORY_CONDITIONS = "_victory_conditions_";
+    //private static final String KEY_VICTORY_CONDITIONS = "_victory_conditions_";
 
-    private static final String KEY_WORLD_METADATA = "_world_metadata_";
+    //private static final String KEY_WORLD_METADATA = "_world_metadata_";
     private static final String KEY_UNDOREDOMANAGER = "_undo_redo_manager_";
-    private static final String KEY_GAME_SETUP = "_game_setup_";
-    private static final String KEY_VARIANT_INFO = "_variant_info_";
+    //private static final String KEY_GAME_SETUP = "_game_setup_";
+    //private static final String KEY_VARIANT_INFO = "_variant_info_";
     private final info.jdip.world.Map map;                        // the actual map (constant)
     // instance variables
     private SortedMap<Phase, TurnState> turnStates = null;            // turn data
     private Map<Object, Object> nonTurnData = null;            // non-turn data (misc data & per-player data)
 
+    /** The player metadata per power. */
+    private Map<Power, PlayerMetadata> playerMetadata;
+
+    /** The victory conditions. */
+    private VictoryConditions victoryConditions;
+
+    /** The game metadata. */
+    private GameMetadata gameMetadata;
+
+    /** The game setup. */
+    private GameSetup gameSetup;
+
+    /** The variant info. */
+    private VariantInfo variantInfo;
 
     /**
      * Constructs a World object.
@@ -78,6 +92,7 @@ public class World implements Serializable {
         this.map = map;
         turnStates = Collections.synchronizedSortedMap(new TreeMap<>());    // synchronize on TreeMap
         nonTurnData = new HashMap<>(17);
+        playerMetadata = new HashMap<>();
     }// World()
 
     /**
@@ -173,14 +188,16 @@ public class World implements Serializable {
      * Get the Victory Conditions
      */
     public VictoryConditions getVictoryConditions() {
-        return (VictoryConditions) nonTurnData.get(KEY_VICTORY_CONDITIONS);
+        //return (VictoryConditions) nonTurnData.get(KEY_VICTORY_CONDITIONS);
+        return this.victoryConditions;
     }// getVictoryConditions()
 
     /**
      * Set the Victory Conditions
      */
     public void setVictoryConditions(VictoryConditions value) {
-        nonTurnData.put(KEY_VICTORY_CONDITIONS, value);
+        //nonTurnData.put(KEY_VICTORY_CONDITIONS, value);
+        this.victoryConditions = value;
     }// setVictoryConditions()
 
     /**
@@ -339,12 +356,14 @@ public class World implements Serializable {
      * Gets the Game metadata. Never returns null. Does not return a copy.
      */
     public GameMetadata getGameMetadata() {
-        GameMetadata gmd = (GameMetadata) nonTurnData.get(KEY_WORLD_METADATA);
-        if (gmd == null) {
-            gmd = new GameMetadata();
-            setGameMetadata(gmd);
+        //GameMetadata gmd = (GameMetadata) nonTurnData.get(KEY_WORLD_METADATA);
+        //if (gmd == null) {
+        if (this.gameMetadata == null) {
+            //gmd = new GameMetadata();
+            //setGameMetadata(gmd);
+            this.gameMetadata = new GameMetadata();
         }
-        return gmd;
+        return this.gameMetadata;
     }// setGameMetadata()
 
     /**
@@ -355,7 +374,8 @@ public class World implements Serializable {
             throw new IllegalArgumentException("null metadata");
         }
 
-        nonTurnData.put(KEY_WORLD_METADATA, gmd);
+        //nonTurnData.put(KEY_WORLD_METADATA, gmd);
+        this.gameMetadata = gmd;
     }// setGameMetadata()
 
     /**
@@ -365,7 +385,8 @@ public class World implements Serializable {
         if (power == null || pmd == null) {
             throw new IllegalArgumentException("null power or metadata");
         }
-        nonTurnData.put(power, pmd);
+        //nonTurnData.put(power, pmd);
+        playerMetadata.put(power, pmd);
     }// setPlayerMetadata()
 
     /**
@@ -376,7 +397,8 @@ public class World implements Serializable {
             throw new IllegalArgumentException("null power");
         }
 
-        PlayerMetadata pmd = (PlayerMetadata) nonTurnData.get(power);
+        //PlayerMetadata pmd = (PlayerMetadata) nonTurnData.get(power);
+        PlayerMetadata pmd = playerMetadata.get(power);
         if (pmd == null) {
             pmd = new PlayerMetadata();
             setPlayerMetadata(power, pmd);
@@ -406,7 +428,8 @@ public class World implements Serializable {
      * Returns the GameSetup object
      */
     public GameSetup getGameSetup() {
-        return (GameSetup) nonTurnData.get(KEY_GAME_SETUP);
+        //return (GameSetup) nonTurnData.get(KEY_GAME_SETUP);
+        return this.gameSetup;
     }// getGameSetup()
 
     /**
@@ -416,28 +439,33 @@ public class World implements Serializable {
         if (gs == null) {
             throw new IllegalArgumentException();
         }
-        nonTurnData.put(KEY_GAME_SETUP, gs);
+        //nonTurnData.put(KEY_GAME_SETUP, gs);
+        this.gameSetup = gs;
     }// setGameSetup()
 
     /**
      * Get the Variant Info object. This returns a Reference to the Variant information.
      */
     public synchronized VariantInfo getVariantInfo() {
-        VariantInfo vi = (VariantInfo) nonTurnData.get(KEY_VARIANT_INFO);
+        //VariantInfo vi = (VariantInfo) nonTurnData.get(KEY_VARIANT_INFO);
 
-        if (vi == null) {
-            vi = new VariantInfo();
-            nonTurnData.put(KEY_VARIANT_INFO, vi);
+        //if (vi == null) {
+        if (this.variantInfo == null) {
+            //vi = new VariantInfo();
+            //nonTurnData.put(KEY_VARIANT_INFO, vi);
+            this.variantInfo = new VariantInfo();
         }
 
-        return vi;
+        //return vi;
+        return this.variantInfo;
     }// getVariantInfo()
 
     /**
      * Set the Variant Info object.
      */
     public synchronized void setVariantInfo(VariantInfo vi) {
-        nonTurnData.put(KEY_VARIANT_INFO, vi);
+        //nonTurnData.put(KEY_VARIANT_INFO, vi);
+        this.variantInfo = vi;
     }// getVariantInfo()
 
 
