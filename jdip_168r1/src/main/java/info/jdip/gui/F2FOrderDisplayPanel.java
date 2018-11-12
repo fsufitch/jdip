@@ -22,8 +22,6 @@
 //
 package info.jdip.gui;
 
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.map.MapMetadata;
 import info.jdip.gui.map.SVGColorParser;
 import info.jdip.gui.swing.ColorRectIcon;
@@ -306,21 +304,17 @@ public class F2FOrderDisplayPanel extends OrderDisplayPanel {
 
         // we want to share the main panel between all tabs
         // main panel layout
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.PAGE_AXIS));
+        bottomPanel.add(makeSortPanel());
+        bottomPanel.add(buttonPanel);
+
         main = new JPanel();
-        int w1[] = {0};
-        int h1[] = {0, 5, 0, 10, 0};
-
-        HIGLayout hl = new HIGLayout(w1, h1);
-        hl.setColumnWeight(1, 1);
-        hl.setRowWeight(1, 1);
-        main.setLayout(hl);
-
-        HIGConstraints c = new HIGConstraints();
+        main.setLayout(new BorderLayout());
 
         main.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        main.add(orderListScrollPane, c.rc(1, 1, "lrtb"));
-        main.add(makeSortPanel(), c.rc(3, 1));
-        main.add(buttonPanel, c.rc(5, 1));
+        main.add(orderListScrollPane, BorderLayout.CENTER);
+        main.add(bottomPanel, BorderLayout.SOUTH);
 
         tabPane = new JTabbedPane();
         tabListener = new TabListener();

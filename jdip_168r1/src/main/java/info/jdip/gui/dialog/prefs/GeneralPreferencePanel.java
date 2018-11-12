@@ -203,6 +203,7 @@ public class GeneralPreferencePanel extends PreferencePanel {
                 0, 3, 0, 10, 0, 8, 0, BORDER};
         int w1[] = {BORDER, 10, 0, 5, 0, BORDER};
 
+        //TODO: replace HIGLayout
         HIGLayout l1 = new HIGLayout(w1, h1);
         l1.setColumnWeight(3, 1);
         l1.setRowWeight(19, 1);

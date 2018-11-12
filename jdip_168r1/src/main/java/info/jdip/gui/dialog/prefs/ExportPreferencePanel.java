@@ -109,6 +109,7 @@ public class ExportPreferencePanel extends PreferencePanel {
         int h1[] = {BORDER, 0, 5, 0, 1, 0, 1, 0, 1, 0, (BORDER * 2), 0, 5, 0, 1, 0, 1, 0, BORDER};
         int w1[] = {BORDER, INDENT, 0, 0, BORDER};
 
+        //TODO: replace HIGLayout
         HIGLayout l1 = new HIGLayout(w1, h1);
         l1.setColumnWeight(4, 1);
         l1.setRowWeight(18, 1);

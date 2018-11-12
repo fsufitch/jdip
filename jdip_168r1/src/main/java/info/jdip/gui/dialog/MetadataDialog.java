@@ -266,6 +266,7 @@ public class MetadataDialog extends HeaderDialog {
             int w1[] = {BORDER, 10, 0, 5, 0, 10, 5, 0, BORDER};
             int h1[] = {BORDER, 0, 20, 0, 5, 0, 10, 0, 10, 0, 10, 0, 30, 0, 10, 0, 10, 0, BORDER};
 
+            //TODO: replace HIGLayout
             HIGLayout layout = new HIGLayout(w1, h1);
             layout.setColumnWeight(8, 1);
             this.setLayout(layout);
@@ -356,6 +357,7 @@ public class MetadataDialog extends HeaderDialog {
             int w1[] = {BORDER, 0, 5, 0, 15, 0, 5, 0, BORDER};
             int h1[] = {BORDER, 0, 5, 0, 5, 0, 5, 0, 5, 0, 5, 10, 0, 5, 0, BORDER};
 
+            //TODO: replace HIGLayout
             HIGLayout layout = new HIGLayout(w1, h1);
             layout.setColumnWeight(5, 1);
             layout.setRowWeight(12, 1);

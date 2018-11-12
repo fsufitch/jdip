@@ -165,6 +165,7 @@ public class AboutDialog extends HeaderDialog {
         int w1[] = {SYS_BORDER, 0, SYS_BORDER};
         int h1[] = {SYS_BORDER, 0, SYS_BORDER};
 
+        //TODO: replace HIGLayout
         HIGLayout l1 = new HIGLayout(w1, h1);
         l1.setColumnWeight(2, 1);
         l1.setRowWeight(2, 1);
@@ -203,6 +204,7 @@ public class AboutDialog extends HeaderDialog {
         int w1[] = {SYS_BORDER, 0, SYS_BORDER};
         int h1[] = {SYS_BORDER, 0, SYS_BORDER};
 
+        //TODO: replace HIGLayout
         HIGLayout l1 = new HIGLayout(w1, h1);
         l1.setColumnWeight(2, 1);
         l1.setRowWeight(2, 1);
@@ -277,6 +279,7 @@ public class AboutDialog extends HeaderDialog {
         int w1[] = {SYS_BORDER, 0, SYS_BORDER};
         int h1[] = {SYS_BORDER, 0, SYS_BORDER};
 
+        //TODO: replace HIGLayout
         HIGLayout l1 = new HIGLayout(w1, h1);
         l1.setColumnWeight(2, 1);
         l1.setRowWeight(2, 1);

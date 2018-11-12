@@ -22,8 +22,6 @@
 //
 package info.jdip.gui;
 
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.dialog.prefs.GeneralPreferencePanel;
 import info.jdip.gui.swing.XJScrollPane;
 import info.jdip.gui.undo.UndoAddMultipleOrders;
@@ -805,20 +803,10 @@ public class OrderDisplayPanel extends JPanel {
      * by the constructor.
      */
     protected void makeLayout() {
-        // start layout
-        int w1[] = {0};
-        int h1[] = {0, 5, 0};    // 3 pixels between scroll list & sort buttons
-
-        HIGLayout hl = new HIGLayout(w1, h1);
-        hl.setColumnWeight(1, 1);
-        hl.setRowWeight(1, 1);
-        setLayout(hl);
-
-        HIGConstraints c = new HIGConstraints();
-
-        add(orderListScrollPane, c.rc(1, 1, "lrtb"));
-        add(makeSortPanel(), c.rc(3, 1));
-    }// makeLayout()
+        setLayout(new BorderLayout());
+        add(orderListScrollPane, BorderLayout.CENTER);
+        add(makeSortPanel(), BorderLayout.SOUTH);
+    }
 
     /**
      * Makes the panel containing the sort buttons.

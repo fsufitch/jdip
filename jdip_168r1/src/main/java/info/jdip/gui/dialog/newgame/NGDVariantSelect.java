@@ -260,6 +260,7 @@ public class NGDVariantSelect extends JPanel implements NewGameDialog.NGDTabPane
         int w1[] = {BORDER, 0, 15, 0, BORDER};    // cols
         int h1[] = {2 * BORDER, 0, 5, 0, BORDER};    // rows
 
+        //TODO: replace HIGLayout
         HIGLayout l1 = new HIGLayout(w1, h1);
         l1.setColumnWeight(4, 1);
         l1.setRowWeight(4, 1);

@@ -110,6 +110,7 @@ public class DisplayPreferencePanel extends PreferencePanel {
         int h1[] = {BORDER, 0, 15, 35, 10, 0, 2, 0, 2, 0, 0, 2, 0, 2, 0, 0, 15, 0, 5, 0, 10, 0, 15, 0, BORDER};
         int w1[] = {BORDER, INDENT, 0, 10, 0, 15, 0, 25, 0, 4, 0, 0, 0, BORDER};
 
+        //TODO: replace HIGLayout
         HIGLayout l1 = new HIGLayout(w1, h1);
         l1.setColumnWeight(13, 1);
         l1.setRowWeight(23, 1);

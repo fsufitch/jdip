@@ -111,6 +111,7 @@ public class NGDMapAndUnits extends JPanel implements NewGameDialog.NGDTabPane {
         int w1[] = {50, 0, 0};        // cols
         int h1[] = {0, 0, 0, 0};        // rows
 
+        //TODO: replace HIGLayout
         HIGLayout l1 = new HIGLayout(w1, h1);
         l1.setColumnWeight(3, 1);
         l1.setRowWeight(1, 1);
@@ -415,6 +416,7 @@ public class NGDMapAndUnits extends JPanel implements NewGameDialog.NGDTabPane {
             int w1[] = {0, BORDER_10, 0};            // cols
             int h1[] = {0, BORDER_5, 0, 0};        // rows
 
+            //TODO: replace HIGLayout
             HIGLayout l1 = new HIGLayout(w1, h1);
             l1.setColumnWeight(3, 1);
             l1.setRowWeight(4, 1);

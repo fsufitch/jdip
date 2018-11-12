@@ -232,6 +232,7 @@ public class NGDRuleOptions extends JPanel implements NewGameDialog.NGDTabPane {
         int w1[] = {25, 0, 5};    //            9  10 11 12 13 14 15  16,17  18,19
         int h1[] = {10, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 10, 0, 5, 0, 5};
 
+        //TODO: replace HIGLayout
         HIGLayout l1 = new HIGLayout(w1, h1);
         l1.setColumnWeight(2, 1);
         l1.setRowWeight(14, 1);

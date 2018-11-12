@@ -128,6 +128,7 @@ public class OrderStatusPanel extends XJPanel {
         int w1[] = {0, 5, 0};
         int h1[] = {5, 0, 25, 0, 10};
 
+        //TODO: replace HIGLayout
         HIGLayout hl = new HIGLayout(w1, h1);
         hl.setColumnWeight(3, 1);
         hl.setRowWeight(2, 1);

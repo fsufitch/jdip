@@ -198,6 +198,7 @@ public class NGDStartOptions extends JPanel implements NewGameDialog.NGDTabPane 
 
 
         // higlayout
+        //TODO: replace HIGLayout
         HIGLayout l1 = new HIGLayout(w1, h1);
         l1.setColumnWeight(4, 1);
         l1.setRowWeight(16, 1);

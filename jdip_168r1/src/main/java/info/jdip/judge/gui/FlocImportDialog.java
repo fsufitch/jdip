@@ -133,6 +133,7 @@ public class FlocImportDialog extends HeaderDialog implements FlocImportCallback
         int w1[] = {BORDER, 0, 5, 0, BORDER};
         int h1[] = {BORDER, 0, 20, 0, 0, BORDER, 0};
 
+        //TODO: replace HIGLayout
         HIGLayout l1 = new HIGLayout(w1, h1);
         l1.setColumnWeight(1, 1);
         l1.setRowWeight(1, 2);

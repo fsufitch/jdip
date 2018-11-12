@@ -214,6 +214,7 @@ public class ValidationOptionsDialog extends HeaderDialog {
         int w1[] = {25, 0};
         int h1[] = {10, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0};
 
+        //TODO: replace HIGLayout
         HIGLayout l1 = new HIGLayout(w1, h1);
         l1.setColumnWeight(2, 1);
         l1.setRowWeight(14, 1);
