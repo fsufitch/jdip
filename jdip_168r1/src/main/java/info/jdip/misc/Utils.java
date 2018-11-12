@@ -46,7 +46,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -1397,20 +1396,6 @@ public class Utils {
         return isWindows;
     }// isWindows()
 
-    /**
-     * Returns true if running within Web Start.
-     */
-    public static boolean isInWebstart() {
-        try {
-            final Class<javax.jnlp.ServiceManager> service = javax.jnlp.ServiceManager.class;
-            final Method lookup = service.getMethod("lookup", String.class);
-            final Object basic = lookup.invoke(null, "javax.jnlp.BasicService");
-            return true;
-        } catch (Exception e) {
-            // exception == false
-        }
-        return false;
-    }// isInWebstart()
 
     /**
      * Null-safe object comparison.

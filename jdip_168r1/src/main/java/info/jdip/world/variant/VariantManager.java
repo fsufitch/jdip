@@ -23,7 +23,6 @@
 package info.jdip.world.variant;
 
 import info.jdip.gui.dialog.ErrorDialog;
-import info.jdip.misc.Utils;
 import info.jdip.world.variant.data.MapGraphic;
 import info.jdip.world.variant.data.SymbolPack;
 import info.jdip.world.variant.data.Variant;
@@ -97,8 +96,6 @@ public class VariantManager {
     // class variables
     private static VariantManager vm = null;
 
-    // instance variables
-    private final boolean isInWebstart;
     private HashMap<String, MapRec> variantMap = null;    // map of lowercased Variant names to MapRec objects (which contain VRecs)
     private HashMap<String, MapRec> symbolMap = null;    // lowercase symbol names to MapRec objects (which contain SPRecs)
 
@@ -115,7 +112,6 @@ public class VariantManager {
     private VariantManager() {
         variantMap = new HashMap<>(53);
         symbolMap = new HashMap<>(17);
-        isInWebstart = Utils.isInWebstart();
     }// VariantManager()
 
     /**
@@ -128,7 +124,7 @@ public class VariantManager {
      */
     public static synchronized void init(File[] searchPaths, boolean isValidating)
             throws javax.xml.parsers.ParserConfigurationException, NoVariantsException {
-        logger.trace( "VariantManager.init()");
+        logger.trace("VariantManager.init()");
 
         if (searchPaths == null || searchPaths.length == 0) {
             throw new IllegalArgumentException();
@@ -199,46 +195,8 @@ public class VariantManager {
         }
 
 
-        // if we are in webstart, search for variants within webstart jars
         Enumeration enm = null;
         ClassLoader cl = null;
-
-        if (vm.isInWebstart) {
-            cl = vm.getClass().getClassLoader();
-
-            try {
-                enm = cl.getResources(VARIANT_FILE_NAME);
-            } catch (IOException e) {
-                enm = null;
-            }
-
-            if (enm != null) {
-                while (enm.hasMoreElements()) {
-                    URL variantURL = (URL) enm.nextElement();
-
-                    // parse variant description file, and create hash entry of variant object -> URL
-
-                    String pluginName = getWSPluginName(variantURL);
-                    try (InputStream is = new BufferedInputStream(variantURL.openStream())) {
-
-                        variantParser.parse(is, variantURL);
-                        Variant[] variants = variantParser.getVariants();
-
-                        // add variants; variants with same name (but older versions) are
-                        // replaced with same-name newer versioned variants
-                        for (Variant variant : variants) {
-                            addVariant(variant, pluginName, variantURL);
-                        }
-                    } catch (IOException e) {
-                        // display error dialog
-                        ErrorDialog.displayFileIO(null, e, variantURL.toString());
-                    } catch (org.xml.sax.SAXException e) {
-                        // display error dialog
-                        ErrorDialog.displayGeneral(null, e);
-                    }
-                }
-            }// if(enm != null)
-        }
 
         // check: did we find *any* variants? Throw an exception.
         if (vm.variantMap.isEmpty()) {
@@ -286,40 +244,8 @@ public class VariantManager {
             }
         }
 
-        // if we are in webstart, search for variants within webstart jars
         enm = null;
         cl = null;
-
-        if (vm.isInWebstart) {
-            cl = vm.getClass().getClassLoader();
-
-            try {
-                enm = cl.getResources(SYMBOL_FILE_NAME);
-            } catch (IOException e) {
-                enm = null;
-            }
-
-            if (enm != null) {
-                while (enm.hasMoreElements()) {
-                    URL symbolURL = (URL) enm.nextElement();
-
-                    // parse variant description file, and create hash entry of variant object -> URL
-
-                    String pluginName = getWSPluginName(symbolURL);
-                    try (InputStream is = new BufferedInputStream(symbolURL.openStream())) {
-                        symbolParser.parse(is, symbolURL);
-                        addSymbolPack(symbolParser.getSymbolPack(), pluginName, symbolURL);
-                    } catch (IOException e) {
-                        // display error dialog
-                        ErrorDialog.displayFileIO(null, e, symbolURL.toString());
-                    } catch (org.xml.sax.SAXException e) {
-                        // display error dialog
-                        ErrorDialog.displayGeneral(null, e);
-                    }
-                }
-            }// if(enm != null)
-        }// if(isInWebStart)
-
 
         // check: did we find *any* symbol packs? Throw an exception.
         if (vm.symbolMap.isEmpty()) {
@@ -453,7 +379,7 @@ public class VariantManager {
         // automatically. Log this method, though
         float spVersion = symbolPackVersion;
         if (spVersion <= 0.0f) {
-            logger.warn( "VariantManager.getSymbolPack() called with symbolPackVersion of <= 0.0f. Check parameters.");
+            logger.warn("VariantManager.getSymbolPack() called with symbolPackVersion of <= 0.0f. Check parameters.");
             spVersion = VERSION_NEWEST;
         }
 
@@ -540,15 +466,6 @@ public class VariantManager {
         // ensure we have been initialized...
         checkVM();
 
-        // if we are in webstart, assume that this is a webstart jar.
-        if (vm.isInWebstart) {
-            URL url = getWSResource(packURL, uri);
-
-            // if cannot get it, fall through.
-            if (url != null) {
-                return url;
-            }
-        }
 
         // if URI has a defined scheme, convert to a URL (if possible) and return it.
         if (uri.getScheme() != null) {
@@ -638,17 +555,6 @@ public class VariantManager {
             throw new IllegalArgumentException("null URI");
         }
 
-        // if we are in webstart, assume that this is a webstart jar.
-        if (vm.isInWebstart) {
-            URL url = getWSResource(mro, uri);
-
-            // if cannot get it, fall through.
-            if (url != null) {
-                return url;
-            }
-        }
-
-
         // if URI has a defined scheme, convert to a URL (if possible) and return it.
         if (uri.getScheme() != null) {
             try {
@@ -702,117 +608,6 @@ public class VariantManager {
         return s.substring(s.lastIndexOf("/") + 1);
     }// getFile()
 
-    /**
-     * Get the webstart plugin name
-     */
-    private static String getWSPluginName(URL url) {
-        final String s = url.toString();
-        final int idxExclam = s.indexOf('!');
-        if (idxExclam >= 0) {
-            return s.substring(s.lastIndexOf("/", idxExclam) + 1, idxExclam);
-        } else {
-            return s;
-        }
-    }// getWSPluginName()
-
-    /**
-     * Get a resource for a variant. This uses the variantName to
-     * deconflict, if multiple resources exist with the same name.
-     * <p>
-     * Conflict occur when plugins are loaded under the same ClassLoader,
-     * because variant plugin namespace is not unique.
-     * <p>
-     * This primarily applies to Webstart resources
-     */
-    private static URL getWSResource(MapRecObj mro, URI uri) {
-        assert (vm.isInWebstart);
-
-        if (uri == null) {
-            return null;
-        }
-
-        ClassLoader cl = vm.getClass().getClassLoader();
-
-        if (mro != null) {
-            Enumeration enm = null;
-
-            try {
-                enm = cl.getResources(uri.toString());
-            } catch (IOException e) {
-                return null;
-            }
-
-            while (enm.hasMoreElements()) {
-                URL url = (URL) enm.nextElement();
-
-                // deconflict. Note that this is not, and cannot be, foolproof;
-                // due to name-mangling by webstart. For example, if two plugins
-                // called "test" and "Supertest" exist, test may find the data
-                // file within Supertest because indexOf(test, SuperTest) >= 0
-                //
-                // however, if we can get the mangled name and set it as the
-                // 'pluginName', we can be foolproof.
-                //
-                String lcPath = url.getPath();
-                String search = mro.getPluginName() + "!";
-
-                if (lcPath.contains(search)) {
-                    return url;
-                }
-            }
-        }
-
-        return null;
-    }// getWSResource()
-
-    /**
-     * Get a resource for a variant. This uses the variantName to
-     * deconflict, if multiple resources exist with the same name.
-     * <p>
-     * Conflict occur when plugins are loaded under the same ClassLoader,
-     * because variant plugin namespace is not unique.
-     * <p>
-     * This primarily applies to Webstart resources
-     */
-    private static URL getWSResource(URL packURL, URI uri) {
-		/*
-			NOTE: this method is used by getResource(URL, URI), which is
-			chiefly used by VariantManager and associated parsers; a VariantRecord
-			has not yet been created. So we cannot use that; the internal
-			logic here is slightly different.
-		*/
-        assert (vm.isInWebstart);
-
-        ClassLoader cl = vm.getClass().getClassLoader();
-        String deconflictName = getWSPluginName(packURL);
-
-        Enumeration enm = null;
-
-        try {
-            enm = cl.getResources(uri.toString());
-        } catch (IOException e) {
-            return null;
-        }
-
-        while (enm.hasMoreElements()) {
-            URL url = (URL) enm.nextElement();
-
-            // deconflict. Note that this is not, and cannot be, foolproof;
-            // due to name-mangling by webstart. For example, if two plugins
-            // called "test" and "Supertest" exist, test may find the data
-            // file within Supertest because indexOf(test, SuperTest) >= 0
-            //
-            // however, if we can get the mangled name and set it as the
-            // 'pluginName', we can be foolproof.
-            //
-            String lcPath = url.getPath();
-            if (lcPath.contains(deconflictName)) {
-                return url;
-            }
-        }
-
-        return null;
-    }// getWSResource()
 
     /**
      * Adds a Variant. If the variant already exists with the same
@@ -850,7 +645,7 @@ public class VariantManager {
         } else {
             // we are mapped. See if this version has been added.
             // If not, we'll add it.
-            if (!mapRec.add(vr) && !vm.isInWebstart) {
+            if (!mapRec.add(vr)) {
                 final VRec vrec2 = (VRec) mapRec.get(v.getVersion());
                 final Variant v2 = vrec2.getVariant();
 
@@ -924,7 +719,7 @@ public class VariantManager {
             vm.symbolMap.put(spName, mapRec);
         } else {
             // we are mapped. See if this version has been added.
-            if (!mapRec.add(spRec) && !vm.isInWebstart) {
+            if (!mapRec.add(spRec)) {
                 SPRec spRec2 = (SPRec) mapRec.get(sp.getVersion());
                 final SymbolPack sp2 = spRec2.getSymbolPack();
                 if (sp2.getVersion() == sp.getVersion()) {

@@ -828,8 +828,6 @@ public class ErrorDialog extends TextViewer {
             sb.append(rt.maxMemory());
 
             sb.append("\n------ System Info -----------------------");
-            sb.append("\n  In Web Start: ");
-            sb.append(Utils.isInWebstart());
 
             // ArrayList of strings
             ArrayList<String> list = new ArrayList<>();
