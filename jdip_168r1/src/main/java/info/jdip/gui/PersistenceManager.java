@@ -34,6 +34,7 @@ import info.jdip.misc.Utils;
 import info.jdip.world.Phase;
 import info.jdip.world.TurnState;
 import info.jdip.world.World;
+import info.jdip.world.WorldImporter;
 import info.jdip.world.variant.VariantManager;
 import info.jdip.world.variant.data.Variant;
 import org.slf4j.Logger;
@@ -250,6 +251,33 @@ public class PersistenceManager {
         }
         return null;
     }// open()
+
+    public World importOldGame() {
+        if (confirmDialog()) {
+            // JFileChooser setup
+            XJFileChooser chooser = XJFileChooser.getXJFileChooser();
+            chooser.addFileFilter(SimpleFileFilter.IMPORT_GAME_FILTER);
+            chooser.setFileFilter(SimpleFileFilter.IMPORT_GAME_FILTER);
+            chooser.setCurrentDirectory(GeneralPreferencePanel.getDefaultGameDir());
+            File file = chooser.displayOpen(clientFrame);
+            XJFileChooser.dispose();
+
+            // get file name
+            if (file != null) {
+                World world = null;
+
+                try {
+                    world = importGameFile(file);
+                } catch (Exception e) {
+                    ErrorDialog.displayFileIO(clientFrame, e, file.toString());
+                }
+
+                openWorld(world, file);
+                return world;
+            }
+        }
+        return null;
+    } // importOldGame()
 
     /**
      * Basic operations performed whenever we read in a World.
@@ -558,6 +586,30 @@ public class PersistenceManager {
     private World readGameFile(File file)
             throws Exception {
         World w = World.open(file);
+
+        // check if variant is available; if not, inform user.
+        World.VariantInfo vi = w.getVariantInfo();
+
+        if (VariantManager.getVariant(vi.getVariantName(), vi.getVariantVersion()) == null) {
+            Variant variant = VariantManager.getVariant(vi.getVariantName(), VariantManager.VERSION_NEWEST);
+            if (variant == null) {
+                // we don't have the variant AT ALL
+                ErrorDialog.displayVariantNotAvailable(clientFrame, vi);
+                return null;
+            } else {
+                // try most current version: HOWEVER, warn the user that it might not work
+                ErrorDialog.displayVariantVersionMismatch(clientFrame, vi, variant.getVersion());
+                vi.setVariantVersion(variant.getVersion());
+            }
+        }
+
+        return w;
+    }// readGameFile()
+
+    // reads in an old game file
+    private World importGameFile(File file) throws Exception {
+        WorldImporter wi = new WorldImporter();
+        World w = wi.importGame(file);
 
         // check if variant is available; if not, inform user.
         World.VariantInfo vi = w.getVariantInfo();

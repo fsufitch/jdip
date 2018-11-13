@@ -70,6 +70,7 @@ public class ClientMenu {
     public static final Item FILE_NEW_F2F = new Item("FILE_NEW_F2F");
     public static final Item FILE_NEW_NET = new Item("FILE_NEW_NET");
     public static final Item FILE_OPEN = new Item("FILE_OPEN");
+    public static final Item FILE_IMPORT_OLD = new Item("FILE_IMPORT_OLD");
     public static final Item FILE_RECENT = new Item("FILE_RECENT");
     public static final Item FILE_SAVE = new Item("FILE_SAVE");
     public static final Item FILE_SAVEAS = new Item("FILE_SAVEAS");
@@ -177,6 +178,7 @@ public class ClientMenu {
 
         menu.add(subMenu);                                // 1 [number to index for MRU file list]
         menu.add(makeMenuItem(FILE_OPEN));
+        menu.add(makeMenuItem(FILE_IMPORT_OLD));
         menu.add(makeMenuItem(FILE_SAVE));
         menu.add(makeMenuItem(FILE_SAVEAS));
         menu.add(makeMenuItem(FILE_SAVETO));            // 5
