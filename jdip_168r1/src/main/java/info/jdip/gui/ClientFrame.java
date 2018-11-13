@@ -1200,6 +1200,7 @@ public class ClientFrame extends JFrame {
 
             clientMenu.setActionMethod(ClientMenu.FILE_NEW_F2F, this, "onFileNewF2F");
             clientMenu.setActionMethod(ClientMenu.FILE_OPEN, this, "onFileOpen");
+            clientMenu.setActionMethod(ClientMenu.FILE_IMPORT_OLD, this, "onFileImportOld");
             clientMenu.setActionMethod(ClientMenu.FILE_SAVE, persistMan, "save");
             clientMenu.setActionMethod(ClientMenu.FILE_SAVEAS, persistMan, "saveAs");
             clientMenu.setActionMethod(ClientMenu.FILE_SAVETO, persistMan, "saveTo");
@@ -1277,6 +1278,13 @@ public class ClientFrame extends JFrame {
 
         public void onFileOpen() {
             World world = persistMan.open();
+            if (world != null) {
+                createWorld(world);
+            }
+        }
+
+        public void onFileImportOld() {
+            World world = persistMan.importOldGame();
             if (world != null) {
                 createWorld(world);
             }

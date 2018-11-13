@@ -42,6 +42,13 @@ public class SimpleFileFilter extends FileFilter implements FilenameFilter {
                     Utils.getLocalString("SimpleFileFilter.savegame.description"));
 
     /**
+     * Old Save Game file filter (typically, ".jdip")
+     */
+    public static final SimpleFileFilter IMPORT_GAME_FILTER =
+            new SimpleFileFilter(Utils.getLocalString("SimpleFileFilter.importgame.extension"),
+                    Utils.getLocalString("SimpleFileFilter.importgame.description"));
+
+    /**
      * JPEG file filter
      */
     public static final SimpleFileFilter JPG_FILTER = new SimpleFileFilter("jpg",
