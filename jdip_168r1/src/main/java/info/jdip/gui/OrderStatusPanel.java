@@ -22,8 +22,6 @@
 //
 package info.jdip.gui;
 
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.swing.XJPanel;
 import info.jdip.misc.Utils;
 import info.jdip.order.Orderable;
@@ -124,22 +122,27 @@ public class OrderStatusPanel extends XJPanel {
      * Layout components
      */
     private void makeLayout() {
-        // start layout
-        int w1[] = {0, 5, 0};
-        int h1[] = {5, 0, 25, 0, 10};
 
-        //TODO: replace HIGLayout
-        HIGLayout hl = new HIGLayout(w1, h1);
-        hl.setColumnWeight(3, 1);
-        hl.setRowWeight(2, 1);
-        setLayout(hl);
-
-        HIGConstraints c = new HIGConstraints();
-
-        add(phase, c.rcwh(2, 1, 3, 1, "lr"));
-        add(orderFieldLabel, c.rc(4, 1, "l"));
-        add(orderField, c.rc(4, 3, "lr"));
-    }// makeLayout()
+        GroupLayout groupLayout = new GroupLayout(this);
+        setLayout(groupLayout);
+        groupLayout.setAutoCreateGaps(true);
+        groupLayout.setAutoCreateContainerGaps(true);
+        groupLayout.setVerticalGroup(
+                groupLayout.createSequentialGroup()
+                        .addComponent(phase)
+                        .addGroup(groupLayout.createParallelGroup()
+                                .addComponent(orderFieldLabel)
+                                .addComponent(orderField)
+                        )
+        );
+        groupLayout.setHorizontalGroup(
+                groupLayout.createParallelGroup()
+                        .addComponent(phase)
+                        .addGroup(groupLayout.createSequentialGroup()
+                                .addComponent(orderFieldLabel)
+                                .addComponent(orderField))
+        );
+    }
 
     /**
      * Property change event listener

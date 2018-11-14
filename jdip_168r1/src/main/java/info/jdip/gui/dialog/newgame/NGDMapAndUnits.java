@@ -22,8 +22,6 @@
 //
 package info.jdip.gui.dialog.newgame;
 
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.swing.GradientJLabel;
 import info.jdip.gui.swing.XJScrollPane;
 import info.jdip.misc.Utils;
@@ -105,19 +103,6 @@ public class NGDMapAndUnits extends JPanel implements NewGameDialog.NGDTabPane {
      * Panel Layout
      */
     private void makeLayout() {
-        // create unit option panel with checkboxes inside
-        //
-        JPanel symbolPanel = new JPanel();
-        int w1[] = {50, 0, 0};        // cols
-        int h1[] = {0, 0, 0, 0};        // rows
-
-        //TODO: replace HIGLayout
-        HIGLayout l1 = new HIGLayout(w1, h1);
-        l1.setColumnWeight(3, 1);
-        l1.setRowWeight(1, 1);
-        l1.setRowWeight(4, 1);
-        symbolPanel.setLayout(l1);
-
         // main panel layout
         //
         this.setLayout(new GridLayout(2, 1, 0, 15));
@@ -413,22 +398,13 @@ public class NGDMapAndUnits extends JPanel implements NewGameDialog.NGDTabPane {
          * layout the SelectorPanel
          */
         private void makeSPLayout() {
-            int w1[] = {0, BORDER_10, 0};            // cols
-            int h1[] = {0, BORDER_5, 0, 0};        // rows
+            BorderLayout borderLayout = new BorderLayout(5, 5);
+            setLayout(borderLayout);
 
-            //TODO: replace HIGLayout
-            HIGLayout l1 = new HIGLayout(w1, h1);
-            l1.setColumnWeight(3, 1);
-            l1.setRowWeight(4, 1);
-            l1.setRowWeight(3, 1);
-
-            setLayout(l1);
-            HIGConstraints c = new HIGConstraints();
-
-            add(label, c.rcwh(1, 1, 3, 1, "lr"));
-            add(jsp, c.rcwh(3, 1, 1, 2, "lrtb"));
-            add(description, c.rcwh(3, 3, 1, 1, "lrtb"));
-            add(underDesc, c.rcwh(4, 3, 1, 1, "lrb"));
+            add(label, BorderLayout.NORTH);
+            add(jsp, BorderLayout.WEST);
+            add(description, BorderLayout.CENTER);
+            add(underDesc, BorderLayout.SOUTH);
         }// makeSPLayout()
 
         /**

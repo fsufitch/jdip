@@ -22,8 +22,6 @@
 
 package info.jdip.gui.dialog.prefs;
 
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.ClientFrame;
 import info.jdip.gui.OrderDisplayPanel;
 import info.jdip.gui.swing.GradientJLabel;
@@ -31,6 +29,7 @@ import info.jdip.misc.SharedPrefs;
 import info.jdip.misc.Utils;
 import info.jdip.order.OrderFormat;
 import info.jdip.order.OrderFormatOptions;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -105,66 +104,57 @@ public class DisplayPreferencePanel extends PreferencePanel {
         example = new JLabel(""); //Utils.createTextLabel("", false);
         updateExampleAndFormatOptions();
 
-        // layout
-        //                   2      4      6    8   10     13   15       18    20     22     23
-        int h1[] = {BORDER, 0, 15, 35, 10, 0, 2, 0, 2, 0, 0, 2, 0, 2, 0, 0, 15, 0, 5, 0, 10, 0, 15, 0, BORDER};
-        int w1[] = {BORDER, INDENT, 0, 10, 0, 15, 0, 25, 0, 4, 0, 0, 0, BORDER};
 
-        //TODO: replace HIGLayout
-        HIGLayout l1 = new HIGLayout(w1, h1);
-        l1.setColumnWeight(13, 1);
-        l1.setRowWeight(23, 1);
-        setLayout(l1);
+        setLayout(new MigLayout());
 
-        HIGConstraints c = new HIGConstraints();
 
-        add(new GradientJLabel(Utils.getLocalString(I18N_ORDFMT_GROUP_NAME)), c.rcwh(2, 2, 12, 1, "lr"));
+        add(new GradientJLabel(Utils.getLocalString(I18N_ORDFMT_GROUP_NAME)),"span");
 
-        add(example, c.rcwh(4, 3, 11, 1, "lr"));
+        add(example,"span");
 
-        add(csPower.getLabel(), c.rcwh(6, 3, 1, 1, "l"));
+        add(csPower.getLabel(),"span 3"); //power does not have full/abbv combo
 		/* power names cannot be full/brief (yet); show no radiobuttons
 		add(csPower.getChoice1(), c.rcwh(6,5,1,1,"l"));
 		add(csPower.getChoice2(), c.rcwh(6,7,1,1,"l"));
 		*/
-        add(new JLabel(Utils.getLocalString(I18N_STYLE)), c.rcwh(6, 9, 1, 1, "r"));
-        add(csPower.getComboBox(), c.rcwh(6, 11, 1, 1, "l"));
+        add(new JLabel(Utils.getLocalString(I18N_STYLE)));
+        add(csPower.getComboBox(),"wrap");
 
-        add(csUnit.getLabel(), c.rcwh(8, 3, 1, 1, "l"));
-        add(csUnit.getChoice1(), c.rcwh(8, 5, 1, 1, "l"));
-        add(csUnit.getChoice2(), c.rcwh(8, 7, 1, 1, "l"));
-        add(new JLabel(Utils.getLocalString(I18N_STYLE)), c.rcwh(8, 9, 1, 1, "r"));
-        add(csUnit.getComboBox(), c.rcwh(8, 11, 1, 1, "l"));
+        add(csUnit.getLabel());
+        add(csUnit.getChoice1());
+        add(csUnit.getChoice2());
+        add(new JLabel(Utils.getLocalString(I18N_STYLE)));
+        add(csUnit.getComboBox(),"wrap");
 
-        add(csOrderName.getLabel(), c.rcwh(10, 3, 1, 1, "l"));
-        add(csOrderName.getChoice1(), c.rcwh(10, 5, 1, 1, "l"));
-        add(csOrderName.getChoice2(), c.rcwh(10, 7, 1, 1, "l"));
-        add(new JLabel(Utils.getLocalString(I18N_STYLE)), c.rcwh(10, 9, 1, 1, "r"));
-        add(csOrderName.getComboBox(), c.rcwh(10, 11, 1, 1, "l"));
-        add(csOrderName.getCheckBox(), c.rcwh(11, 5, 9, 1, "l"));
+        add(csOrderName.getLabel());
+        add(csOrderName.getChoice1());
+        add(csOrderName.getChoice2());
+        add(new JLabel(Utils.getLocalString(I18N_STYLE)));
+        add(csOrderName.getComboBox(),"wrap");
+        add(csOrderName.getCheckBox(),"span");
 
-        add(csProvince.getLabel(), c.rcwh(13, 3, 1, 1, "l"));
-        add(csProvince.getChoice1(), c.rcwh(13, 5, 1, 1, "l"));
-        add(csProvince.getChoice2(), c.rcwh(13, 7, 1, 1, "l"));
-        add(new JLabel(Utils.getLocalString(I18N_STYLE)), c.rcwh(13, 9, 1, 1, "r"));
-        add(csProvince.getComboBox(), c.rcwh(13, 11, 1, 1, "l"));
+        add(csProvince.getLabel());
+        add(csProvince.getChoice1());
+        add(csProvince.getChoice2());
+        add(new JLabel(Utils.getLocalString(I18N_STYLE)));
+        add(csProvince.getComboBox(),"wrap");
 
-        add(csCoast.getLabel(), c.rcwh(15, 3, 1, 1, "l"));
-        add(csCoast.getChoice1(), c.rcwh(15, 5, 1, 1, "l"));
-        add(csCoast.getChoice2(), c.rcwh(15, 7, 1, 1, "l"));
-        add(new JLabel(Utils.getLocalString(I18N_STYLE)), c.rcwh(15, 9, 1, 1, "r"));
-        add(csCoast.getComboBox(), c.rcwh(15, 11, 1, 1, "l"));
-        add(csCoast.getCheckBox(), c.rcwh(16, 5, 9, 1, "l"));
+        add(csCoast.getLabel());
+        add(csCoast.getChoice1());
+        add(csCoast.getChoice2());
+        add(new JLabel(Utils.getLocalString(I18N_STYLE)));
+        add(csCoast.getComboBox(),"wrap");
+        add(csCoast.getCheckBox(),"span");
 
-        add(cbPossessive, c.rcwh(18, 3, 11, 1, "l"));
-        add(cbDot, c.rcwh(20, 3, 11, 1, "l"));
+        add(cbPossessive,"span");
+        add(cbDot,"span");
 
         JPanel arrowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         arrowPanel.add(new JLabel(Utils.getLocalString(I18N_ARROW_STYLE)));
         arrowPanel.add(Box.createHorizontalStrut(4));
-        arrowPanel.add(arrowBox);
+        arrowPanel.add(arrowBox,"span");
 
-        add(arrowPanel, c.rcwh(22, 3, 11, 1, "l"));
+        add(arrowPanel,"span");
 
     }// DisplayPreferencePanel()
 

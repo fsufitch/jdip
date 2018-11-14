@@ -23,8 +23,6 @@
 package info.jdip.gui.dialog;
 
 
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.AbstractCFPListener;
 import info.jdip.gui.ClientFrame;
 import info.jdip.gui.map.MapMetadata;
@@ -36,6 +34,8 @@ import info.jdip.world.Power;
 import info.jdip.world.World;
 import info.jdip.world.metadata.GameMetadata;
 import info.jdip.world.metadata.PlayerMetadata;
+import net.miginfocom.layout.CC;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -254,53 +254,43 @@ public class MetadataDialog extends HeaderDialog {
         private final JTextField modName = new JTextField(COLUMNS_LONG);
         private final JTextField modEmail = Utils.createEmailTextField(COLUMNS_LONG);
         private final JTextField modURI = Utils.createURITextField(COLUMNS_LONG);
-        private final JTextField judgeName = new JTextField(COLUMNS);
+        private final JTextField judgeName = new JTextField(COLUMNS_LONG);
         private final JTextField gameURI = Utils.createURITextField(COLUMNS_LONG);
-        private final JTextField gameID = new JTextField(COLUMNS);
+        private final JTextField gameID = new JTextField(COLUMNS_LONG);
 
 
         public GamePanel() {
             notes.setBorder(new EtchedBorder());
 
-            // layout
-            int w1[] = {BORDER, 10, 0, 5, 0, 10, 5, 0, BORDER};
-            int h1[] = {BORDER, 0, 20, 0, 5, 0, 10, 0, 10, 0, 10, 0, 30, 0, 10, 0, 10, 0, BORDER};
 
-            //TODO: replace HIGLayout
-            HIGLayout layout = new HIGLayout(w1, h1);
-            layout.setColumnWeight(8, 1);
-            this.setLayout(layout);
-
-            HIGConstraints c = new HIGConstraints();
-
-            this.add(new JLabel(Utils.getLocalString(GDF_GAME_NAME)), c.rcwh(2, 3, 1, 1, "r"));
-            this.add(gameName, c.rcwh(2, 5, 1, 1, "lr"));
+            this.setLayout(new MigLayout("fill, wrap 4",
+                    "[][grow][][grow]",
+                    "[][][][][][grow]"));
 
 
-            this.add(new JLabel(Utils.getLocalString(GDF_NOTES)), c.rcwh(4, 8, 1, 1, "l"));
-            this.add(makeScrollPane(notes), c.rcwh(6, 8, 1, 14, "lrtb"));
+            this.add(new JLabel(Utils.getLocalString(GDF_GAME_NAME)));
+            this.add(gameName);
+            this.add(new JLabel(Utils.getLocalString(GDF_JUDGE_NAME)));
+            this.add(judgeName);
 
-            this.add(new JLabel(Utils.getLocalString(GDF_COMMENT)), c.rcwh(6, 3, 1, 1, "r"));
-            this.add(comment, c.rcwh(6, 5, 1, 1, "lr"));
+            this.add(new JLabel(Utils.getLocalString(GDF_GAME_ID)));
+            this.add(gameID);
+            this.add(new JLabel(Utils.getLocalString(GDF_MOD_NAME)));
+            this.add(modName);
 
-            this.add(new JLabel(Utils.getLocalString(GDF_GAME_URI)), c.rcwh(8, 3, 1, 1, "r"));
-            this.add(gameURI, c.rcwh(8, 5, 1, 1, "lr"));
+            this.add(new JLabel(Utils.getLocalString(GDF_GAME_URI)));
+            this.add(gameURI);
+            this.add(new JLabel(Utils.getLocalString(GDF_MOD_EMAIL)));
+            this.add(modEmail);
 
-            this.add(new JLabel(Utils.getLocalString(GDF_GAME_ID)), c.rcwh(10, 3, 1, 1, "r"));
-            this.add(gameID, c.rcwh(10, 5, 1, 1, "lr"));
+            this.add(new JLabel(Utils.getLocalString(GDF_COMMENT)));
+            this.add(comment);
+            this.add(new JLabel(Utils.getLocalString(GDF_MOD_URI)));
+            this.add(modURI);
 
-            this.add(new JLabel(Utils.getLocalString(GDF_JUDGE_NAME)), c.rcwh(12, 3, 1, 1, "r"));
-            this.add(judgeName, c.rcwh(12, 5, 1, 1, "lr"));
 
-
-            this.add(new JLabel(Utils.getLocalString(GDF_MOD_NAME)), c.rcwh(14, 3, 1, 1, "r"));
-            this.add(modName, c.rcwh(14, 5, 1, 1, "lr"));
-
-            this.add(new JLabel(Utils.getLocalString(GDF_MOD_EMAIL)), c.rcwh(16, 3, 1, 1, "r"));
-            this.add(modEmail, c.rcwh(16, 5, 1, 1, "lr"));
-
-            this.add(new JLabel(Utils.getLocalString(GDF_MOD_URI)), c.rcwh(18, 3, 1, 1, "r"));
-            this.add(modURI, c.rcwh(18, 5, 1, 1, "lr"));
+            this.add(new JLabel(Utils.getLocalString(GDF_NOTES)), "span");
+            this.add(makeScrollPane(notes), "span,grow");
         }// GamePanel()
 
         /**
@@ -339,8 +329,8 @@ public class MetadataDialog extends HeaderDialog {
 
     private class PlayerPanel extends JPanel {
         private final JTextPane notes = new JTextPane();
-        private final JTextField name = new JTextField(COLUMNS);
-        private final JTextField uri = Utils.createURITextField(COLUMNS);
+        private final JTextField name = new JTextField(COLUMNS_LONG);
+        private final JTextField uri = Utils.createURITextField(COLUMNS_LONG);
         private final JTextField[] email = new JTextField[4];
         private Power power = null;
 
@@ -350,35 +340,27 @@ public class MetadataDialog extends HeaderDialog {
             notes.setBorder(new EtchedBorder());
 
             for (int i = 0; i < email.length; i++) {
-                email[i] = Utils.createEmailTextField(COLUMNS);
+                email[i] = Utils.createEmailTextField(COLUMNS_LONG);
             }
 
-            // layout
-            int w1[] = {BORDER, 0, 5, 0, 15, 0, 5, 0, BORDER};
-            int h1[] = {BORDER, 0, 5, 0, 5, 0, 5, 0, 5, 0, 5, 10, 0, 5, 0, BORDER};
+            this.setLayout(new MigLayout("fill",
+                    "[][grow][][grow]",
+                    "[][][][][grow]"));
 
-            //TODO: replace HIGLayout
-            HIGLayout layout = new HIGLayout(w1, h1);
-            layout.setColumnWeight(5, 1);
-            layout.setRowWeight(12, 1);
-            this.setLayout(layout);
+            this.add(new JLabel(Utils.getLocalString(PDF_NAME)));
+            this.add(name, "wrap");
+            this.add(new JLabel(Utils.getLocalString(PDF_URI)));
+            this.add(uri, "wrap");
+            this.add(new JLabel(Utils.getLocalString(PDF_NOTES)), "cell 0 3");
 
-            HIGConstraints c = new HIGConstraints();
-
-            this.add(new JLabel(Utils.getLocalString(PDF_NAME)), c.rcwh(2, 2, 1, 1, "r"));
-            this.add(name, c.rcwh(2, 4, 1, 1, "l"));
-
-            this.add(new JLabel(Utils.getLocalString(PDF_URI)), c.rcwh(4, 2, 1, 1, "r"));
-            this.add(uri, c.rcwh(4, 4, 1, 1, "l"));
-
-            this.add(new JLabel(Utils.getLocalString(PDF_NOTES)), c.rcwh(10, 2, 1, 1, "l"));
-            this.add(makeScrollPane(notes), c.rcwh(12, 2, 7, 1, "lrtb"));
 
             for (int i = 0; i < email.length; i++) {
-                int row = 2 + (i * 2);
-                this.add(new JLabel(Utils.getLocalString(PDF_EMAIL) + " " + String.valueOf(i + 1)), c.rcwh(row, 6, 1, 1, "r"));
-                this.add(email[i], c.rcwh(row, 8, 1, 1, "l"));
+                this.add(new JLabel(Utils.getLocalString(PDF_EMAIL) + " " + String.valueOf(i + 1)), new CC().cell(2, i));
+                this.add(email[i], new CC().cell(3, i));
             }
+
+            this.add(makeScrollPane(notes), "cell 0 4, span, grow");
+
         }// PlayerPanel()
 
         /**

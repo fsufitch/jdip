@@ -23,20 +23,18 @@
 
 package info.jdip.gui.dialog.prefs;
 
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.ClientFrame;
 import info.jdip.gui.swing.AssocJComboBox;
 import info.jdip.gui.swing.GradientJLabel;
 import info.jdip.misc.SharedPrefs;
 import info.jdip.misc.Utils;
+import net.miginfocom.swing.MigLayout;
 import org.apache.batik.transcoder.Transcoder;
 import org.apache.batik.transcoder.image.ImageTranscoder;
 import org.apache.batik.transcoder.image.JPEGTranscoder;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -104,66 +102,40 @@ public class ExportPreferencePanel extends PreferencePanel {
         // create GUI components
         makeAndSetGUIItems();
 
-
         // layout
-        int h1[] = {BORDER, 0, 5, 0, 1, 0, 1, 0, 1, 0, (BORDER * 2), 0, 5, 0, 1, 0, 1, 0, BORDER};
-        int w1[] = {BORDER, INDENT, 0, 0, BORDER};
-
-        //TODO: replace HIGLayout
-        HIGLayout l1 = new HIGLayout(w1, h1);
-        l1.setColumnWeight(4, 1);
-        l1.setRowWeight(18, 1);
-        setLayout(l1);
-
-        HIGConstraints c = new HIGConstraints();
+        setLayout(new MigLayout("noGrid"));
 
         // full size
         // add text label to first JRadioButton
         jrb[0].setText(Utils.getLocalString(I18N_CHOICE_SIZE_FULL));
 
         // category + choices
-        add(new GradientJLabel(Utils.getLocalString(I18N_CAT_SIZE)), c.rcwh(2, 2, 3, 1, "lr"));
-        add(jrb[0], c.rcwh(4, 3, 3, 1));    // this one has a text label; it's wider
-        add(jrb[1], c.rc(6, 3));
-        add(jrb[2], c.rc(8, 3));
-        add(jrb[3], c.rc(10, 3));
+        add(new GradientJLabel(Utils.getLocalString(I18N_CAT_SIZE)), "span, wrap");
+        add(jrb[0], "wrap");    // this one has a text label; it's wider
 
-        // full size
-        //add(new JLabel(Utils.getLocalString(I18N_CHOICE_SIZE_FULL)), c.rcwh(4,4,1,1,"l"));
+        add(jrb[1]);
+        add(imgWidth);
+        add(new JLabel(" x "));
+        add(imgHeight);
+        add(new JLabel(Utils.getLocalString(I18N_CHOICE_SIZE_DEFINED)), "wrap");
 
-        // constrained size
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.add(imgWidth);
-        panel.add(new JLabel(" x "));
-        panel.add(imgHeight);
-        panel.add(new JLabel(Utils.getLocalString(I18N_CHOICE_SIZE_DEFINED)));
-        add(panel, c.rcwh(6, 4, 1, 1, "l"));
+        add(jrb[2]);
+        add(imgWidthOnly);
+        add(new JLabel(Utils.getLocalString(I18N_CHOICE_SIZE_WIDTHONLY)), "wrap");
 
-        // width-locked
-        panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.add(imgWidthOnly);
-        panel.add(new JLabel(Utils.getLocalString(I18N_CHOICE_SIZE_WIDTHONLY)));
-        add(panel, c.rcwh(8, 4, 1, 1, "l"));
-
-        // height-locked
-        panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.add(imgHeightOnly);
-        panel.add(new JLabel(Utils.getLocalString(I18N_CHOICE_SIZE_HEIGHTONLY)));
-        add(panel, c.rcwh(10, 4, 1, 1, "l"));
+        add(jrb[3]);
+        add(imgHeightOnly);
+        add(new JLabel(Utils.getLocalString(I18N_CHOICE_SIZE_HEIGHTONLY)), "wrap");
 
 
         // category + choices
-        add(new GradientJLabel(Utils.getLocalString(I18N_CAT_SETTINGS)), c.rcwh(12, 2, 3, 1, "lr"));
+        add(new GradientJLabel(Utils.getLocalString(I18N_CAT_SETTINGS)), "span, wrap");
 
-        panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.add(new JLabel(Utils.getLocalString(I18N_CHOICE_JPG_QUALITY)));
-        panel.add(jpgQuality);
-        add(panel, c.rcwh(14, 3, 2, 1, "l"));
+        add(new JLabel(Utils.getLocalString(I18N_CHOICE_JPG_QUALITY)));
+        add(jpgQuality, "wrap");
 
-        panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.add(new JLabel(Utils.getLocalString(I18N_CHOICE_PNG_BPP)));
-        panel.add(pngBPP);
-        add(panel, c.rcwh(16, 3, 2, 1, "l"));
+        add(new JLabel(Utils.getLocalString(I18N_CHOICE_PNG_BPP)));
+        add(pngBPP, "wrap");
     }// ExportPreferencePanel()
 
     /**

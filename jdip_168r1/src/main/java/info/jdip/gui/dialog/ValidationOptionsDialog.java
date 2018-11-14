@@ -22,8 +22,6 @@
 //
 package info.jdip.gui.dialog;
 
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.ClientFrame;
 import info.jdip.misc.Utils;
 import info.jdip.order.ValidationOptions;
@@ -50,24 +48,20 @@ public class ValidationOptionsDialog extends HeaderDialog {
     private static final String DIALOG_TITLE = "VOD.title";
     private static final String INIT_TEXT = "VOD.starttext";
     private static final String HEADER_LOCATION = "VOD.location.header";
-
+    private final StringBuffer sb = new StringBuffer(1024);
     // instance variables
     private ValidationOptions oldOpts = null;
     private ValidationOptions valOpts = null;
     private ValidationOptions returnedOpts = null;
     private ClientFrame parent = null;
     private ValidationOptions.DescriptiveOption[] dopts = null;
-
     // GUI components
     private JList optionList = null;
-
     // GUI components: on radio button panel
     private JEditorPane description = null;
     private JRadioButton[] radioButtons = null;
     private ButtonGroup buttonGroup = null;
     private RBListener rbListener = null;
-
-    private final StringBuffer sb = new StringBuffer(1024);
 
 
     private ValidationOptionsDialog(ClientFrame parent, ValidationOptions oldOptions) {
@@ -211,21 +205,13 @@ public class ValidationOptionsDialog extends HeaderDialog {
 
     private void makeVODLayout() {
         // layout subpanel (description + radio buttons)
-        int w1[] = {25, 0};
-        int h1[] = {10, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0};
-
-        //TODO: replace HIGLayout
-        HIGLayout l1 = new HIGLayout(w1, h1);
-        l1.setColumnWeight(2, 1);
-        l1.setRowWeight(14, 1);
 
         JPanel subPanel = new JPanel();
-        subPanel.setLayout(l1);
-        HIGConstraints c = new HIGConstraints();
+        BoxLayout layout = new BoxLayout(subPanel, BoxLayout.Y_AXIS);
+        subPanel.setLayout(layout);
 
-        subPanel.add(new JPanel(), c.rcwh(14, 1, 2, 1));
         for (int i = 0; i < radioButtons.length; i++) {
-            subPanel.add(radioButtons[i], c.rc((2 * (i + 1)), 2, "l"));
+            subPanel.add(radioButtons[i]);
         }
 
         JPanel rightPanel = new JPanel();

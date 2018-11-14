@@ -22,8 +22,6 @@
 //
 package info.jdip.gui.dialog;
 
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.ClientFrame;
 import info.jdip.gui.swing.SwingWorker;
 import info.jdip.gui.swing.XJScrollPane;
@@ -161,19 +159,10 @@ public class AboutDialog extends HeaderDialog {
         textPanel.setCaretPosition(0);
         textPanel.repaint();
         licensePanel = new JPanel();
+        BoxLayout layout = new BoxLayout(licensePanel, BoxLayout.Y_AXIS);
+        licensePanel.setLayout(layout);
 
-        int w1[] = {SYS_BORDER, 0, SYS_BORDER};
-        int h1[] = {SYS_BORDER, 0, SYS_BORDER};
-
-        //TODO: replace HIGLayout
-        HIGLayout l1 = new HIGLayout(w1, h1);
-        l1.setColumnWeight(2, 1);
-        l1.setRowWeight(2, 1);
-        licensePanel.setLayout(l1);
-
-        HIGConstraints c = new HIGConstraints();
-        licensePanel.add(licenseScroller, c.rcwh(2, 2, 1, 1, "lrtb"));
-        //licensePanel.add(new XJScrollPane(editPanel), c.rcwh(2,2,1,1,"lrtb"));
+        licensePanel.add(licenseScroller);
     }// makeAboutPanel()
 
     /**
@@ -200,18 +189,10 @@ public class AboutDialog extends HeaderDialog {
 
         // create / layout the panel
         systemPanel = new JPanel();
+        BoxLayout boxLayout = new BoxLayout(systemPanel, BoxLayout.Y_AXIS);
+        systemPanel.setLayout(boxLayout);
 
-        int w1[] = {SYS_BORDER, 0, SYS_BORDER};
-        int h1[] = {SYS_BORDER, 0, SYS_BORDER};
-
-        //TODO: replace HIGLayout
-        HIGLayout l1 = new HIGLayout(w1, h1);
-        l1.setColumnWeight(2, 1);
-        l1.setRowWeight(2, 1);
-        systemPanel.setLayout(l1);
-
-        HIGConstraints c = new HIGConstraints();
-        systemPanel.add(new XJScrollPane(sysTable), c.rcwh(2, 2, 1, 1, "lrtb"));
+        systemPanel.add(new XJScrollPane(sysTable));
     }// makeSystemPanel();
 
 
@@ -275,18 +256,10 @@ public class AboutDialog extends HeaderDialog {
 
         // create / layout the panel
         JPanel panel = new JPanel();
+        BoxLayout layout = new BoxLayout(panel, BoxLayout.Y_AXIS);
+        panel.setLayout(layout);
 
-        int w1[] = {SYS_BORDER, 0, SYS_BORDER};
-        int h1[] = {SYS_BORDER, 0, SYS_BORDER};
-
-        //TODO: replace HIGLayout
-        HIGLayout l1 = new HIGLayout(w1, h1);
-        l1.setColumnWeight(2, 1);
-        l1.setRowWeight(2, 1);
-        panel.setLayout(l1);
-
-        HIGConstraints c = new HIGConstraints();
-        panel.add(editPanel, c.rcwh(2, 2, 1, 1, "lrtb"));
+        panel.add(editPanel);
         return panel;
     }// makeTextPanel()
 

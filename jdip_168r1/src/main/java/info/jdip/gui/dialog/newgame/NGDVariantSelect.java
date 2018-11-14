@@ -22,8 +22,6 @@
 //
 package info.jdip.gui.dialog.newgame;
 
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.ClientFrame;
 import info.jdip.gui.dialog.ErrorDialog;
 import info.jdip.gui.swing.GradientJLabel;
@@ -257,22 +255,40 @@ public class NGDVariantSelect extends JPanel implements NewGameDialog.NGDTabPane
         JScrollPane varSP = new XJScrollPane(variantList);
         varSP.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        int w1[] = {BORDER, 0, 15, 0, BORDER};    // cols
-        int h1[] = {2 * BORDER, 0, 5, 0, BORDER};    // rows
 
-        //TODO: replace HIGLayout
-        HIGLayout l1 = new HIGLayout(w1, h1);
-        l1.setColumnWeight(4, 1);
-        l1.setRowWeight(4, 1);
+        GroupLayout groupLayout = new GroupLayout(this);
+        groupLayout.setAutoCreateGaps(true);
+        groupLayout.setAutoCreateContainerGaps(true);
 
-        setLayout(l1);
-        HIGConstraints c = new HIGConstraints();
+        setLayout(groupLayout);
 
-        add(new GradientJLabel(Utils.getLocalString(LABEL_LIST)), c.rcwh(2, 2, 1, 1, "lr"));
-        add(varSP, c.rcwh(4, 2, 1, 1, "lrtb"));
+        GradientJLabel variantLabel = new GradientJLabel(Utils.getLocalString(LABEL_LIST));
+        GradientJLabel descriptionLabel = new GradientJLabel(Utils.getLocalString(LABEL_DESCRIPTION));
+        groupLayout.setVerticalGroup(
+                groupLayout.createParallelGroup()
+                        .addGroup(groupLayout.createSequentialGroup()
+                                .addComponent(variantLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE)
+                                .addComponent(varSP)
+                        )
+                        .addGroup(groupLayout.createSequentialGroup()
+                                .addComponent(descriptionLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE)
+                                .addComponent(descSP))
+        );
 
-        add(new GradientJLabel(Utils.getLocalString(LABEL_DESCRIPTION)), c.rcwh(2, 4, 1, 1, "lr"));
-        add(descSP, c.rcwh(4, 4, 1, 1, "lrtb"));
+        groupLayout.setHorizontalGroup(
+                groupLayout.createSequentialGroup()
+                        .addGroup(groupLayout.createParallelGroup()
+                                .addComponent(variantLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(varSP, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        )
+                        .addGroup(groupLayout.createParallelGroup()
+                                .addComponent(descriptionLabel)
+                                .addComponent(descSP))
+        );
+
+
     }// makeLayout()
 
 }// class NGDVariantSelect

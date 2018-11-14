@@ -41,6 +41,11 @@ dependencies {
     compile group: 'org.apache.xmlgraphics', name: 'fop', version: '1.0'
     compile group: 'com.jgoodies', name: 'looks', version: '2.2.2'
 
+// https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
+    compile group: 'com.miglayout', name: 'miglayout-swing', version: '5.2'
+
+
+
     // Add all the jar dependencies from the lib folder.
     compile fileTree(dir: 'lib', include: ['*.jar'])
 

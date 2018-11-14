@@ -22,8 +22,6 @@
 //
 package info.jdip.gui.dialog.newgame;
 
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.swing.GradientJLabel;
 import info.jdip.misc.Utils;
 import info.jdip.world.Phase;
@@ -176,8 +174,7 @@ public class NGDStartOptions extends JPanel implements NewGameDialog.NGDTabPane 
      * Layout the panel
      */
     private void makeLayout() {
-        int w1[] = {BORDER, 15, 0, 0, BORDER};
-        int h1[] = {BORDER, 0, 10, 0, 5, 0, 20, 0, 5, 0, 5, 0, 5, 0, 5, 0, 0, 5, 0, BORDER};
+
 
         // create 'minipanels': these put labels and spinners horizontally adjacent
         JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -197,28 +194,24 @@ public class NGDStartOptions extends JPanel implements NewGameDialog.NGDTabPane 
         vc3.add(new JLabel(Utils.getLocalString(LABEL_VC_DURATION)));
 
 
-        // higlayout
-        //TODO: replace HIGLayout
-        HIGLayout l1 = new HIGLayout(w1, h1);
-        l1.setColumnWeight(4, 1);
-        l1.setRowWeight(16, 1);
+        BoxLayout layout = new BoxLayout(this, BoxLayout.Y_AXIS);  //todo: this layout is disgusting, should be replaced sooner rather than later...
+        setLayout(layout);
 
-        setLayout(l1);
-        HIGConstraints c = new HIGConstraints();
+        add(introText);
 
-        add(introText, c.rcwh(2, 2, 3, 1, "lrtb"));
+        add(new GradientJLabel(Utils.getLocalString(LABEL_TIME)));
+        add(timePanel);
 
-        add(new GradientJLabel(Utils.getLocalString(LABEL_TIME)), c.rcwh(4, 2, 2, 1, "lr"));
-        add(timePanel, c.rc(6, 3, "l"));
+        add(new GradientJLabel(Utils.getLocalString(LABEL_VC)));
+        add(vc1);
+        add(vc2);
+        add(vc3);
+        add(new Box.Filler(new Dimension(0, 0), new Dimension(0, Short.MAX_VALUE),
+                new Dimension(0, Short.MAX_VALUE)));
 
-        add(new GradientJLabel(Utils.getLocalString(LABEL_VC)), c.rcwh(8, 2, 2, 1, "lr"));
-        add(vc1, c.rc(10, 3, "l"));
-        add(vc2, c.rc(12, 3, "l"));
-        add(vc3, c.rc(14, 3, "l"));
+        add(new JSeparator());
 
-        add(new JSeparator(), c.rcwh(17, 2, 3, 1, "lr"));
-
-        add(reset, c.rcwh(19, 2, 2, 1, "l"));
+        add(reset);
     }// makeLayout()
 
 

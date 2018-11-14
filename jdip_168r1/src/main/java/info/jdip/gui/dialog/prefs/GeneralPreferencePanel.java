@@ -24,8 +24,6 @@
 package info.jdip.gui.dialog.prefs;
 
 import com.l2fprod.common.swing.JDirectoryChooser;
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.ClientFrame;
 import info.jdip.gui.OrderDisplayPanel;
 import info.jdip.gui.map.MapRenderer2;
@@ -35,6 +33,7 @@ import info.jdip.misc.LRUCache;
 import info.jdip.misc.SharedPrefs;
 import info.jdip.misc.Utils;
 import org.slf4j.Logger;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -180,58 +179,35 @@ public class GeneralPreferencePanel extends PreferencePanel {
         // update components
         getSettings();
 
-        // mini-panels
-        JPanel clrPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        clrPanel.add(new JLabel(Utils.getLocalString(GPP_CLEAR_MRU_TEXT)));
-        clrPanel.add(Box.createHorizontalStrut(5));
-        clrPanel.add(clearMRU);
+        setLayout(new MigLayout("noGrid"));
 
-        JPanel orderP = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        orderP.add(new JLabel(Utils.getLocalString(GPP_ORDER_SORT_LABEL)));
-        orderP.add(Box.createHorizontalStrut(5));
-        orderP.add(orderSorting);
-        orderP.add(Box.createHorizontalStrut(10));
-        orderP.add(reverseSort);
+        add(saveWindowSettings, "wrap");
+        add(showResolution, "wrap");
 
-        JPanel mapP = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        mapP.add(new JLabel(Utils.getLocalString(GPP_MAP_LABEL)));
-        mapP.add(Box.createHorizontalStrut(5));
-        mapP.add(mapLabels);
+        add(new JSeparator(), "grow, wrap");
+        add(new JLabel(Utils.getLocalString(GPP_ORDER_SORT_LABEL)));
+        add(Box.createHorizontalStrut(5));
+        add(orderSorting);
+        add(Box.createHorizontalStrut(10), "wrap");
+        add(reverseSort, "wrap");
+        add(new JSeparator(), "grow, wrap");
 
-        // layout
-        int h1[] = {BORDER, 0, 8, 0, 8, 0, 8, 0, 3, 0, 7, 36,    // upto row 12
-                0, 3, 0, 10, 0, 8, 0, BORDER};
-        int w1[] = {BORDER, 10, 0, 5, 0, BORDER};
-
-        //TODO: replace HIGLayout
-        HIGLayout l1 = new HIGLayout(w1, h1);
-        l1.setColumnWeight(3, 1);
-        l1.setRowWeight(19, 1);
-        setLayout(l1);
-
-
-        HIGConstraints c = new HIGConstraints();
-        add(saveWindowSettings, c.rcwh(2, 2, 4, 1, "l"));
-        add(showResolution, c.rcwh(4, 2, 4, 1, "l"));
-
-        add(orderP, c.rcwh(6, 2, 4, 1, "l"));
-
-        add(mapP, c.rcwh(8, 2, 4, 1, "l"));
-        add(new JLabel(Utils.getLocalString(GPP_MAP_LABEL_NOTE)),
-                c.rcwh(10, 3, 3, 1, "ltb"));
+        add(new JLabel(Utils.getLocalString(GPP_MAP_LABEL)));
+        add(Box.createHorizontalStrut(5));
+        add(mapLabels, "wrap");
+        add(new JLabel(Utils.getLocalString(GPP_MAP_LABEL_NOTE)), "wrap");
 
         // separator bar (12)
-        add(new JSeparator(), c.rcwh(12, 2, 4, 1, "lr"));
+        add(new JSeparator(), "grow, wrap");
 
         // save dir
-        add(new JLabel(Utils.getLocalString(GPP_SAVE_DIR_TEXT)),
-                c.rcwh(13, 2, 4, 1, "l"));
-        add(saveDir, c.rcwh(15, 3, 1, 1, "lr"));
-        add(browseSaveDir, c.rcwh(15, 5, 1, 1, "lrtb"));
+        add(new JLabel(Utils.getLocalString(GPP_SAVE_DIR_TEXT)), "wrap");
+        add(saveDir, "grow");
+        add(browseSaveDir, "wrap");
 
-        // clear MRU
-        add(clrPanel, c.rcwh(17, 2, 4, 1, "l"));
-
+        add(new JLabel(Utils.getLocalString(GPP_CLEAR_MRU_TEXT)));
+        add(Box.createHorizontalStrut(5));
+        add(clearMRU);
     }// GeneralPreferencePanel()
 
     /**

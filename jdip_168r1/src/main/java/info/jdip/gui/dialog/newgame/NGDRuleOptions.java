@@ -22,8 +22,6 @@
 //
 package info.jdip.gui.dialog.newgame;
 
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.dialog.ErrorDialog;
 import info.jdip.gui.swing.XJScrollPane;
 import info.jdip.misc.Utils;
@@ -228,29 +226,21 @@ public class NGDRuleOptions extends JPanel implements NewGameDialog.NGDTabPane {
      * Layout the panel
      */
     private void makeLayout() {
-        // layout subpanel (description + radio buttons)
-        int w1[] = {25, 0, 5};    //            9  10 11 12 13 14 15  16,17  18,19
-        int h1[] = {10, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 10, 0, 5, 0, 5};
 
-        //TODO: replace HIGLayout
-        HIGLayout l1 = new HIGLayout(w1, h1);
-        l1.setColumnWeight(2, 1);
-        l1.setRowWeight(14, 1);
 
         JPanel ruleListPanel = new JPanel(new BorderLayout());
         ruleListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         ruleListPanel.add(new XJScrollPane(optionList), BorderLayout.CENTER);
 
         JPanel subPanel = new JPanel();
-        subPanel.setLayout(l1);
-        HIGConstraints c = new HIGConstraints();
+        BoxLayout boxLayout = new BoxLayout(subPanel, BoxLayout.Y_AXIS);
+        subPanel.setLayout(boxLayout);
 
-        subPanel.add(reset, c.rcwh(18, 1, 2, 1, "l"));
-        subPanel.add(new JSeparator(), c.rcwh(16, 1, 2, 1, "lr"));
-        subPanel.add(new JPanel(), c.rcwh(14, 1, 2, 1));
-        for (int i = 0; i < radioButtons.length; i++) {
-            subPanel.add(radioButtons[i], c.rc((2 * (i + 1)), 2, "l"));
+        for (JRadioButton radioButton : radioButtons) {
+            subPanel.add(radioButton);
         }
+        subPanel.add(Box.createVerticalGlue());
+        subPanel.add(reset);  //todo: this button looks very ugly now
 
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BorderLayout());

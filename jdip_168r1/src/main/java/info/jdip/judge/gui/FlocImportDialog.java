@@ -23,8 +23,6 @@
 
 package info.jdip.judge.gui;
 
-import cz.autel.dmi.HIGConstraints;
-import cz.autel.dmi.HIGLayout;
 import info.jdip.gui.ClientFrame;
 import info.jdip.gui.dialog.ErrorDialog;
 import info.jdip.gui.dialog.HeaderDialog;
@@ -130,23 +128,39 @@ public class FlocImportDialog extends HeaderDialog implements FlocImportCallback
      */
     private JPanel makeContent() {
 
-        int w1[] = {BORDER, 0, 5, 0, BORDER};
-        int h1[] = {BORDER, 0, 20, 0, 0, BORDER, 0};
 
-        //TODO: replace HIGLayout
-        HIGLayout l1 = new HIGLayout(w1, h1);
-        l1.setColumnWeight(1, 1);
-        l1.setRowWeight(1, 2);
-        l1.setColumnWeight(5, 1);
-        l1.setRowWeight(5, 3);
+        JPanel content = new JPanel();
+        GroupLayout groupLayout = new GroupLayout(content);
+        content.setLayout(groupLayout);
+        groupLayout.setAutoCreateGaps(true);
+        groupLayout.setAutoCreateContainerGaps(true);
+        JLabel labelJudges = new JLabel(Utils.getLocalString(LABEL_JUDGES));
+        JLabel labelTfGame = new JLabel(Utils.getLocalString(LABEL_GAMENAME));
+        groupLayout.setVerticalGroup(
+                groupLayout.createSequentialGroup()
+                        .addGroup(groupLayout.createParallelGroup()
+                                .addComponent(labelJudges)
+                                .addComponent(cbJudges, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE)
+                        )
+                        .addGroup(groupLayout.createParallelGroup()
+                                .addComponent(labelTfGame)
+                                .addComponent(tfGameName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE)
+                        )
+        );
+        groupLayout.setHorizontalGroup(
+                groupLayout.createSequentialGroup()
+                        .addGroup(groupLayout.createParallelGroup()
+                                .addComponent(labelJudges)
+                                .addComponent(labelTfGame)
+                        )
+                        .addGroup(groupLayout.createParallelGroup()
+                                .addComponent(cbJudges)
+                                .addComponent(tfGameName)
+                        )
+        );
 
-        JPanel content = new JPanel(l1);
-
-        HIGConstraints c = new HIGConstraints();
-        content.add(new JLabel(Utils.getLocalString(LABEL_JUDGES)), c.rcwh(2, 2, 1, 1, "r"));
-        content.add(cbJudges, c.rcwh(2, 4, 1, 1, "l"));
-        content.add(new JLabel(Utils.getLocalString(LABEL_GAMENAME)), c.rcwh(4, 2, 1, 1, "r"));
-        content.add(tfGameName, c.rcwh(4, 4, 1, 1, "lrtb"));
 
         return content;
     }// makeContent()
