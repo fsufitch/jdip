@@ -8,6 +8,7 @@ repositories {
     jcenter()
 }
 
+version='1.8.0-SNAPSHOT'
 
 dependencies {
 
@@ -65,10 +66,11 @@ test {
 file('resource/variants').eachDir { dir ->
     def taskName = "${dir.name}Variants"
     def task = tasks.create(name: taskName, type: Zip) {
-        baseName = taskName
+        archiveName = taskName+".zip"
         from fileTree(dir)
         destinationDir file("build/tmp/variants")
         group='variants'
+        description= "Builds the $archiveName."
     }
     test.dependsOn(task)
     run.dependsOn(task)
@@ -77,10 +79,11 @@ file('resource/variants').eachDir { dir ->
 file('resource/symbols').eachDir { dir ->
     def taskName = "${dir.name}Symbols"
     def task = tasks.create(name: taskName, type: Zip) {
-        baseName = taskName
+        archiveName = taskName+".zip"
         from fileTree(dir)
         destinationDir file("build/tmp/variants")
         group='variants'
+        description= "Builds the $archiveName."
 
     }
     test.dependsOn(task)
