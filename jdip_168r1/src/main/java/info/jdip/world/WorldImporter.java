@@ -37,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import javax.xml.stream.events.Attribute;
 
@@ -262,7 +263,21 @@ public class WorldImporter {
         }
         CollectionInformation powersInfo = (CollectionInformation)powersSerInfo;
 
-        List<Power> powers = new LinkedList<>();
+        Map<UUID, Power> powers = extractPowers(powersInfo);
+
+        return null;
+    }
+
+    /**
+     * Extract the powers out of a collection information containing only powers.
+     * 
+     * @param powersInfo the CollectionInformation containing all powers.
+     * @return a map with UUIDs (for lookup) and the powers extracted. The returned Map retains the order information
+     *  given in the collection.
+     * @throws JDipException if there are unexpected informations in the given CollectionInformation.
+     */
+    private Map<UUID, Power> extractPowers(CollectionInformation powersInfo) throws JDipException {
+        Map<UUID, Power> powers = new LinkedHashMap<>();
         for (SerializeInformation powerSerInfo: powersInfo.getCollectionEntries()) {
             if (!powerSerInfo.isObject() || !"dip.world.Power".equals(powerSerInfo.getClassName())) {
                 throw new JDipException("Expected the collection of powers to be of type dip.world.Power");
@@ -302,19 +317,25 @@ public class WorldImporter {
             PrimitiveInformation adjectiveInfo = (PrimitiveInformation)adjectiveSerInfo;
             adjective = adjectiveInfo.getValue();
             
-            powers.add(new Power(names.toArray(new String[names.size()]), adjective, isActive));
+            powers.put(powerInfo.getUuid(), new Power(names.toArray(new String[names.size()]), adjective, isActive));
         }
 
-        return null;
+        return powers;
     }
 
 
     private static abstract class SerializeInformation {
-        
+
+        private final UUID uuid = UUID.randomUUID();
+
         private final String className;
 
         public SerializeInformation(String className) {
             this.className = className;
+        }
+
+        public UUID getUuid() {
+            return uuid;
         }
 
         public String getClassName() {
