@@ -17,6 +17,7 @@
  */
 package info.jdip.world;
 
+import info.jdip.JDipException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -60,7 +61,7 @@ public class WorldImporter {
         objectLookup = new HashMap<>();
     }
 
-    public World importGame(File file) throws IOException, XMLStreamException {
+    public World importGame(File file) throws IOException, XMLStreamException, JDipException {
         GZIPInputStream gis = new GZIPInputStream(new BufferedInputStream(new FileInputStream(file), 8192));
         XMLInputFactory inputFactory = XMLInputFactory.newFactory();
         XMLEventReader eventReader = inputFactory.createXMLEventReader(gis);
@@ -120,7 +121,7 @@ public class WorldImporter {
             }
         }
 
-        return null;
+        return createWorld();
     }
 
     private void handleObject(StartElement startElement) throws XMLStreamException {
@@ -247,6 +248,66 @@ public class WorldImporter {
         }
     }
 
+    private World createWorld() throws JDipException {
+        SerializeInformation mapSerInfo = world.getAttribute("map");
+        if (mapSerInfo == null || !mapSerInfo.isObject() || !"dip.world.Map".equals(mapSerInfo.getClassName())) {
+            throw new JDipException("Expected the world to have a map of type dip.world.Map");
+        }
+        ObjectInformation mapInfo = (ObjectInformation)mapSerInfo;
+
+        SerializeInformation powersSerInfo = mapInfo.getAttribute("powers");
+        if (powersSerInfo == null || !powersSerInfo.isCollection() ||
+                !"dip.world.Power".equals(powersSerInfo.getClassName())) {
+            throw new JDipException("Expected the map to have powers of type dip.world.Power");
+        }
+        CollectionInformation powersInfo = (CollectionInformation)powersSerInfo;
+
+        List<Power> powers = new LinkedList<>();
+        for (SerializeInformation powerSerInfo: powersInfo.getCollectionEntries()) {
+            if (!powerSerInfo.isObject() || !"dip.world.Power".equals(powerSerInfo.getClassName())) {
+                throw new JDipException("Expected the collection of powers to be of type dip.world.Power");
+            }
+            ObjectInformation powerInfo = (ObjectInformation)powerSerInfo;
+            SerializeInformation namesSerInfo = powerInfo.getAttribute("names");
+            if (namesSerInfo == null || !namesSerInfo.isCollection() ||
+                    !"java.lang.String".equals(namesSerInfo.getClassName())) {
+                throw new JDipException("Expected a power to contain a collection of names of the type java.lang.String");
+            }
+
+            List<String> names = new LinkedList<>();
+            CollectionInformation namesInfo = (CollectionInformation)namesSerInfo;
+            for (SerializeInformation nameSerInfo: namesInfo.getCollectionEntries()) {
+                if (!nameSerInfo.isPrimitive() || !"string".equals(nameSerInfo.getClassName())) {
+                    throw new JDipException("Expected the content of the names collection to be a string");
+                }
+                PrimitiveInformation nameInfo = (PrimitiveInformation)nameSerInfo;
+                names.add(nameInfo.getValue());
+            }
+
+            boolean isActive;
+            SerializeInformation activeSerInfo = powerInfo.getAttribute("isActive");
+            if (activeSerInfo == null || !activeSerInfo.isPrimitive() ||
+                    !"boolean".equals(activeSerInfo.getClassName())) {
+                throw new JDipException("Expected a power to contain a boolean isActive");
+            }
+            PrimitiveInformation activeInfo = (PrimitiveInformation)activeSerInfo;
+            isActive = Boolean.parseBoolean(activeInfo.getValue());
+
+            String adjective;
+            SerializeInformation adjectiveSerInfo = powerInfo.getAttribute("adjective");
+            if (adjectiveSerInfo == null || !activeSerInfo.isPrimitive() ||
+                    !"string".equals(adjectiveSerInfo.getClassName())) {
+                throw new JDipException("Expected a power to contain a string adjective");
+            }
+            PrimitiveInformation adjectiveInfo = (PrimitiveInformation)adjectiveSerInfo;
+            adjective = adjectiveInfo.getValue();
+            
+            powers.add(new Power(names.toArray(new String[names.size()]), adjective, isActive));
+        }
+
+        return null;
+    }
+
 
     private static abstract class SerializeInformation {
         
@@ -322,8 +383,8 @@ public class WorldImporter {
             this.attributes.put(name, value);
         }
 
-        public Iterator<Map.Entry<String, SerializeInformation>> getAttributes() {
-            return Collections.unmodifiableMap(attributes).entrySet().iterator();
+        public SerializeInformation getAttribute(String name) {
+            return attributes.get(name);
         }
 
         @Override
@@ -408,8 +469,8 @@ public class WorldImporter {
             return encapsulatedList.add(value);
         }
 
-        public Iterator<SerializeInformation> getCollectionEntries() {
-            return encapsulatedList.iterator();
+        public List<SerializeInformation> getCollectionEntries() {
+            return Collections.unmodifiableList(encapsulatedList);
         }
 
     }
