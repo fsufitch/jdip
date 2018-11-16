@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -262,10 +261,20 @@ public class WorldImporter {
             throw new JDipException("Expected the map to have powers of type dip.world.Power");
         }
         CollectionInformation powersInfo = (CollectionInformation)powersSerInfo;
-
         Map<UUID, Power> powers = extractPowers(powersInfo);
 
-        return null;
+        SerializeInformation provincesSerInfo = mapInfo.getAttribute("provinces");
+        if (provincesSerInfo == null || !provincesSerInfo.isCollection() ||
+                !"dip.world.Province".equals(provincesSerInfo.getClassName())) {
+            throw new JDipException("Expected the map to have provinces of type dip.world.Province");
+        }
+        CollectionInformation provincesInfo = (CollectionInformation)provincesSerInfo;
+        Map<UUID, Province> provinces = extractProvinces(provincesInfo);
+
+        info.jdip.world.Map map = new info.jdip.world.Map(powers.values().toArray(new Power[powers.size()]),
+                provinces.values().toArray(new Province[provinces.size()]));
+
+        return new World(map);
     }
 
     /**
@@ -283,10 +292,12 @@ public class WorldImporter {
                 throw new JDipException("Expected the collection of powers to be of type dip.world.Power");
             }
             ObjectInformation powerInfo = (ObjectInformation)powerSerInfo;
+
             SerializeInformation namesSerInfo = powerInfo.getAttribute("names");
             if (namesSerInfo == null || !namesSerInfo.isCollection() ||
                     !"java.lang.String".equals(namesSerInfo.getClassName())) {
-                throw new JDipException("Expected a power to contain a collection of names of the type java.lang.String");
+                throw new JDipException(
+                        "Expected a power to contain a collection of names of the type java.lang.String");
             }
 
             List<String> names = new LinkedList<>();
@@ -316,11 +327,156 @@ public class WorldImporter {
             }
             PrimitiveInformation adjectiveInfo = (PrimitiveInformation)adjectiveSerInfo;
             adjective = adjectiveInfo.getValue();
-            
+
             powers.put(powerInfo.getUuid(), new Power(names.toArray(new String[names.size()]), adjective, isActive));
         }
 
         return powers;
+    }
+
+    /**
+     * Extract the powers out of a collection information containing only provinces.
+     *
+     * @param provincesInfo the CollectionInformation containing all provinces.
+     * @return a map with UUIDs (for lookup) and the provinces extracted. The returned Map retains the order information
+     *  given in the collection.
+     * @throws JDipException if there are unexpected informations in the given CollectionInformation.
+     */
+    private Map<UUID, Province> extractProvinces(CollectionInformation provincesInfo) throws JDipException {
+        Map<UUID, Province> provinces = new LinkedHashMap<>();
+        // this map collects the raw adjacency informations from the saved games file to handle it in a second step
+        // the UUID is the same as in the provinces map
+        Map<UUID, ObjectInformation> adjacencyInfos = new HashMap<>();
+        for (SerializeInformation provinceSerInfo: provincesInfo.getCollectionEntries()) {
+            if (!provinceSerInfo.isObject() || !"dip.world.Province".equals(provinceSerInfo.getClassName())) {
+                throw new JDipException("Expected the collection of provinces to be of type dip.world.Province");
+            }
+            ObjectInformation provinceInfo = (ObjectInformation)provinceSerInfo;
+
+            SerializeInformation fullNameSerInfo = provinceInfo.getAttribute("fullName");
+            if (fullNameSerInfo == null || !fullNameSerInfo.isPrimitive()||
+                    !"string".equals(fullNameSerInfo.getClassName())) {
+                throw new JDipException("Expected a province to contain a string fullName");
+            }
+            PrimitiveInformation fullNameInfo = (PrimitiveInformation)fullNameSerInfo;
+            String fullName = fullNameInfo.getValue();
+
+            SerializeInformation shortNamesSerInfo = provinceInfo.getAttribute("shortNames");
+            if (shortNamesSerInfo == null || !shortNamesSerInfo.isCollection() ||
+                    !"java.lang.String".equals(shortNamesSerInfo.getClassName())) {
+                throw new JDipException(
+                        "Expected a province to contain a collection of shortNames of the type java.lang.String");
+            }
+
+            List<String> shortNames = new LinkedList<>();
+            CollectionInformation shortNamesInfo = (CollectionInformation)shortNamesSerInfo;
+            for (SerializeInformation shortNameSerInfo: shortNamesInfo.getCollectionEntries()) {
+                if (!shortNameSerInfo.isPrimitive() || !"string".equals(shortNameSerInfo.getClassName())) {
+                    throw new JDipException("Expected the content of the shortNames collection to be a string");
+                }
+                PrimitiveInformation shortNameInfo = (PrimitiveInformation)shortNameSerInfo;
+                shortNames.add(shortNameInfo.getValue());
+            }
+
+            SerializeInformation indexSerInfo = provinceInfo.getAttribute("index");
+            if (indexSerInfo == null || !indexSerInfo.isPrimitive()||
+                    !"int".equals(indexSerInfo.getClassName())) {
+                throw new JDipException("Expected a province to contain an int index");
+            }
+            PrimitiveInformation indexInfo = (PrimitiveInformation)indexSerInfo;
+            int index = Integer.parseInt(indexInfo.getValue());
+
+            SerializeInformation isConvoyableCoastSerInfo = provinceInfo.getAttribute("isConvoyableCoast");
+            if (isConvoyableCoastSerInfo == null || !isConvoyableCoastSerInfo.isPrimitive()||
+                    !"boolean".equals(isConvoyableCoastSerInfo.getClassName())) {
+                throw new JDipException("Expected a province to contain a boolean isConvoyableCoast");
+            }
+            PrimitiveInformation isConvoyableCoastInfo = (PrimitiveInformation)isConvoyableCoastSerInfo;
+            boolean isConvoyableCoast = Boolean.parseBoolean(isConvoyableCoastInfo.getValue());
+
+            SerializeInformation supplyCenterSerInfo = provinceInfo.getAttribute("supplyCenter");
+            if (supplyCenterSerInfo == null || !supplyCenterSerInfo.isPrimitive()||
+                    !"boolean".equals(supplyCenterSerInfo.getClassName())) {
+                throw new JDipException("Expected a province to contain a boolean supplyCenter");
+            }
+            PrimitiveInformation supplyCenterInfo = (PrimitiveInformation)supplyCenterSerInfo;
+            boolean supplyCenter = Boolean.parseBoolean(supplyCenterInfo.getValue());
+
+            Province province = new Province(fullName, shortNames.toArray(new String[shortNames.size()]), index,
+                    isConvoyableCoast);
+            province.setSupplyCenter(supplyCenter);
+            provinces.put(provinceInfo.getUuid(), province);
+
+            SerializeInformation adjacencySerInfo = provinceInfo.getAttribute("adjacency");
+            if (adjacencySerInfo == null || !adjacencySerInfo.isObject() ||
+                    !"dip.world.Province$Adjacency".equals(adjacencySerInfo.getClassName())) {
+                throw new JDipException(
+                        "Expected a province to contain adjacency of type dip.world.Province$Adjacency");
+            }
+            adjacencyInfos.put(provinceInfo.getUuid(), (ObjectInformation)adjacencySerInfo);
+        }
+
+        assignProvincesToAdjacencies(provinces, adjacencyInfos);
+
+        return provinces;
+    }
+
+    private void assignProvincesToAdjacencies(Map<UUID, Province> provincesMap,
+            Map<UUID, ObjectInformation> adjacencyInfos) throws JDipException {
+        for (Map.Entry<UUID, Province> provinceEntry: provincesMap.entrySet()) {
+            ObjectInformation adjacencyInfo = adjacencyInfos.get(provinceEntry.getKey());
+            SerializeInformation adjLocSerInfo = adjacencyInfo.getAttribute("adjLoc");
+            if (adjLocSerInfo == null || !adjLocSerInfo.isMap()) {
+                throw new JDipException("Expected a adjLoc to be a map");
+            }
+            MapInformation adjLocInfo = (MapInformation)adjLocSerInfo;
+
+            for (Map.Entry<ObjectInformation, ObjectInformation> adjLocEntry: adjLocInfo.getMap().entrySet()) {
+                ObjectInformation adjLocKey = adjLocEntry.getKey();
+                if (adjLocKey == null || !"dip.world.Coast".equals(adjLocKey.getClassName())) {
+                    throw new JDipException("Expected the key of the adjLoc entry to be a dip.world.Coast");
+                }
+                ObjectInformation adjLocValue = adjLocEntry.getValue();
+                if (adjLocValue == null || !adjLocValue.isCollection() ||
+                        !"dip.world.Location".equals(adjLocValue.getClassName())) {
+                    throw new JDipException(
+                            "Expected the value of the adjLoc entry to be a collection of dip.world.Location");
+                }
+                CollectionInformation adjLocLocations = (CollectionInformation)adjLocValue;
+
+                Coast coast = extractCoast(adjLocKey);
+
+                List<Location> locations = new LinkedList<>();
+                for (SerializeInformation locationSerInfo: adjLocLocations.getCollectionEntries()) {
+                    if (!locationSerInfo.isObject() || !"dip.world.Location".equals(locationSerInfo.getClassName())) {
+                        throw new JDipException(
+                                "Expected the entries of the collection adjLoc to be of dip.world.Location");
+                    }
+                    ObjectInformation locationInfo = (ObjectInformation)locationSerInfo;
+
+                    SerializeInformation provinceSerInfo = locationInfo.getAttribute("province");
+                    if (provinceSerInfo == null || !provinceSerInfo.isObject() ||
+                            !"dip.world.Province".equals(provinceSerInfo.getClassName())) {
+                        throw new JDipException("Expected the province in the location to be of dip.world.Province");
+                    }
+                    locations.add(new Location(provincesMap.get(provinceSerInfo.getUuid()), coast));
+                }
+                provinceEntry.getValue().getAdjacency().setLocations(coast,
+                        locations.toArray(new Location[locations.size()]));
+            }
+        }
+    }
+
+    private Coast extractCoast(ObjectInformation coastInfo) throws JDipException {
+        SerializeInformation indexSerInfo = coastInfo.getAttribute("index");
+        if (indexSerInfo == null || !indexSerInfo.isPrimitive()||
+                !"int".equals(indexSerInfo.getClassName())) {
+            throw new JDipException("Expected a coast to contain an int index");
+        }
+        PrimitiveInformation indexInfo = (PrimitiveInformation)indexSerInfo;
+        int index = Integer.parseInt(indexInfo.getValue());
+
+        return Coast.getCoast(index);
     }
 
 
@@ -457,11 +613,11 @@ public class WorldImporter {
             return returnValue;
         }
 
-        public Iterator<Map.Entry<ObjectInformation, ObjectInformation>> getMapEntries() {
+        public Map<ObjectInformation, ObjectInformation> getMap() {
             if (key != null) {
                 throw new IllegalStateException("Found key without value");
             }
-            return encapsulatedMap.entrySet().iterator();
+            return Collections.unmodifiableMap(encapsulatedMap);
         }
 
     }
