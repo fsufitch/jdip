@@ -26,6 +26,7 @@ import info.jdip.gui.swing.GradientJLabel;
 import info.jdip.misc.Utils;
 import info.jdip.world.Phase;
 import info.jdip.world.variant.data.Variant;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -52,11 +53,6 @@ public class NGDStartOptions extends JPanel implements NewGameDialog.NGDTabPane 
     private static final String LABEL_VC_SC_NOCHANGE = "NGDoptions.label_vc_sc_nochange";
     private static final String LABEL_VC_DURATION = "NGDoptions.label_vc_duration";
     private static final String INTRO_TEXT_LOCATION = "NGDoptions.location_intro_text";
-
-    // instance variables
-    private Variant current = null;    // current variant
-    private Variant original = null;
-
     // GUI controls
     private final JComboBox<String> phaseBox;
     private final BCSpinner year;
@@ -65,6 +61,9 @@ public class NGDStartOptions extends JPanel implements NewGameDialog.NGDTabPane 
     private final JSpinner vcDuration;
     private final JButton reset;
     private final JEditorPane introText;
+    // instance variables
+    private Variant current = null;    // current variant
+    private Variant original = null;
 
 
     /**
@@ -174,43 +173,25 @@ public class NGDStartOptions extends JPanel implements NewGameDialog.NGDTabPane 
      * Layout the panel
      */
     private void makeLayout() {
+        setLayout(new MigLayout("noGrid"));
 
+        add(introText, "wrap");
 
-        // create 'minipanels': these put labels and spinners horizontally adjacent
-        JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        timePanel.add(phaseBox);
-        timePanel.add(year);
+        add(new GradientJLabel(Utils.getLocalString(LABEL_TIME)), "growX, wrap");
+        add(phaseBox);
+        add(year, "wrap");
 
-        JPanel vc1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        vc1.add(vcSC);
-        vc1.add(new JLabel(Utils.getLocalString(LABEL_VC_SC_REQ)));
+        add(new GradientJLabel(Utils.getLocalString(LABEL_VC)), "growX, wrap");
+        add(vcSC);
+        add(new JLabel(Utils.getLocalString(LABEL_VC_SC_REQ)), "wrap");
 
-        JPanel vc2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        vc2.add(vcSCChange);
-        vc2.add(new JLabel(Utils.getLocalString(LABEL_VC_SC_NOCHANGE)));
+        add(vcSCChange);
+        add(new JLabel(Utils.getLocalString(LABEL_VC_SC_NOCHANGE)), "wrap");
 
-        JPanel vc3 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        vc3.add(vcDuration);
-        vc3.add(new JLabel(Utils.getLocalString(LABEL_VC_DURATION)));
+        add(vcDuration);
+        add(new JLabel(Utils.getLocalString(LABEL_VC_DURATION)), "wrap push");
 
-
-        BoxLayout layout = new BoxLayout(this, BoxLayout.Y_AXIS);  //todo: this layout is disgusting, should be replaced sooner rather than later...
-        setLayout(layout);
-
-        add(introText);
-
-        add(new GradientJLabel(Utils.getLocalString(LABEL_TIME)));
-        add(timePanel);
-
-        add(new GradientJLabel(Utils.getLocalString(LABEL_VC)));
-        add(vc1);
-        add(vc2);
-        add(vc3);
-        add(new Box.Filler(new Dimension(0, 0), new Dimension(0, Short.MAX_VALUE),
-                new Dimension(0, Short.MAX_VALUE)));
-
-        add(new JSeparator());
-
+        add(new JSeparator(), "growX, wrap, gapY push");
         add(reset);
     }// makeLayout()
 
