@@ -514,6 +514,7 @@ public class WorldImporter {
                             // Ignored
                             break;
                         case "_victory_conditions_":
+                            resultWorld.setVictoryConditions(extractVictoryConditions(nonTurnData.getValue()));
                             break;
                         case "_world_metadata_":
                             break;
@@ -668,6 +669,24 @@ public class WorldImporter {
         return variantInfo;
     }
 
+    private VictoryConditions extractVictoryConditions(SerializeInformation victoryConditionsSerInfo)
+            throws JDipException {
+        if (victoryConditionsSerInfo == null || !victoryConditionsSerInfo.isObject() ||
+                !"dip.world.VictoryConditions".equals(victoryConditionsSerInfo.getClassName())) {
+            throw new JDipException(
+                    "Expected the victory conditions to be an object of class dip.world.VictoryConditions");
+        }
+        ObjectInformation victoryConditionsInfo = (ObjectInformation)victoryConditionsSerInfo;
+
+        int numSCForVictory = extractIntAttribute(victoryConditionsInfo, "numSCForVictory");
+        int maxYearsNoSCChange = extractIntAttribute(victoryConditionsInfo, "maxYearsNoSCChange");
+        int maxGameTimeYears = extractIntAttribute(victoryConditionsInfo, "maxGameTimeYears");
+        int initialYear = extractIntAttribute(victoryConditionsInfo, "initialYear");
+
+        return new VictoryConditions(numSCForVictory, maxYearsNoSCChange, maxGameTimeYears,
+                new Phase(Phase.SeasonType.SPRING, initialYear, Phase.PhaseType.MOVEMENT));
+    }
+
     private String extractStringAttribute(ObjectInformation object, String attributeName) throws JDipException {
         SerializeInformation attributeSerInfo = object.getAttribute(attributeName);
         if (attributeSerInfo == null || !attributeSerInfo.isPrimitive() ||
@@ -688,6 +707,17 @@ public class WorldImporter {
         }
         PrimitiveInformation attributeInfo = (PrimitiveInformation)attributeSerInfo;
         return Float.parseFloat(attributeInfo.getValue());
+    }
+
+    private int extractIntAttribute(ObjectInformation object, String attributeName) throws JDipException {
+        SerializeInformation attributeSerInfo = object.getAttribute(attributeName);
+        if (attributeSerInfo == null || !attributeSerInfo.isPrimitive() ||
+                !"int".equals(attributeSerInfo.getClassName())) {
+            throw new JDipException(new StringBuilder("Expected the ").append(object.getClassName())
+                    .append(" to contain an int attribute with the name ").append(attributeName).toString());
+        }
+        PrimitiveInformation attributeInfo = (PrimitiveInformation)attributeSerInfo;
+        return Integer.parseInt(attributeInfo.getValue());
     }
 
 
