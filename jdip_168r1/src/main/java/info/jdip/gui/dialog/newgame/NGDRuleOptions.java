@@ -30,6 +30,7 @@ import info.jdip.world.RuleOptions;
 import info.jdip.world.RuleOptions.Option;
 import info.jdip.world.RuleOptions.OptionValue;
 import info.jdip.world.variant.data.Variant;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -232,24 +233,17 @@ public class NGDRuleOptions extends JPanel implements NewGameDialog.NGDTabPane {
         ruleListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         ruleListPanel.add(new XJScrollPane(optionList), BorderLayout.CENTER);
 
-        JPanel subPanel = new JPanel();
-        BoxLayout boxLayout = new BoxLayout(subPanel, BoxLayout.Y_AXIS);
-        subPanel.setLayout(boxLayout);
+        this.setLayout(new MigLayout("fill, debug"));
 
+
+        add(ruleListPanel, "dock west");
+        add(description, "wrap");
         for (JRadioButton radioButton : radioButtons) {
-            subPanel.add(radioButton);
+            add(radioButton, "wrap");
         }
-        subPanel.add(Box.createVerticalGlue());
-        subPanel.add(reset);  //todo: this button looks very ugly now
+        add(new JSeparator(), "growX, wrap, newLine push");
+        add(reset, "wrap 5");
 
-        JPanel rightPanel = new JPanel();
-        rightPanel.setLayout(new BorderLayout());
-        rightPanel.add(description, BorderLayout.NORTH);
-        rightPanel.add(subPanel, BorderLayout.CENTER);
-
-        this.setLayout(new BorderLayout());
-        this.add(ruleListPanel, BorderLayout.WEST);
-        this.add(rightPanel, BorderLayout.CENTER);
     }// makeLayout()
 
 
