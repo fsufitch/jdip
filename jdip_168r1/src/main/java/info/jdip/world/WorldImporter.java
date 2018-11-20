@@ -18,6 +18,7 @@
 package info.jdip.world;
 
 import info.jdip.JDipException;
+import info.jdip.world.metadata.GameMetadata;
 import info.jdip.world.metadata.PlayerMetadata;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -517,6 +518,7 @@ public class WorldImporter {
                             resultWorld.setVictoryConditions(extractVictoryConditions(nonTurnData.getValue()));
                             break;
                         case "_world_metadata_":
+                            resultWorld.setGameMetadata(extractGameMetadata(nonTurnData.getValue()));
                             break;
                         case "_game_setup_":
                             break;
@@ -551,31 +553,7 @@ public class WorldImporter {
         }
         playerMetadata.setEmailAddresses(emailAddresses.toArray(new String[emailAddresses.size()]));
 
-        SerializeInformation uriSerInfo = playerMetaDataInfo.getAttribute("uri");
-        // the attribute uri must either be null or an object of the class java.net.URI
-        if (!((uriSerInfo.isPrimitive() && "null".equals(uriSerInfo.getClassName())) ||
-                (uriSerInfo.isObject() && "java.net.URI".equals(uriSerInfo.getClassName())))) {
-            throw new JDipException(
-                    "The uri of the player metadata must either be null or an object of class java.net.URI");
-        }
-        if (uriSerInfo.isPrimitive()) {
-            playerMetadata.setURI(null);
-        } else {
-            ObjectInformation uriInfo = (ObjectInformation)uriSerInfo;
-            SerializeInformation innerUriSerInfo = uriInfo.getAttribute("string");
-            if (innerUriSerInfo == null || !innerUriSerInfo.isPrimitive() ||
-                    !"string".equals(innerUriSerInfo.getClassName())) {
-                // if the class java.net.URI is changed then we ignore it and set the uri to null
-                playerMetadata.setURI(null);
-            } else {
-                try {
-                    playerMetadata.setURI(new URI(((PrimitiveInformation)innerUriSerInfo).getValue()));
-                } catch (URISyntaxException usex) {
-                    playerMetadata.setURI(null);
-                }
-            }
-        }
-
+        playerMetadata.setURI(extractURIAttribute(playerMetaDataInfo, "uri"));
         playerMetadata.setNotes(extractStringAttribute(playerMetaDataInfo, "notes"));
 
         return playerMetadata;
@@ -687,10 +665,41 @@ public class WorldImporter {
                 new Phase(Phase.SeasonType.SPRING, initialYear, Phase.PhaseType.MOVEMENT));
     }
 
+    private GameMetadata extractGameMetadata(SerializeInformation gameMetadataSerInfo) throws JDipException {
+        GameMetadata gameMetadata = new GameMetadata();
+        if (gameMetadataSerInfo == null || !gameMetadataSerInfo.isObject() ||
+                !"dip.world.metadata.GameMetadata".equals(gameMetadataSerInfo.getClassName())) {
+            throw new JDipException(
+                    "Expected the game metadata to be an object of class dip.world.metadata.GameMetadata");
+        }
+        ObjectInformation gameMetadataInfo = (ObjectInformation)gameMetadataSerInfo;
+
+        gameMetadata.setComment(extractStringAttribute(gameMetadataInfo, "comment"));
+        gameMetadata.setGameName(extractStringAttribute(gameMetadataInfo, "gameName"));
+        gameMetadata.setModeratorName(extractStringAttribute(gameMetadataInfo, "moderator"));
+        gameMetadata.setModeratorEmail(extractStringAttribute(gameMetadataInfo, "moderatorEmail"));
+        gameMetadata.setModeratorURI(extractURIAttribute(gameMetadataInfo, "moderatorURI"));
+        gameMetadata.setJudgeName(extractStringAttribute(gameMetadataInfo, "judgeName"));
+        gameMetadata.setGameURI(extractURIAttribute(gameMetadataInfo, "gameURI"));
+        gameMetadata.setNotes(extractStringAttribute(gameMetadataInfo, "notes"));
+        gameMetadata.setGameID(extractStringAttribute(gameMetadataInfo, "id"));
+
+        return gameMetadata;
+    }
+
+    /**
+     * Extract a string from the given object with the given attribute name. May return null if the string is null.
+     *
+     * @param object the object containing the string
+     * @param attributeName the name of the string attribute
+     * @return the string or null
+     * @throws JDipException if an error occurs
+     */
     private String extractStringAttribute(ObjectInformation object, String attributeName) throws JDipException {
         SerializeInformation attributeSerInfo = object.getAttribute(attributeName);
         if (attributeSerInfo == null || !attributeSerInfo.isPrimitive() ||
-                !"string".equals(attributeSerInfo.getClassName())) {
+                (!"string".equals(attributeSerInfo.getClassName()) &&
+                    !"null".equals(attributeSerInfo.getClassName()))) {
             throw new JDipException(new StringBuilder("Expected the ").append(object.getClassName())
                     .append(" to contain a string attribute with the name ").append(attributeName).toString());
         }
@@ -718,6 +727,44 @@ public class WorldImporter {
         }
         PrimitiveInformation attributeInfo = (PrimitiveInformation)attributeSerInfo;
         return Integer.parseInt(attributeInfo.getValue());
+    }
+
+    /**
+     * Extract an URI from the given object with the given attribute name. May return null if either the URI is null or
+     * the URI is invalid.
+     *
+     * @param object the object containing the URI
+     * @param attributeName the name of the URI attribute
+     * @return the URI or null
+     * @throws JDipException if an error occurs
+     */
+    private URI extractURIAttribute(ObjectInformation object, String attributeName) throws JDipException {
+        URI result;
+        SerializeInformation uriSerInfo = object.getAttribute(attributeName);
+        // the attribute uri must either be null or an object of the class java.net.URI
+        if (!((uriSerInfo.isPrimitive() && "null".equals(uriSerInfo.getClassName())) ||
+                (uriSerInfo.isObject() && "java.net.URI".equals(uriSerInfo.getClassName())))) {
+            throw new JDipException(new StringBuilder("Expected the ").append(object.getClassName())
+                    .append(" to contain an URI attribute with the name ").append(attributeName).toString());
+        }
+        if (uriSerInfo.isPrimitive()) {
+            result = null;
+        } else {
+            ObjectInformation uriInfo = (ObjectInformation)uriSerInfo;
+            SerializeInformation innerUriSerInfo = uriInfo.getAttribute("string");
+            if (innerUriSerInfo == null || !innerUriSerInfo.isPrimitive() ||
+                    !"string".equals(innerUriSerInfo.getClassName())) {
+                // if the class java.net.URI is changed then we ignore it and set the uri to null
+                result = null;
+            } else {
+                try {
+                    result = new URI(((PrimitiveInformation)innerUriSerInfo).getValue());
+                } catch (URISyntaxException usex) {
+                    result = null;
+                }
+            }
+        }
+        return result;
     }
 
 
