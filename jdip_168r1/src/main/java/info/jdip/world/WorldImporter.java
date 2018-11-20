@@ -18,6 +18,7 @@
 package info.jdip.world;
 
 import info.jdip.JDipException;
+import info.jdip.gui.DefaultGUIGameSetup;
 import info.jdip.world.metadata.GameMetadata;
 import info.jdip.world.metadata.PlayerMetadata;
 import javax.xml.namespace.QName;
@@ -475,6 +476,7 @@ public class WorldImporter {
                             resultWorld.setGameMetadata(extractGameMetadata(nonTurnData.getValue()));
                             break;
                         case "_game_setup_":
+                            resultWorld.setGameSetup(extractGameSetup(nonTurnData.getValue()));
                             break;
                         default:
                             logger.warn(new StringBuilder("Unknown entry in nonTurnData found: \"")
@@ -637,6 +639,12 @@ public class WorldImporter {
         gameMetadata.setGameID(extractStringAttribute(gameMetadataInfo, "id"));
 
         return gameMetadata;
+    }
+
+    private GameSetup extractGameSetup(SerializeInformation gameSetupSerInfo) throws JDipException {
+        GameSetup gameSetup;
+        gameSetup = new DefaultGUIGameSetup();
+        return gameSetup;
     }
 
     /**
