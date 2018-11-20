@@ -276,7 +276,9 @@ public class WorldImporter {
 
         World resultWorld = new World(map);
 
-        handleNonTurnData(resultWorld, powers);
+        extractNonTurnData(resultWorld, powers);
+
+        extractTurnStates(resultWorld);
 
         return resultWorld;
     }
@@ -439,7 +441,7 @@ public class WorldImporter {
         return Coast.getCoast(extractIntAttribute(coastInfo, "index"));
     }
 
-    private void handleNonTurnData(World resultWorld, Map<UUID, Power> powers) throws JDipException {
+    private void extractNonTurnData(World resultWorld, Map<UUID, Power> powers) throws JDipException {
         SerializeInformation nonTurnSerInfo = world.getAttribute("nonTurnData");
         if (nonTurnSerInfo == null || !nonTurnSerInfo.isMap()) {
             throw new JDipException("Expected the world to have a map of nonTurnData");
@@ -645,6 +647,70 @@ public class WorldImporter {
         GameSetup gameSetup;
         gameSetup = new DefaultGUIGameSetup();
         return gameSetup;
+    }
+
+    private void extractTurnStates(World resultWorld) throws JDipException {
+        SerializeInformation turnStatesSyncMapSerInfo = world.getAttribute("turnStates");
+        if (turnStatesSyncMapSerInfo == null || !turnStatesSyncMapSerInfo.isObject()) {
+            throw new JDipException("Expected the world to have a synchronized map of turnStates");
+        }
+        ObjectInformation turnStatesSyncMapInfo = (ObjectInformation)turnStatesSyncMapSerInfo;
+
+        SerializeInformation turnStatesMapSerInfo = turnStatesSyncMapInfo.getAttribute("m");
+        if (turnStatesMapSerInfo == null || !turnStatesMapSerInfo.isMap()) {
+            throw new JDipException("Expected the synchronized map to contain a map");
+        }
+        MapInformation turnStatesMapInfo = (MapInformation)turnStatesMapSerInfo;
+
+        for (Map.Entry<SerializeInformation, SerializeInformation> turnStateEntry:
+                turnStatesMapInfo.getMap().entrySet()) {
+            TurnState turnState = new TurnState(extractPhase(turnStateEntry.getKey()));
+
+        }
+    }
+
+    private Phase extractPhase(SerializeInformation phaseSerInfo) throws JDipException {
+        if (phaseSerInfo == null || !phaseSerInfo.isObject() ||
+                !"dip.world.Phase".equals(phaseSerInfo.getClassName())) {
+            throw new JDipException("Expected a phase to be an object of type dip.world.Phase");
+        }
+        ObjectInformation phaseInfo = (ObjectInformation)phaseSerInfo;
+
+        SerializeInformation seasonTypeSerInfo = phaseInfo.getAttribute("seasonType");
+        if (seasonTypeSerInfo == null || !seasonTypeSerInfo.isObject() ||
+                !"dip.world.Phase$SeasonType".equals(seasonTypeSerInfo.getClassName())) {
+            throw new JDipException("Expected a phase to contain an object of type dip.world.Phase$SeasonType");
+        }
+        ObjectInformation seasonTypeInfo = (ObjectInformation)seasonTypeSerInfo;
+
+        int seasonTypePosition = extractIntAttribute(seasonTypeInfo, "position");
+        Phase.SeasonType seasonType;
+        if (seasonTypePosition == 1000) {
+            seasonType = Phase.SeasonType.SPRING;
+        } else {
+            seasonType = Phase.SeasonType.FALL;
+        }
+
+        SerializeInformation yearTypeSerInfo = phaseInfo.getAttribute("yearType");
+        if (yearTypeSerInfo == null || !yearTypeSerInfo.isObject() ||
+                !"dip.world.Phase$YearType".equals(yearTypeSerInfo.getClassName())) {
+            throw new JDipException("Expected a phase to contain an object of type dip.world.Phase$YearType");
+        }
+        ObjectInformation yearTypeInfo = (ObjectInformation)yearTypeSerInfo;
+
+        int yearTypeYear = extractIntAttribute(yearTypeInfo, "year");
+        Phase.YearType yearType = new Phase.YearType(yearTypeYear);
+
+        SerializeInformation phaseTypeSerInfo = phaseInfo.getAttribute("phaseType");
+        if (phaseSerInfo == null || !phaseTypeSerInfo.isObject() ||
+                !"dip.world.Phase$PhaseType".equals(phaseTypeSerInfo.getClassName())) {
+            throw new JDipException("Expected a phase to contain an object of type dip.world.Phase$PhaseType");
+        }
+        ObjectInformation phaseTypeInfo = (ObjectInformation)phaseTypeSerInfo;
+
+        Phase.PhaseType phaseType = Phase.PhaseType.parse(extractStringAttribute(phaseTypeInfo, "constName"));
+
+        return new Phase(seasonType, yearType, phaseType);
     }
 
     /**
