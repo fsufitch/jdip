@@ -322,16 +322,8 @@ public class WorldImporter {
             PrimitiveInformation activeInfo = (PrimitiveInformation)activeSerInfo;
             isActive = Boolean.parseBoolean(activeInfo.getValue());
 
-            String adjective;
-            SerializeInformation adjectiveSerInfo = powerInfo.getAttribute("adjective");
-            if (adjectiveSerInfo == null || !activeSerInfo.isPrimitive() ||
-                    !"string".equals(adjectiveSerInfo.getClassName())) {
-                throw new JDipException("Expected a power to contain a string adjective");
-            }
-            PrimitiveInformation adjectiveInfo = (PrimitiveInformation)adjectiveSerInfo;
-            adjective = adjectiveInfo.getValue();
-
-            powers.put(powerInfo.getUuid(), new Power(names.toArray(new String[names.size()]), adjective, isActive));
+            powers.put(powerInfo.getUuid(), new Power(names.toArray(new String[names.size()]),
+                    extractStringAttribute(powerInfo, "adjective"), isActive));
         }
 
         return powers;
@@ -356,14 +348,6 @@ public class WorldImporter {
             }
             ObjectInformation provinceInfo = (ObjectInformation)provinceSerInfo;
 
-            SerializeInformation fullNameSerInfo = provinceInfo.getAttribute("fullName");
-            if (fullNameSerInfo == null || !fullNameSerInfo.isPrimitive()||
-                    !"string".equals(fullNameSerInfo.getClassName())) {
-                throw new JDipException("Expected a province to contain a string fullName");
-            }
-            PrimitiveInformation fullNameInfo = (PrimitiveInformation)fullNameSerInfo;
-            String fullName = fullNameInfo.getValue();
-
             SerializeInformation shortNamesSerInfo = provinceInfo.getAttribute("shortNames");
             if (shortNamesSerInfo == null || !shortNamesSerInfo.isCollection() ||
                     !"java.lang.String".equals(shortNamesSerInfo.getClassName())) {
@@ -381,33 +365,11 @@ public class WorldImporter {
                 shortNames.add(shortNameInfo.getValue());
             }
 
-            SerializeInformation indexSerInfo = provinceInfo.getAttribute("index");
-            if (indexSerInfo == null || !indexSerInfo.isPrimitive()||
-                    !"int".equals(indexSerInfo.getClassName())) {
-                throw new JDipException("Expected a province to contain an int index");
-            }
-            PrimitiveInformation indexInfo = (PrimitiveInformation)indexSerInfo;
-            int index = Integer.parseInt(indexInfo.getValue());
-
-            SerializeInformation isConvoyableCoastSerInfo = provinceInfo.getAttribute("isConvoyableCoast");
-            if (isConvoyableCoastSerInfo == null || !isConvoyableCoastSerInfo.isPrimitive()||
-                    !"boolean".equals(isConvoyableCoastSerInfo.getClassName())) {
-                throw new JDipException("Expected a province to contain a boolean isConvoyableCoast");
-            }
-            PrimitiveInformation isConvoyableCoastInfo = (PrimitiveInformation)isConvoyableCoastSerInfo;
-            boolean isConvoyableCoast = Boolean.parseBoolean(isConvoyableCoastInfo.getValue());
-
-            SerializeInformation supplyCenterSerInfo = provinceInfo.getAttribute("supplyCenter");
-            if (supplyCenterSerInfo == null || !supplyCenterSerInfo.isPrimitive()||
-                    !"boolean".equals(supplyCenterSerInfo.getClassName())) {
-                throw new JDipException("Expected a province to contain a boolean supplyCenter");
-            }
-            PrimitiveInformation supplyCenterInfo = (PrimitiveInformation)supplyCenterSerInfo;
-            boolean supplyCenter = Boolean.parseBoolean(supplyCenterInfo.getValue());
-
-            Province province = new Province(fullName, shortNames.toArray(new String[shortNames.size()]), index,
-                    isConvoyableCoast);
-            province.setSupplyCenter(supplyCenter);
+            Province province = new Province(extractStringAttribute(provinceInfo, "fullName"),
+                    shortNames.toArray(new String[shortNames.size()]),
+                    extractIntAttribute(provinceInfo, "index"),
+                    extractBooleanAttribute(provinceInfo, "isConvoyableCoast"));
+            province.setSupplyCenter(extractBooleanAttribute(provinceInfo, "supplyCenter"));
             provinces.put(provinceInfo.getUuid(), province);
 
             SerializeInformation adjacencySerInfo = provinceInfo.getAttribute("adjacency");
@@ -473,15 +435,7 @@ public class WorldImporter {
     }
 
     private Coast extractCoast(ObjectInformation coastInfo) throws JDipException {
-        SerializeInformation indexSerInfo = coastInfo.getAttribute("index");
-        if (indexSerInfo == null || !indexSerInfo.isPrimitive()||
-                !"int".equals(indexSerInfo.getClassName())) {
-            throw new JDipException("Expected a coast to contain an int index");
-        }
-        PrimitiveInformation indexInfo = (PrimitiveInformation)indexSerInfo;
-        int index = Integer.parseInt(indexInfo.getValue());
-
-        return Coast.getCoast(index);
+        return Coast.getCoast(extractIntAttribute(coastInfo, "index"));
     }
 
     private void handleNonTurnData(World resultWorld, Map<UUID, Power> powers) throws JDipException {
@@ -599,8 +553,6 @@ public class WorldImporter {
             }
             ObjectInformation ruleOptionKey = (ObjectInformation)ruleOptionKeySer;
 
-            String name = extractStringAttribute(ruleOptionKey, "name");
-
             List<RuleOptions.OptionValue> allowed = new LinkedList<>();
             SerializeInformation allowedSerInfo = (SerializeInformation)ruleOptionKey.getAttribute("allowed");
             if (allowedSerInfo == null || !allowedSerInfo.isCollection() ||
@@ -628,8 +580,8 @@ public class WorldImporter {
             RuleOptions.OptionValue defaultValue =
                     new RuleOptions.OptionValue(extractStringAttribute(defaultValueInfo, "name"));
 
-            RuleOptions.Option option = new RuleOptions.Option(name, defaultValue,
-                    allowed.toArray(new RuleOptions.OptionValue[allowed.size()]));
+            RuleOptions.Option option = new RuleOptions.Option(extractStringAttribute(ruleOptionKey, "name"),
+                    defaultValue, allowed.toArray(new RuleOptions.OptionValue[allowed.size()]));
 
             SerializeInformation ruleOptionValueSerInfo = ruleOptionEntry.getValue();
             if (!ruleOptionValueSerInfo.isObject() ||
@@ -727,6 +679,17 @@ public class WorldImporter {
         }
         PrimitiveInformation attributeInfo = (PrimitiveInformation)attributeSerInfo;
         return Integer.parseInt(attributeInfo.getValue());
+    }
+
+    private boolean extractBooleanAttribute(ObjectInformation object, String attributeName) throws JDipException {
+        SerializeInformation attributeSerInfo = object.getAttribute(attributeName);
+        if (attributeSerInfo == null || !attributeSerInfo.isPrimitive() ||
+                !"boolean".equals(attributeSerInfo.getClassName())) {
+            throw new JDipException(new StringBuilder("Expected the ").append(object.getClassName())
+                    .append(" to contain a boolean attribute with the name ").append(attributeName).toString());
+        }
+        PrimitiveInformation attributeInfo = (PrimitiveInformation)attributeSerInfo;
+        return Boolean.parseBoolean(attributeInfo.getValue());
     }
 
     /**
