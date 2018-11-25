@@ -37,6 +37,17 @@ public class TimeResult extends Result {
     // instance variables
     private final long timeStamp;    // milliseconds since midnight, January 1, 1970 UTC.
 
+    /**
+     * A TimeStamped result, applicable to a particular power.
+     * <p>
+     * Note that resource must correspond to an il8n resource!
+     */
+    public TimeResult(Power power, String resource, long timeStamp) {
+        super(power, resource);
+
+        // create timestamp
+        this.timeStamp = timeStamp;
+    }
 
     /**
      * A TimeStamped result, applicable to a particular power.
@@ -44,11 +55,8 @@ public class TimeResult extends Result {
      * Note that resource must correspond to an il8n resource!
      */
     public TimeResult(Power power, String resource) {
-        super(power, resource);
-
-        // create timestamp
-        timeStamp = System.currentTimeMillis();
-    }// Result()
+        this(power, resource, System.currentTimeMillis());
+    }
 
 
     /**
