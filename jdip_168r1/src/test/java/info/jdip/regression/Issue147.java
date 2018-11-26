@@ -17,8 +17,8 @@ import static info.jdip.world.Phase.SeasonType.SPRING;
 
 public class Issue147 {
     @Test
-    @DisplayName("Issue 147")
-    public void fleetCannotSupportInland() throws Exception {
+    @DisplayName("Issue 147: should not create a convoy paradox")
+    public void shouldNotCreateParadox() throws Exception {
         Case testCase = standard(SPRING, 1901, MOVEMENT)
                 .army(RUSSIA, BULGARIA)
                 .army(RUSSIA, GREECE)
