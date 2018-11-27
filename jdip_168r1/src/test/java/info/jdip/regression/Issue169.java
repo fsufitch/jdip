@@ -50,4 +50,22 @@ public class Issue169 {
 
         TestCaseRunner.runCase(testCase);
     }
+
+    @Test
+    @DisplayName("Issue 169: London army should not bounce in normandy even when convoy order is used when the unit  we try to convoy is fleet")
+    public void londonToNormandyShouldNotBounceWithConvoyInCaseWeAreConvoyingFleet() throws Exception {
+        Case testCase = h32(SPRING, 1426, MOVEMENT)
+                .fleet(ENGLAND, LONDON)
+                .army(FRANCE, PARIS)
+                .fleet(ENGLAND, ENGLISH_CHANNEL)
+                .order(LONDON).moveTo(NORMANDY)
+                .order(PARIS).moveTo(NORMANDY)
+                .order(ENGLISH_CHANNEL).convoy(LONDON,NORMANDY)
+                .expectFleet(ENGLAND, LONDON)
+                .expectArmy(FRANCE, NORMANDY)
+                .expectFleet(ENGLAND, ENGLISH_CHANNEL)
+                .build();
+
+        TestCaseRunner.runCase(testCase);
+    }
 }
