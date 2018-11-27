@@ -42,6 +42,10 @@ public class TestCaseBuilder<L extends TestLocation, P extends TestPower> {
         return new TestCaseBuilder<>(Variant.STANDARD, new Phase(seasonType, year, phaseType));
     }
 
+    public static TestCaseBuilder<StandardLocation, StandardPower> ancientMediterranean(Phase.SeasonType seasonType, int year, Phase.PhaseType phaseType) {
+        return new TestCaseBuilder<>(Variant.STANDARD, new Phase(seasonType, year, phaseType));
+    }
+
     void addOrder(TestOrder order){
         orders.add(order);
     }
@@ -143,7 +147,7 @@ public class TestCaseBuilder<L extends TestLocation, P extends TestPower> {
     }
 
     enum Variant {
-        STANDARD
+        STANDARD, ANCIENT_MEDITERRANEAN
     }
 
 
