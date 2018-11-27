@@ -2,41 +2,30 @@ package info.jdip.regression;
 
 import info.jdip.misc.Case;
 import info.jdip.misc.TestCaseRunner;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static info.jdip.test.builder.TestCaseBuilder.ancientMediterranean;
-import static info.jdip.test.builder.standard.StandardLocation.DENMARK;
-import static info.jdip.test.builder.standard.StandardLocation.HOLLAND;
-import static info.jdip.test.builder.standard.StandardLocation.NORTH_SEA;
-import static info.jdip.test.builder.standard.StandardLocation.NORWAY;
-import static info.jdip.test.builder.standard.StandardLocation.NORWEGIAN_SEA;
-import static info.jdip.test.builder.standard.StandardLocation.SWEDEN;
-import static info.jdip.test.builder.standard.StandardPower.GERMANY;
-import static info.jdip.test.builder.standard.StandardPower.RUSSIA;
+import static info.jdip.test.builder.ancient.AncientMediterranenanLocation.AEGEAN_SEA;
+import static info.jdip.test.builder.ancient.AncientMediterranenanLocation.CRETE;
+import static info.jdip.test.builder.ancient.AncientMediterranenanLocation.SPARTA;
+import static info.jdip.test.builder.ancient.AncientMediterranenanPower.GREECE;
 import static info.jdip.world.Phase.PhaseType.MOVEMENT;
 import static info.jdip.world.Phase.SeasonType.SPRING;
 
 public class Issue168 {
     @Test
-    @DisplayName("Issue 168")
-    public void fleetCannotSupportInland() throws Exception {
+    @Disabled
+    @DisplayName("Issue 168: Army should be able to convoy to Crete in ancient mediterranean")
+    public void shouldConvoyArmyOnCrete() throws Exception {
         Case testCase = ancientMediterranean(SPRING, 1, MOVEMENT).
-                fleet(GERMANY, NORTH_SEA)
-                .army(GERMANY, HOLLAND)
-                .order(NORTH_SEA).convoy(HOLLAND, DENMARK)
-                .order(HOLLAND).moveTo(DENMARK)
-                .army(RUSSIA, SWEDEN)
-                .order(SWEDEN).moveTo(DENMARK)
-                .fleet(RUSSIA, NORWEGIAN_SEA)
-                .fleet(RUSSIA, NORWAY)
-                .order(NORWEGIAN_SEA).supportMove(NORWAY, NORTH_SEA)
-                .order(NORWAY).moveTo(NORTH_SEA)
-                .expectArmy(GERMANY, HOLLAND)
-                .expectArmy(RUSSIA, DENMARK)
-                .expectFleet(RUSSIA, NORTH_SEA)
-                .expectFleet(RUSSIA, NORWEGIAN_SEA)
-                .expectDislodgedFleet(GERMANY, NORTH_SEA)
+                fleet(GREECE, AEGEAN_SEA)
+                .army(GREECE, SPARTA)
+                .order(SPARTA).moveTo(CRETE)
+                .order(AEGEAN_SEA).convoy(SPARTA,CRETE)
+                .expectArmy(GREECE, CRETE)
+                .expectFleet(GREECE, AEGEAN_SEA)
                 .build();
 
         TestCaseRunner.runCase(testCase);

@@ -2,6 +2,8 @@ package info.jdip.test.builder;
 
 import info.jdip.misc.Case;
 import info.jdip.order.OrderParser;
+import info.jdip.test.builder.ancient.AncientMediterranenanLocation;
+import info.jdip.test.builder.ancient.AncientMediterranenanPower;
 import info.jdip.test.builder.standard.StandardLocation;
 import info.jdip.test.builder.standard.StandardPower;
 import info.jdip.test.builder.standard.UnitType;
@@ -42,8 +44,8 @@ public class TestCaseBuilder<L extends TestLocation, P extends TestPower> {
         return new TestCaseBuilder<>(Variant.STANDARD, new Phase(seasonType, year, phaseType));
     }
 
-    public static TestCaseBuilder<StandardLocation, StandardPower> ancientMediterranean(Phase.SeasonType seasonType, int year, Phase.PhaseType phaseType) {
-        return new TestCaseBuilder<>(Variant.STANDARD, new Phase(seasonType, year, phaseType));
+    public static TestCaseBuilder<AncientMediterranenanLocation, AncientMediterranenanPower> ancientMediterranean(Phase.SeasonType seasonType, int year, Phase.PhaseType phaseType) {
+        return new TestCaseBuilder<>(Variant.ANCIENT_MEDITERRANEAN, new Phase(seasonType, year, phaseType));
     }
 
     void addOrder(TestOrder order){
@@ -91,7 +93,7 @@ public class TestCaseBuilder<L extends TestLocation, P extends TestPower> {
 
     public Case build() throws NoVariantsException, ParserConfigurationException, InvalidWorldException {
         VariantManager.init(new File[]{new File("build/tmp/variants")}, false);
-        info.jdip.world.variant.data.Variant variant = VariantManager.getVariant(this.variant.name(), VariantManager.VERSION_NEWEST);
+        info.jdip.world.variant.data.Variant variant = VariantManager.getVariant(this.variant.getVariantName(), VariantManager.VERSION_NEWEST);
         World world = WorldFactory.getInstance().createWorld(variant);
         TurnState templateTurnState = world.getLastTurnState();
         world.removeTurnState(templateTurnState);
@@ -147,7 +149,11 @@ public class TestCaseBuilder<L extends TestLocation, P extends TestPower> {
     }
 
     enum Variant {
-        STANDARD, ANCIENT_MEDITERRANEAN
+        STANDARD, ANCIENT_MEDITERRANEAN;
+
+        public String getVariantName() {
+            return name().replace("_", " ");
+        }
     }
 
 
