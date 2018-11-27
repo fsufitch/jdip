@@ -2,8 +2,8 @@ package info.jdip.test.builder;
 
 import info.jdip.misc.Case;
 import info.jdip.order.OrderParser;
-import info.jdip.test.builder.ancient.AncientMediterranenanLocation;
-import info.jdip.test.builder.ancient.AncientMediterranenanPower;
+import info.jdip.test.builder.ancient.AncientMediterraneanLocation;
+import info.jdip.test.builder.ancient.AncientMediterraneanPower;
 import info.jdip.test.builder.standard.StandardLocation;
 import info.jdip.test.builder.standard.StandardPower;
 import info.jdip.test.builder.standard.UnitType;
@@ -44,7 +44,7 @@ public class TestCaseBuilder<L extends TestLocation, P extends TestPower> {
         return new TestCaseBuilder<>(Variant.STANDARD, new Phase(seasonType, year, phaseType));
     }
 
-    public static TestCaseBuilder<AncientMediterranenanLocation, AncientMediterranenanPower> ancientMediterranean(Phase.SeasonType seasonType, int year, Phase.PhaseType phaseType) {
+    public static TestCaseBuilder<AncientMediterraneanLocation, AncientMediterraneanPower> ancientMediterranean(Phase.SeasonType seasonType, int year, Phase.PhaseType phaseType) {
         return new TestCaseBuilder<>(Variant.ANCIENT_MEDITERRANEAN, new Phase(seasonType, year, phaseType));
     }
 

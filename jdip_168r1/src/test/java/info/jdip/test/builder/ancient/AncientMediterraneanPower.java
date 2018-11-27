@@ -2,7 +2,7 @@ package info.jdip.test.builder.ancient;
 
 import info.jdip.test.builder.TestPower;
 
-public enum AncientMediterranenanPower implements TestPower {
+public enum AncientMediterraneanPower implements TestPower {
     CARTHAGE, EGYPT, GREECE, PERSIA, ROME;
 
     @Override
