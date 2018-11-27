@@ -2,6 +2,7 @@ package info.jdip.regression;
 
 import info.jdip.misc.Case;
 import info.jdip.misc.TestCaseRunner;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +18,7 @@ import static info.jdip.world.Phase.SeasonType.SPRING;
 
 public class Issue147 {
     @Test
+    @Disabled
     @DisplayName("Issue 147: should not create a convoy paradox")
     public void shouldNotCreateParadox() throws Exception {
         Case testCase = standard(SPRING, 1901, MOVEMENT)
