@@ -5,6 +5,7 @@ import info.jdip.misc.TestCaseRunner;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static info.jdip.test.builder.TestCaseBuilder.standard;
 import static info.jdip.test.builder.standard.StandardLocation.DENMARK;
 import static info.jdip.test.builder.standard.StandardLocation.HOLLAND;
 import static info.jdip.test.builder.standard.StandardLocation.NORTH_SEA;
@@ -13,7 +14,6 @@ import static info.jdip.test.builder.standard.StandardLocation.NORWEGIAN_SEA;
 import static info.jdip.test.builder.standard.StandardLocation.SWEDEN;
 import static info.jdip.test.builder.standard.StandardPower.GERMANY;
 import static info.jdip.test.builder.standard.StandardPower.RUSSIA;
-import static info.jdip.test.builder.TestCaseBuilder.standard;
 import static info.jdip.world.Phase.PhaseType.MOVEMENT;
 import static info.jdip.world.Phase.SeasonType.SPRING;
 
@@ -21,8 +21,8 @@ public class Issue165 {
     @Test
     @DisplayName("Issue 165")
     public void fleetCannotSupportInland() throws Exception {
-        Case testCase = standard(SPRING, 1901, MOVEMENT).
-                fleet(GERMANY, NORTH_SEA)
+        Case testCase = standard(SPRING, 1901, MOVEMENT)
+                .fleet(GERMANY, NORTH_SEA)
                 .army(GERMANY, HOLLAND)
                 .order(NORTH_SEA).convoy(HOLLAND, DENMARK)
                 .order(HOLLAND).moveTo(DENMARK)
