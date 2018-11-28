@@ -48,6 +48,10 @@ public class TestCaseBuilder<L extends TestLocation, P extends TestPower> {
         return new TestCaseBuilder<>(Variant.CROWDED_MILAN, new Phase(seasonType, year, phaseType));
     }
 
+    public static TestCaseBuilder<MilanLocation, StandardPower> milan(Phase.SeasonType seasonType, int year, Phase.PhaseType phaseType) {
+        return new TestCaseBuilder<>(Variant.CROWDED_MILAN, new Phase(seasonType, year, phaseType));
+    }
+
     void addOrder(TestOrder order){
         orders.add(order);
     }
@@ -149,7 +153,7 @@ public class TestCaseBuilder<L extends TestLocation, P extends TestPower> {
     }
 
     enum Variant {
-        STANDARD, CROWDED_MILAN
+        STANDARD, MILAN, CROWDED_MILAN
     }
 
 
