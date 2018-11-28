@@ -3,7 +3,7 @@ package info.jdip.test.builder.standard;
 import info.jdip.test.builder.TestLocation;
 
 public enum StandardLocation implements TestLocation {
-    TRIESTE, BUDAPEST, GALACIA, DENMARK, RUMANIA, NORWAY, SWEDEN, HOLLAND, NORTH_SEA, NORWEGIAN_SEA;
+    TRIESTE, BUDAPEST, GALACIA, DENMARK, RUMANIA, NORWAY, SWEDEN, HOLLAND, NORTH_SEA, NORWEGIAN_SEA, PRUSSIA;
 
     @Override
     public String getLocationName() {

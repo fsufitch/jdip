@@ -2,6 +2,8 @@ package info.jdip.test.builder;
 
 import info.jdip.misc.Case;
 import info.jdip.order.OrderParser;
+import info.jdip.test.builder.milan.CrowdedMilanPower;
+import info.jdip.test.builder.milan.MilanLocation;
 import info.jdip.test.builder.standard.StandardLocation;
 import info.jdip.test.builder.standard.StandardPower;
 import info.jdip.test.builder.standard.UnitType;
@@ -40,6 +42,10 @@ public class TestCaseBuilder<L extends TestLocation, P extends TestPower> {
 
     public static TestCaseBuilder<StandardLocation, StandardPower> standard(Phase.SeasonType seasonType, int year, Phase.PhaseType phaseType) {
         return new TestCaseBuilder<>(Variant.STANDARD, new Phase(seasonType, year, phaseType));
+    }
+
+    public static TestCaseBuilder<MilanLocation, CrowdedMilanPower> crowdedMilan(Phase.SeasonType seasonType, int year, Phase.PhaseType phaseType) {
+        return new TestCaseBuilder<>(Variant.CROWDED_MILAN, new Phase(seasonType, year, phaseType));
     }
 
     void addOrder(TestOrder order){
@@ -143,7 +149,7 @@ public class TestCaseBuilder<L extends TestLocation, P extends TestPower> {
     }
 
     enum Variant {
-        STANDARD
+        STANDARD, CROWDED_MILAN
     }
 
 
