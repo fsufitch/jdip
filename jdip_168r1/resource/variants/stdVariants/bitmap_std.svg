@@ -229,7 +229,7 @@
 		<jdipNS:PROVINCE name="arm"><jdipNS:UNIT x="1076" y="775"/><jdipNS:DISLODGED_UNIT x="1090" y="757"/><jdipNS:SUPPLY_CENTER x="1103" y="812"/></jdipNS:PROVINCE>
 		<jdipNS:PROVINCE name="bal"><jdipNS:UNIT x="650" y="430"/><jdipNS:DISLODGED_UNIT x="675" y="405"/><jdipNS:SUPPLY_CENTER x="0 " y="0 "/></jdipNS:PROVINCE>
 		<jdipNS:PROVINCE name="bar"><jdipNS:UNIT x="850" y="47"/><jdipNS:DISLODGED_UNIT x="815" y="47"/><jdipNS:SUPPLY_CENTER x="0 " y="0 "/></jdipNS:PROVINCE>
-		<jdipNS:PROVINCE name="bel"><jdipNS:UNIT x="388" y="514"/><jdipNS:DISLODGED_UNIT x="298" y="508"/><jdipNS:SUPPLY_CENTER x="418" y="548"/></jdipNS:PROVINCE>
+		<jdipNS:PROVINCE name="bel"><jdipNS:UNIT x="388" y="514"/><jdipNS:DISLODGED_UNIT x="398" y="508"/><jdipNS:SUPPLY_CENTER x="418" y="548"/></jdipNS:PROVINCE>
 		<jdipNS:PROVINCE name="ber"><jdipNS:UNIT x="561" y="471"/><jdipNS:DISLODGED_UNIT x="587" y="478"/><jdipNS:SUPPLY_CENTER x="565" y="504"/></jdipNS:PROVINCE>
 		<jdipNS:PROVINCE name="bla"><jdipNS:UNIT x="885" y="707"/><jdipNS:DISLODGED_UNIT x="867" y="730"/><jdipNS:SUPPLY_CENTER x="0 " y="0 "/></jdipNS:PROVINCE>
 		<jdipNS:PROVINCE name="boh"><jdipNS:UNIT x="584" y="560"/><jdipNS:DISLODGED_UNIT x="612" y="563"/><jdipNS:SUPPLY_CENTER x="581" y="584"/></jdipNS:PROVINCE>
