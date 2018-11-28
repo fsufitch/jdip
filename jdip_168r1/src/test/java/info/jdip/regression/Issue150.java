@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static info.jdip.test.builder.TestCaseBuilder.crowdedMilan;
+import static info.jdip.test.builder.TestCaseBuilder.milan;
 import static info.jdip.test.builder.TestCaseBuilder.standard;
 import static info.jdip.test.builder.milan.CrowdedMilanPower.GERMANY;
 import static info.jdip.test.builder.milan.CrowdedMilanPower.RUSSIA;
@@ -89,6 +90,44 @@ public class Issue150 {
                 .army(StandardPower.RUSSIA, StandardLocation.WARSAW)
                 .order(StandardLocation.WARSAW).moveTo(StandardLocation.PRUSSIA)
                 .expectArmy(StandardPower.RUSSIA, StandardLocation.PRUSSIA)
+                .build();
+
+        TestCaseRunner.runCase(testCase);
+    }
+
+    @Test
+    @Disabled("To not fail pipeline, this test has to be fix for the issue 150 to be closed")
+    @DisplayName("Gitlab Issue 150: Should be possible to move from Prussia to Silesia in Milan")
+    public void shouldMoveFromPrussiaToSilesiaInMilan() throws Exception {
+        Case testCase = milan(SPRING, 1901, MOVEMENT)
+                .army(StandardPower.GERMANY, PRUSSIA)
+                .order(PRUSSIA).moveTo(SILESIA)
+                .expectArmy(StandardPower.GERMANY, SILESIA)
+                .build();
+
+        TestCaseRunner.runCase(testCase);
+    }
+
+    @Test
+    @Disabled("To not fail pipeline, this test has to be fix for the issue 150 to be closed")
+    @DisplayName("Gitlab Issue 150: Should be possible to move from Prussia to Warsaw in Milan")
+    public void shouldMoveFromPrussiaToWarsawInMilan() throws Exception {
+        Case testCase = milan(SPRING, 1901, MOVEMENT)
+                .army(StandardPower.GERMANY, PRUSSIA)
+                .order(PRUSSIA).moveTo(WARSAW)
+                .expectArmy(StandardPower.GERMANY, WARSAW)
+                .build();
+
+        TestCaseRunner.runCase(testCase);
+    }
+
+    @Test
+    @DisplayName("Gitlab Issue 150: Should be possible to move from Warsaw to Prussia in Milan")
+    public void shouldMoveFromWarsawToPrussiaInMilan() throws Exception {
+        Case testCase = milan(SPRING, 1901, MOVEMENT)
+                .army(StandardPower.RUSSIA, WARSAW)
+                .order(WARSAW).moveTo(PRUSSIA)
+                .expectArmy(StandardPower.RUSSIA, PRUSSIA)
                 .build();
 
         TestCaseRunner.runCase(testCase);

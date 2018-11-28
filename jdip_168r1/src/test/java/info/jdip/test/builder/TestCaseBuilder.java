@@ -49,7 +49,7 @@ public class TestCaseBuilder<L extends TestLocation, P extends TestPower> {
     }
 
     public static TestCaseBuilder<MilanLocation, StandardPower> milan(Phase.SeasonType seasonType, int year, Phase.PhaseType phaseType) {
-        return new TestCaseBuilder<>(Variant.CROWDED_MILAN, new Phase(seasonType, year, phaseType));
+        return new TestCaseBuilder<>(Variant.MILAN, new Phase(seasonType, year, phaseType));
     }
 
     void addOrder(TestOrder order){
