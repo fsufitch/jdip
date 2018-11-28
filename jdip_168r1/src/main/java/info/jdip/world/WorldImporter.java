@@ -44,7 +44,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 import javax.xml.stream.events.Attribute;
 import org.slf4j.Logger;
@@ -139,7 +141,7 @@ public class WorldImporter {
             }
         }
 
-        return extractWorld(world);
+        return extractWorld(world).orElseThrow(() -> new JDipException("Cannot find a world to import"));
     }
 
     private void handleObject(StartElement startElement) throws XMLStreamException, JDipException {
@@ -257,193 +259,230 @@ public class WorldImporter {
         }
     }
 
-    private World extractWorld(SerializeInformation worldSerInfo) throws JDipException {
+    private Optional<World> extractWorld(SerializeInformation worldSerInfo) throws JDipException {
         if (worldSerInfo == null || !worldSerInfo.isObject() ||
                 !"dip.world.World".equals(worldSerInfo.getClassName())) {
-            throw new JDipException("Expected the world to be an object of class dip.world.World");
+            return Optional.empty();
         }
         ObjectInformation worldInfo = (ObjectInformation)worldSerInfo;
-
-        info.jdip.world.Map map = extractMap(worldInfo.getAttribute("map"));
-
+        info.jdip.world.Map map = extractMap(worldInfo.getAttribute("map")).orElseThrow(
+                () -> new JDipException("Expected a world to contain a map"));
         World resultWorld = new World(map);
 
-        extractNonTurnData(resultWorld);
+        NonTurnDataProxy nonTurnData = extractNonTurnData(worldInfo.getAttribute("nonTurnData"))
+                .orElseThrow(() -> new JDipException("Found unexpected element in non turn data"));
+        nonTurnData.transferNonTurnData(resultWorld);
 
         extractTurnStates(resultWorld);
 
-        return resultWorld;
+        return Optional.of(resultWorld);
     }
 
-    private info.jdip.world.Map extractMap(SerializeInformation mapSerInfo) throws JDipException {
+    private Optional<info.jdip.world.Map> extractMap(SerializeInformation mapSerInfo) throws JDipException {
         if (mapSerInfo == null || !mapSerInfo.isObject() || !"dip.world.Map".equals(mapSerInfo.getClassName())) {
-            throw new JDipException("Expected a map to be an object of type dip.world.Map");
+            return Optional.empty();
         }
         ObjectInformation mapInfo = (ObjectInformation)mapSerInfo;
 
-        return new info.jdip.world.Map(extractPowers(mapInfo.getAttribute("powers")),
-                extractProvinces(mapInfo.getAttribute("provinces")));
+        return Optional.of(new info.jdip.world.Map(
+                extractPowers(mapInfo.getAttribute("powers"))
+                    .orElseThrow(() -> new JDipException("Expected the map to contain an array of powers")),
+                extractProvinces(mapInfo.getAttribute("provinces"))
+                    .orElseThrow(() -> new JDipException("Expected the map to contain an array of provinces"))
+        ));
     }
 
-    private Power[] extractPowers(SerializeInformation powersSerInfo) throws JDipException {
+    private Optional<Power[]> extractPowers(SerializeInformation powersSerInfo) throws JDipException {
         if (powersSerInfo == null || !powersSerInfo.isCollection() ||
                 !"dip.world.Power".equals(powersSerInfo.getClassName())) {
-            throw new JDipException("Expected the powers to be a collection of type dip.world.Power");
+            return Optional.empty();
         }
         CollectionInformation powersInfo = (CollectionInformation)powersSerInfo;
         List<Power> powersList = new LinkedList<>();
         for (SerializeInformation powerSerInfo: powersInfo.getCollectionEntries()) {
-            powersList.add(extractPower(powerSerInfo));
+            Optional<Power> power = extractPower(powerSerInfo);
+            if (power.isPresent()) {
+                powersList.add(power.get());
+            }
         }
-        return powersList.toArray(new Power[powersList.size()]);
+        return Optional.of(powersList.toArray(new Power[powersList.size()]));
     }
 
-    private Power extractPower(SerializeInformation powerSerInfo) throws JDipException {
+    private Optional<Power> extractPower(SerializeInformation powerSerInfo) throws JDipException {
         if (powerSerInfo == null || !powerSerInfo.isObject() ||
                 !"dip.world.Power".equals(powerSerInfo.getClassName())) {
-            throw new JDipException("Expected a power to be an object of type dip.world.Power");
+            return Optional.empty();
         }
         Power power = powers.get(powerSerInfo.getUuid());
         if (power == null) {
             ObjectInformation powerInfo = (ObjectInformation)powerSerInfo;
 
             power = new Power(extractStringArray(powerInfo.getAttribute("names")),
-                    extractString(powerInfo.getAttribute("adjective")),
+                    extractString(powerInfo.getAttribute("adjective"))
+                        .orElseThrow(() -> new JDipException("The adjective of a power may not be null")),
                     extractBoolean(powerInfo.getAttribute("isActive")));
             powers.put(powerInfo.getUuid(), power);
         }
-        return power;
+        return Optional.of(power);
     }
 
-    private Province[] extractProvinces(SerializeInformation provincesSerInfo) throws JDipException {
+    private Optional<Province[]> extractProvinces(SerializeInformation provincesSerInfo) throws JDipException {
         if (provincesSerInfo == null || !provincesSerInfo.isCollection() ||
                 !"dip.world.Province".equals(provincesSerInfo.getClassName())) {
-            throw new JDipException("Expected the provinces to be a collection of type dip.world.Province");
+            return Optional.empty();
         }
         CollectionInformation provincesInfo = (CollectionInformation)provincesSerInfo;
         List<Province> provincesList = new LinkedList<>();
         for (SerializeInformation provinceSerInfo: provincesInfo.getCollectionEntries()) {
-            provincesList.add(extractProvince(provinceSerInfo));
+            Optional<Province> province = extractProvince(provinceSerInfo);
+            if (province.isPresent()) {
+                provincesList.add(province.get());
+            }
         }
-        return provincesList.toArray(new Province[provincesList.size()]);
+        return Optional.of(provincesList.toArray(new Province[provincesList.size()]));
     }
 
-    private Province extractProvince(SerializeInformation provinceSerInfo) throws JDipException {
+    private Optional<Province> extractProvince(SerializeInformation provinceSerInfo) throws JDipException {
         if (provinceSerInfo == null || !provinceSerInfo.isObject() ||
                 !"dip.world.Province".equals(provinceSerInfo.getClassName())) {
-            throw new JDipException("Expected a province to be an object of type dip.world.Province");
+            return Optional.empty();
         }
         Province province = provinces.get(provinceSerInfo.getUuid());
         if (province == null) {
             ObjectInformation provinceInfo = (ObjectInformation)provinceSerInfo;
-            province = new Province(extractString(provinceInfo.getAttribute("fullName")),
+            province = new Province(extractString(provinceInfo.getAttribute("fullName"))
+                        .orElseThrow(() -> new JDipException("The fullName of a province may not be null")),
                     extractStringArray(provinceInfo.getAttribute("shortNames")),
-                    extractInt(provinceInfo.getAttribute("index")),
+                    extractInt(provinceInfo.getAttribute("index"))
+                            .orElseThrow(() -> new JDipException("Expected the province to contain an index")),
                     extractBoolean(provinceInfo.getAttribute("isConvoyableCoast")));
             province.setSupplyCenter(extractBoolean(provinceInfo.getAttribute("supplyCenter")));
             // TODO extractBorders
             provinces.put(provinceInfo.getUuid(), province);
 
-            AdjacencyProxy adjacencyProxy = extractAdjacency(provinceInfo.getAttribute("adjacency"));
-            adjacencyProxy.transferToAdjacency(province.getAdjacency());
+            extractAdjacency(provinceInfo.getAttribute("adjacency"))
+                        .orElseThrow(() -> new JDipException("Expected a province to contain adjacency information"))
+                    .transferToAdjacency(province.getAdjacency());
         }
-        return province;
+        return Optional.of(province);
     }
 
-    private AdjacencyProxy extractAdjacency(SerializeInformation adjacencySerInfo) throws JDipException {
+    private Optional<AdjacencyProxy> extractAdjacency(SerializeInformation adjacencySerInfo) throws JDipException {
         if (adjacencySerInfo == null || !adjacencySerInfo.isObject() ||
                 !"dip.world.Province$Adjacency".equals(adjacencySerInfo.getClassName())) {
-            throw new JDipException("Expected a adjacency to be an object of type dip.world.Province$Adjacency");
+            return Optional.empty();
         }
         ObjectInformation adjacencyInfo = (ObjectInformation)adjacencySerInfo;
         return extractAdjacencyMap(adjacencyInfo.getAttribute("adjLoc"));
     }
 
-    private AdjacencyProxy extractAdjacencyMap(SerializeInformation adjacencyMapSerInfo) throws JDipException {
+    private Optional<AdjacencyProxy> extractAdjacencyMap(SerializeInformation adjacencyMapSerInfo)
+            throws JDipException {
         if (adjacencyMapSerInfo == null || !adjacencyMapSerInfo.isMap() ||
                 !"java.util.HashMap".equals(adjacencyMapSerInfo.getClassName())) {
-            throw new JDipException("Expected the adjLoc to be a map of type java.util.HashMap");
+            return Optional.empty();
         }
         MapInformation adjacencyMapInfo = (MapInformation)adjacencyMapSerInfo;
         AdjacencyProxy adjacency = new AdjacencyProxy();
         for (Map.Entry<SerializeInformation, SerializeInformation> adjacencyMapEntrySerInfo:
                 adjacencyMapInfo.getMap().entrySet()) {
-            adjacency.addAdjacency(extractCoast(adjacencyMapEntrySerInfo.getKey()),
-                    extractLocations(adjacencyMapEntrySerInfo.getValue()));
+            adjacency.addAdjacency(extractCoast(adjacencyMapEntrySerInfo.getKey())
+                        .orElseThrow(() -> new JDipException("Expected a known coast in adjacency")),
+                    extractLocations(adjacencyMapEntrySerInfo.getValue())
+                        .orElseThrow(() -> new JDipException("Expected alocation array in adjacency"))
+            );
         }
-        return adjacency;
+        return Optional.of(adjacency);
     }
 
-    private Coast extractCoast(SerializeInformation coastSerInfo) throws JDipException {
+    private Optional<Coast> extractCoast(SerializeInformation coastSerInfo) throws JDipException {
         if (coastSerInfo == null || !coastSerInfo.isObject() ||
                 !"dip.world.Coast".equals(coastSerInfo.getClassName())) {
-            throw new JDipException("Expected the coast to be an object of type dip.world.Coast");
+            return Optional.empty();
         }
         ObjectInformation coastInfo = (ObjectInformation)coastSerInfo;
-        return Coast.getCoast(extractInt(coastInfo.getAttribute("index")));
+        return Optional.ofNullable(Coast.getCoast(extractInt(coastInfo.getAttribute("index"))
+                .orElseThrow(() -> new JDipException("Expected the coast to contain an index"))));
     }
 
-    private Location[] extractLocations(SerializeInformation locationsSerInfo) throws JDipException {
+    private Optional<Location[]> extractLocations(SerializeInformation locationsSerInfo) throws JDipException {
         if (locationsSerInfo == null || !locationsSerInfo.isCollection() ||
                 !"dip.world.Location".equals(locationsSerInfo.getClassName())) {
-            throw new JDipException("Expected the locations to be a collection of type dip.world.Location");
+            return Optional.empty();
         }
         CollectionInformation locationsInfo = (CollectionInformation)locationsSerInfo;
         List<Location> locations = new LinkedList<>();
         for (SerializeInformation locationSerInfo: locationsInfo.getCollectionEntries()) {
-            locations.add(extractLocation(locationSerInfo));
+            Optional<Location> location = extractLocation(locationSerInfo);
+            if (location.isPresent()) {
+                locations.add(location.get());
+            }
         }
-        return locations.toArray(new Location[locations.size()]);
+        return Optional.of(locations.toArray(new Location[locations.size()]));
     }
 
-    private Location extractLocation(SerializeInformation locationSerInfo) throws JDipException {
+    private Optional<Location> extractLocation(SerializeInformation locationSerInfo) throws JDipException {
         if (locationSerInfo == null || !locationSerInfo.isObject()||
                 !"dip.world.Location".equals(locationSerInfo.getClassName())) {
-            throw new JDipException("Expected the location to be an object of type dip.world.Location");
+            return Optional.empty();
         }
         ObjectInformation locationInfo = (ObjectInformation)locationSerInfo;
-        return new Location(extractProvince(locationInfo.getAttribute("province")),
-                extractCoast(locationInfo.getAttribute("coast")));
+        return Optional.of(new Location(
+                extractProvince(locationInfo.getAttribute("province"))
+                    .orElseThrow(() -> new JDipException("Expected a location to contain a province")),
+                extractCoast(locationInfo.getAttribute("coast"))
+                    .orElseThrow(() -> new JDipException("Expected a location to contain a coast"))
+        ));
     }
 
-    private void extractNonTurnData(World resultWorld) throws JDipException {
-        SerializeInformation nonTurnSerInfo = world.getAttribute("nonTurnData");
-        if (nonTurnSerInfo == null || !nonTurnSerInfo.isMap()) {
-            throw new JDipException("Expected the world to have a map of nonTurnData");
+    private Optional<NonTurnDataProxy> extractNonTurnData(SerializeInformation nonTurnDataSerInfo)
+            throws JDipException {
+        if (nonTurnDataSerInfo == null || !nonTurnDataSerInfo.isMap() ||
+                !"java.util.HashMap".equals(nonTurnDataSerInfo.getClassName())) {
+            return Optional.empty();
         }
-        MapInformation nonTurnInfo = (MapInformation)nonTurnSerInfo;
+        MapInformation nonTurnDataInfo = (MapInformation)nonTurnDataSerInfo;
 
-        for (Map.Entry<SerializeInformation, SerializeInformation> nonTurnData: nonTurnInfo.getMap().entrySet()) {
+        NonTurnDataProxy nonTurnDataProxy = new NonTurnDataProxy();
+        for (Map.Entry<SerializeInformation, SerializeInformation> nonTurnData: nonTurnDataInfo.getMap().entrySet()) {
             SerializeInformation keySerInfo = nonTurnData.getKey();
             if (keySerInfo.isObject()) {
                 if ("dip.world.Power".equals(keySerInfo.getClassName())) {
-                    SerializeInformation playerMetaDataSer = nonTurnData.getValue();
-                    if (!playerMetaDataSer.isObject() ||
-                            !"dip.world.metadata.PlayerMetadata".equals(playerMetaDataSer.getClassName())) {
-                        throw new JDipException(
-                                "Non turn data with key Power must have a value of type PlayerMetadata");
-                    }
-                    PlayerMetadata playerMetaData = extractPlayerMetaData((ObjectInformation)playerMetaDataSer);
-                    resultWorld.setPlayerMetadata(powers.get(keySerInfo.getUuid()), playerMetaData);
+                    Power power = extractPower(keySerInfo).orElseThrow(
+                            () -> new JDipException("Expected the non turn data map to contain a power as key"));
+                    PlayerMetadata playerMetadata = extractPlayerMetadata(nonTurnData.getValue())
+                            .orElseThrow(() -> new JDipException(
+                                    "Expected the non turn data map to contain player metadata as value"));
+                    nonTurnDataProxy.addPlayerMetadata(power, playerMetadata);
+                } else {
+                    return Optional.empty();
                 }
             } else if (keySerInfo.isPrimitive()) {
                 if ("string".equals(keySerInfo.getClassName())) {
                     PrimitiveInformation keyInfo = (PrimitiveInformation)keySerInfo;
                     switch (keyInfo.getValue()) {
                         case "_variant_info_":
-                            resultWorld.setVariantInfo(extractVariantInfo(nonTurnData.getValue()));
+                            nonTurnDataProxy.setVariantInfo(extractVariantInfo(nonTurnData.getValue())
+                                    .orElseThrow(() -> new JDipException(
+                                            "Expected the non turn data to contain a variant info")));
                             break;
                         case "_undo_redo_manager_":
                             // Ignored
                             break;
                         case "_victory_conditions_":
-                            resultWorld.setVictoryConditions(extractVictoryConditions(nonTurnData.getValue()));
+                            nonTurnDataProxy.setVictoryConditions(extractVictoryConditions(nonTurnData.getValue())
+                                    .orElseThrow(() -> new JDipException(
+                                            "Expected the non turn data to contain victory conditions")));
                             break;
                         case "_world_metadata_":
-                            resultWorld.setGameMetadata(extractGameMetadata(nonTurnData.getValue()));
+                            nonTurnDataProxy.setGameMetadata(extractGameMetadata(nonTurnData.getValue())
+                                    .orElseThrow(() -> new JDipException(
+                                            "Expected the non turn data to contain game metadata")));
                             break;
                         case "_game_setup_":
-                            resultWorld.setGameSetup(extractGameSetup(nonTurnData.getValue()));
+                            nonTurnDataProxy.setGameSetup(extractGameSetup(nonTurnData.getValue())
+                                    .orElseThrow(() -> new JDipException(
+                                            "Expected the non turn data to contain a game setup")));
                             break;
                         default:
                             logger.warn(new StringBuilder("Unknown entry in nonTurnData found: \"")
@@ -453,165 +492,195 @@ public class WorldImporter {
                 }
             }
         }
+        return Optional.of(nonTurnDataProxy);
     }
 
-    private PlayerMetadata extractPlayerMetaData(ObjectInformation playerMetaDataInfo) throws JDipException {
+    private Optional<PlayerMetadata> extractPlayerMetadata(SerializeInformation playerMetadataSerInfo)
+            throws JDipException {
+        if (playerMetadataSerInfo == null || !playerMetadataSerInfo.isObject()||
+                !"dip.world.metadata.PlayerMetadata".equals(playerMetadataSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation playerMetadataInfo = (ObjectInformation)playerMetadataSerInfo;
+
         PlayerMetadata playerMetadata = new PlayerMetadata();
-
-        playerMetadata.setName(extractStringAttribute(playerMetaDataInfo, "name"));
-
-        SerializeInformation emailSerInfo = playerMetaDataInfo.getAttribute("email");
-        if (emailSerInfo == null || !emailSerInfo.isCollection() ||
-                !"java.lang.String".equals(emailSerInfo.getClassName())) {
-            throw new JDipException("Expected the player metadata to contain a collection of email addresses");
-        }
-        CollectionInformation emailInfo = (CollectionInformation)emailSerInfo;
-        List<String> emailAddresses = new LinkedList<>();
-        for (SerializeInformation emailEntry: emailInfo.getCollectionEntries()) {
-            if (!emailEntry.isPrimitive() || !"string".equals(emailEntry.getClassName())) {
-                throw new JDipException("Expected the email address of a player metadata to be a string");
-            }
-            PrimitiveInformation email = (PrimitiveInformation)emailEntry;
-            emailAddresses.add(email.getValue());
-        }
-        playerMetadata.setEmailAddresses(emailAddresses.toArray(new String[emailAddresses.size()]));
-
-        playerMetadata.setURI(extractURIAttribute(playerMetaDataInfo, "uri"));
-        playerMetadata.setNotes(extractStringAttribute(playerMetaDataInfo, "notes"));
-
-        return playerMetadata;
+        playerMetadata.setName(extractString(playerMetadataInfo.getAttribute("name"))
+                .orElseThrow(() -> new JDipException("The name of a PlayerMetadata may not be null"))
+        );
+        playerMetadata.setEmailAddresses(extractStringArray(playerMetadataInfo.getAttribute("email")));
+        playerMetadata.setURI(extractURI(playerMetadataInfo.getAttribute("uri")).orElse(null));
+        playerMetadata.setNotes(extractString(playerMetadataInfo.getAttribute("notes"))
+                .orElseThrow(() -> new JDipException("The notes of a PlayerMetadata may not be null")));
+        return Optional.of(playerMetadata);
     }
 
-    private World.VariantInfo extractVariantInfo(SerializeInformation variantInfoSerInfo) throws JDipException {
-        World.VariantInfo variantInfo = new World.VariantInfo();
-
+    private Optional<World.VariantInfo> extractVariantInfo(SerializeInformation variantInfoSerInfo)
+            throws JDipException {
         if (variantInfoSerInfo == null || !variantInfoSerInfo.isObject() ||
                 !"dip.world.World$VariantInfo".equals(variantInfoSerInfo.getClassName())) {
-            throw new JDipException("Expected the variant info to be an object of class dip.world.World$VariantInfo");
+            return Optional.empty();
         }
         ObjectInformation variantInfoInfo = (ObjectInformation)variantInfoSerInfo;
 
-        variantInfo.setVariantName(extractStringAttribute(variantInfoInfo, "variantName"));
-        variantInfo.setMapName(extractStringAttribute(variantInfoInfo, "mapName"));
-        variantInfo.setSymbolPackName(extractStringAttribute(variantInfoInfo, "symbolsName"));
-        variantInfo.setVariantVersion(extractFloatAttribute(variantInfoInfo, "variantVersion"));
-        variantInfo.setSymbolPackVersion(extractFloatAttribute(variantInfoInfo, "symbolsVersion"));
+        World.VariantInfo variantInfo = new World.VariantInfo();
+        variantInfo.setVariantName(extractString(variantInfoInfo.getAttribute("variantName"))
+                .orElseThrow(() -> new JDipException("Expected the variant info to contain a variantName")));
+        variantInfo.setMapName(extractString(variantInfoInfo.getAttribute("mapName"))
+                .orElseThrow(() -> new JDipException("Expected the variantInfo to contain a mapName")));
+        variantInfo.setSymbolPackName(extractString(variantInfoInfo.getAttribute("symbolsName"))
+                .orElseThrow(() -> new JDipException("Expected the variantInfo to contain a symbolsName")));
+        variantInfo.setVariantVersion(extractFloat(variantInfoInfo.getAttribute("variantVersion"))
+                .orElseThrow(() -> new JDipException("Expected the variantInfo to contain a variantVersion")));
+        variantInfo.setSymbolPackVersion(extractFloat(variantInfoInfo.getAttribute("symbolsVersion"))
+                .orElseThrow(() -> new JDipException("Expected the variant info to contain a symbolPackVersion")));
+        variantInfo.setRuleOptions(extractRuleOptions(variantInfoInfo.getAttribute("ruleOptions"))
+                .orElseThrow(() -> new JDipException("Expected the variant info to contain ruleOptions")));
 
-        RuleOptions ruleOptions = new RuleOptions();
-        variantInfo.setRuleOptions(ruleOptions);
-
-        SerializeInformation ruleOptionsSerInfo = variantInfoInfo.getAttribute("ruleOptions");
-        if (ruleOptionsSerInfo == null || !ruleOptionsSerInfo.isObject() ||
-                !"dip.world.RuleOptions".equals(ruleOptionsSerInfo.getClassName())) {
-            throw new JDipException(
-                    "Expected the variant info to contain an attribute ruleOptions of type dip.world.RuleOptions");
-        }
-        ObjectInformation ruleOptionsInfo = (ObjectInformation)ruleOptionsSerInfo;
-        SerializeInformation ruleOptionMapSerInfo = ruleOptionsInfo.getAttribute("optionMap");
-        if (ruleOptionMapSerInfo == null || !ruleOptionMapSerInfo.isMap()) {
-            throw new JDipException("Expected the ruleOptions to contain a map optionMap");
-        }
-        MapInformation ruleOptionsMapInfo = (MapInformation)ruleOptionMapSerInfo;
-        for (Map.Entry<SerializeInformation, SerializeInformation> ruleOptionEntry:
-                ruleOptionsMapInfo.getMap().entrySet()) {
-            SerializeInformation ruleOptionKeySer = ruleOptionEntry.getKey();
-            if (!ruleOptionKeySer.isObject() ||
-                    !"dip.world.RuleOptions$Option".equals(ruleOptionKeySer.getClassName())) {
-                throw new JDipException(
-                        "Expected the ruleOptions map to have a key of type dip.world.RuleOptions$Option");
-            }
-            ObjectInformation ruleOptionKey = (ObjectInformation)ruleOptionKeySer;
-
-            List<RuleOptions.OptionValue> allowed = new LinkedList<>();
-            SerializeInformation allowedSerInfo = (SerializeInformation)ruleOptionKey.getAttribute("allowed");
-            if (allowedSerInfo == null || !allowedSerInfo.isCollection() ||
-                    !"dip.world.RuleOptions$OptionValue".equals(allowedSerInfo.getClassName())) {
-                throw new JDipException("Expected the key of a rule option to contain a collection allowed");
-            }
-            CollectionInformation allowedInfo = (CollectionInformation)allowedSerInfo;
-            for (SerializeInformation optionValueSerInfo: allowedInfo.getCollectionEntries()) {
-                if (!optionValueSerInfo.isObject() ||
-                        !"dip.world.RuleOptions$OptionValue".equals(optionValueSerInfo.getClassName())) {
-                    throw new JDipException("Expected the optionValue to be an object");
-                }
-                ObjectInformation optionValueInfo = (ObjectInformation)optionValueSerInfo;
-                allowed.add(new RuleOptions.OptionValue(extractStringAttribute(optionValueInfo, "name")));
-            }
-
-            SerializeInformation defaultValueSerInfo = ruleOptionKey.getAttribute("defaultValue");
-            if (defaultValueSerInfo == null || !defaultValueSerInfo.isObject() ||
-                    !"dip.world.RuleOptions$OptionValue".equals(defaultValueSerInfo.getClassName())) {
-                throw new JDipException(
-                        "Expected the default value to be an object of type dip.world.RuleOptions$OptionValue");
-            }
-            ObjectInformation defaultValueInfo = (ObjectInformation)defaultValueSerInfo;
-
-            RuleOptions.OptionValue defaultValue =
-                    new RuleOptions.OptionValue(extractStringAttribute(defaultValueInfo, "name"));
-
-            RuleOptions.Option option = new RuleOptions.Option(extractStringAttribute(ruleOptionKey, "name"),
-                    defaultValue, allowed.toArray(new RuleOptions.OptionValue[allowed.size()]));
-
-            SerializeInformation ruleOptionValueSerInfo = ruleOptionEntry.getValue();
-            if (!ruleOptionValueSerInfo.isObject() ||
-                    !"dip.world.RuleOptions$OptionValue".equals(defaultValueSerInfo.getClassName())) {
-                throw new JDipException(
-                        "Expected the ruleOptions map to have a value of type dip.world.RuleOptions$OptionValue");
-            }
-            ObjectInformation ruleOptionValueInfo = (ObjectInformation)ruleOptionValueSerInfo;
-            RuleOptions.OptionValue optionValue =
-                    new RuleOptions.OptionValue(extractStringAttribute(ruleOptionValueInfo, "name"));
-
-            ruleOptions.setOption(option, optionValue);
-        }
-
-        return variantInfo;
+        return Optional.of(variantInfo);
     }
 
-    private VictoryConditions extractVictoryConditions(SerializeInformation victoryConditionsSerInfo)
+    private Optional<RuleOptions> extractRuleOptions(SerializeInformation ruleOptionsSerInfo) throws JDipException {
+        if (ruleOptionsSerInfo == null || !ruleOptionsSerInfo.isObject() ||
+                !"dip.world.RuleOptions".equals(ruleOptionsSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation ruleOptionsInfo = (ObjectInformation)ruleOptionsSerInfo;
+        return extractOptionMap(ruleOptionsInfo.getAttribute("optionMap"));
+    }
+
+    private Optional<RuleOptions> extractOptionMap(SerializeInformation optionMapSerInfo) throws JDipException {
+        if (optionMapSerInfo == null || !optionMapSerInfo.isMap()||
+                !"java.util.HashMap".equals(optionMapSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        MapInformation optionMapInfo = (MapInformation)optionMapSerInfo;
+
+        RuleOptions ruleOptions = new RuleOptions();
+        for (Map.Entry<SerializeInformation, SerializeInformation> optionSerInfo: optionMapInfo.getMap().entrySet()) {
+            RuleOptions.Option option = extractOption(optionSerInfo.getKey())
+                    .orElseThrow(() -> new JDipException("Expected the option map to contain an option as key"));
+            RuleOptions.OptionValue optionValue = extractOptionValue(optionSerInfo.getValue()).orElseThrow(
+                    () -> new JDipException("Expected the option map to contain an option value as value"));
+            ruleOptions.setOption(option, optionValue);
+        }
+        return Optional.of(ruleOptions);
+    }
+
+    private Optional<RuleOptions.Option> extractOption(SerializeInformation optionSerInfo) throws JDipException {
+        if (optionSerInfo == null || !optionSerInfo.isObject() ||
+                !"dip.world.RuleOptions$Option".equals(optionSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation optionInfo = (ObjectInformation)optionSerInfo;
+
+        String optionName = extractString(optionInfo.getAttribute("name"))
+                .orElseThrow(() -> new JDipException("Expected an option to contain a name"));
+        RuleOptions.OptionValue[] allowed = extractOptionValueArray(optionInfo.getAttribute("allowed"))
+                .orElseThrow(() -> new JDipException("Expected an option to contain an array with allowed values"));
+        RuleOptions.OptionValue defaultValue = extractOptionValue(optionInfo.getAttribute("defaultValue"))
+                .orElseThrow(() -> new JDipException("Expected an option to contain a defaultValue"));
+        return Optional.of(new RuleOptions.Option(optionName, defaultValue, allowed));
+    }
+
+    private Optional<RuleOptions.OptionValue[]> extractOptionValueArray(SerializeInformation optionValuesSerInfo)
+            throws JDipException {
+        if (optionValuesSerInfo == null || !optionValuesSerInfo.isCollection() ||
+                !"dip.world.RuleOptions$OptionValue".equals(optionValuesSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        CollectionInformation optionValuesInfo = (CollectionInformation)optionValuesSerInfo;
+
+        List<RuleOptions.OptionValue> optionValues = new LinkedList<>();
+        for (SerializeInformation optionValueSerInfo: optionValuesInfo.getCollectionEntries()) {
+            Optional<RuleOptions.OptionValue> optionValue = extractOptionValue(optionValueSerInfo);
+            if (optionValue.isPresent()) {
+                optionValues.add(optionValue.get());
+            }
+        }
+        return Optional.of(optionValues.toArray(new RuleOptions.OptionValue[optionValues.size()]));
+    }
+
+    private Optional<RuleOptions.OptionValue> extractOptionValue(SerializeInformation optionValueSerInfo)
+            throws JDipException {
+        if (optionValueSerInfo == null || !optionValueSerInfo.isObject() ||
+                !"dip.world.RuleOptions$OptionValue".equals(optionValueSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation optionValueInfo = (ObjectInformation)optionValueSerInfo;
+
+        return Optional.of(new RuleOptions.OptionValue(extractString(optionValueInfo.getAttribute("name"))
+                .orElseThrow(() -> new JDipException("Expected an option value to contain a name"))));
+    }
+
+    private Optional<VictoryConditions> extractVictoryConditions(SerializeInformation victoryConditionsSerInfo)
             throws JDipException {
         if (victoryConditionsSerInfo == null || !victoryConditionsSerInfo.isObject() ||
                 !"dip.world.VictoryConditions".equals(victoryConditionsSerInfo.getClassName())) {
-            throw new JDipException(
-                    "Expected the victory conditions to be an object of class dip.world.VictoryConditions");
+            return Optional.empty();
         }
         ObjectInformation victoryConditionsInfo = (ObjectInformation)victoryConditionsSerInfo;
 
-        int numSCForVictory = extractIntAttribute(victoryConditionsInfo, "numSCForVictory");
-        int maxYearsNoSCChange = extractIntAttribute(victoryConditionsInfo, "maxYearsNoSCChange");
-        int maxGameTimeYears = extractIntAttribute(victoryConditionsInfo, "maxGameTimeYears");
-        int initialYear = extractIntAttribute(victoryConditionsInfo, "initialYear");
+        int numSCForVictory = extractInt(victoryConditionsInfo.getAttribute("numSCForVictory"))
+                .orElseThrow(() -> new JDipException("Expected the victory conditions to contain numSCForVictory"));
+        int maxYearsNoSCChange = extractInt(victoryConditionsInfo.getAttribute("maxYearsNoSCChange"))
+                .orElseThrow(() -> new JDipException("Expected the victory conditions to contain maxYearsNoSCChange"));
+        int maxGameTimeYears = extractInt(victoryConditionsInfo.getAttribute("maxGameTimeYears"))
+                .orElseThrow(() -> new JDipException("Expected the victory conditions to contain maxGameTimeYears"));
+        int initialYear = extractInt(victoryConditionsInfo.getAttribute("initialYear"))
+                .orElseThrow(() -> new JDipException("Expected the victory conditions to contain initialYear"));
 
-        return new VictoryConditions(numSCForVictory, maxYearsNoSCChange, maxGameTimeYears,
-                new Phase(Phase.SeasonType.SPRING, initialYear, Phase.PhaseType.MOVEMENT));
+        return Optional.of(new VictoryConditions(numSCForVictory, maxYearsNoSCChange, maxGameTimeYears,
+                new Phase(Phase.SeasonType.SPRING, initialYear, Phase.PhaseType.MOVEMENT)));
     }
 
-    private GameMetadata extractGameMetadata(SerializeInformation gameMetadataSerInfo) throws JDipException {
-        GameMetadata gameMetadata = new GameMetadata();
+    private Optional<GameMetadata> extractGameMetadata(SerializeInformation gameMetadataSerInfo) throws JDipException {
         if (gameMetadataSerInfo == null || !gameMetadataSerInfo.isObject() ||
                 !"dip.world.metadata.GameMetadata".equals(gameMetadataSerInfo.getClassName())) {
-            throw new JDipException(
-                    "Expected the game metadata to be an object of class dip.world.metadata.GameMetadata");
+            return Optional.empty();
         }
         ObjectInformation gameMetadataInfo = (ObjectInformation)gameMetadataSerInfo;
 
-        gameMetadata.setComment(extractStringAttribute(gameMetadataInfo, "comment"));
-        gameMetadata.setGameName(extractStringAttribute(gameMetadataInfo, "gameName"));
-        gameMetadata.setModeratorName(extractStringAttribute(gameMetadataInfo, "moderator"));
-        gameMetadata.setModeratorEmail(extractStringAttribute(gameMetadataInfo, "moderatorEmail"));
-        gameMetadata.setModeratorURI(extractURIAttribute(gameMetadataInfo, "moderatorURI"));
-        gameMetadata.setJudgeName(extractStringAttribute(gameMetadataInfo, "judgeName"));
-        gameMetadata.setGameURI(extractURIAttribute(gameMetadataInfo, "gameURI"));
-        gameMetadata.setNotes(extractStringAttribute(gameMetadataInfo, "notes"));
-        gameMetadata.setGameID(extractStringAttribute(gameMetadataInfo, "id"));
-
-        return gameMetadata;
+        GameMetadata gameMetadata = new GameMetadata();
+        gameMetadata.setComment(extractString(gameMetadataInfo.getAttribute("comment"))
+                .orElseThrow(() -> new JDipException("Expected the game metadata to contain a comment")));
+        gameMetadata.setGameName(extractString(gameMetadataInfo.getAttribute("gameName"))
+                .orElseThrow(() -> new JDipException("Expected the game metadata to contain a gameName")));
+        gameMetadata.setModeratorName(extractString(gameMetadataInfo.getAttribute("moderator")).orElse(null));
+        gameMetadata.setModeratorEmail(extractString(gameMetadataInfo.getAttribute("moderatorEmail")).orElse(null));
+        gameMetadata.setModeratorURI(extractURI(gameMetadataInfo.getAttribute("moderatorURI")).orElse(null));
+        gameMetadata.setJudgeName(extractString(gameMetadataInfo.getAttribute("judgeName")).orElse(null));
+        gameMetadata.setGameURI(extractURI(gameMetadataInfo.getAttribute("gameURI")).orElse(null));
+        gameMetadata.setNotes(extractString(gameMetadataInfo.getAttribute("notes"))
+                .orElseThrow(() -> new JDipException("Expected the game metadata to contain notes")));
+        gameMetadata.setGameID(extractString(gameMetadataInfo.getAttribute("id"))
+                .orElseThrow(() -> new JDipException("Expected the game metadata to contain a game ID")));
+        return Optional.of(gameMetadata);
     }
 
-    private GameSetup extractGameSetup(SerializeInformation gameSetupSerInfo) throws JDipException {
-        GameSetup gameSetup;
-        gameSetup = new DefaultGUIGameSetup();
-        return gameSetup;
+    private Optional<GameSetup> extractGameSetup(SerializeInformation gameSetupSerInfo) throws JDipException {
+        if (gameSetupSerInfo == null || !gameSetupSerInfo.isObject()) {
+            return Optional.empty();
+        }
+        return Optional.of(new DefaultGUIGameSetup());
+    }
+
+    private Optional<Map<Phase, TurnState>> extractSyncTurnStates(SerializeInformation turnStateSerInfo)
+            throws JDipException {
+        if (turnStateSerInfo == null || !turnStateSerInfo.isObject() ||
+                !"java.util.Collections$SynchronizedSortedMap".equals(turnStateSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation turnStateInfo = (ObjectInformation)turnStateSerInfo;
+        return extractTurnStates(turnStateInfo.getAttribute("m"));
+    }
+
+    private Optional<Map<Phase, TurnState>> extractTurnStates(SerializeInformation turnStateSerInfo)
+            throws JDipException {
+        if (turnStateSerInfo == null || !turnStateSerInfo.isMap()) {
+            return Optional.empty();
+        }
+        MapInformation turnStateInfo = (MapInformation)turnStateSerInfo;
+        return Optional.empty();
     }
 
     private void extractTurnStates(World resultWorld) throws JDipException {
@@ -767,16 +836,22 @@ public class WorldImporter {
 
         List<String> stringArray = new LinkedList<>();
         for (SerializeInformation stringSerInfo: stringArrayInfo.getCollectionEntries()) {
-            stringArray.add(extractString(stringSerInfo));
+            stringArray.add(extractString(stringSerInfo)
+                    .orElseThrow(() -> new JDipException("Expected the content of a string array not to be null")));
         }
         return stringArray.toArray(new String[stringArray.size()]);
     }
 
-    private String extractString(SerializeInformation stringSerInfo) throws JDipException {
-        if (stringSerInfo == null || !stringSerInfo.isPrimitive() || ! "string".equals(stringSerInfo.getClassName())) {
-            throw new JDipException("Expected a string to be a primitive");
+    private Optional<String> extractString(SerializeInformation stringSerInfo) throws JDipException {
+        if (stringSerInfo == null || !stringSerInfo.isPrimitive()) {
+            throw new JDipException("The argument to extractString must be a primitive");
         }
-        return ((PrimitiveInformation)stringSerInfo).getValue();
+        if ("null".equals(stringSerInfo.getClassName())) {
+            return Optional.empty();
+        } else {
+            PrimitiveInformation stringInfo = (PrimitiveInformation)stringSerInfo;
+            return Optional.of(stringInfo.getValue());
+        }
     }
 
     /**
@@ -799,29 +874,23 @@ public class WorldImporter {
         return attributeInfo.getValue();
     }
 
-    private float extractFloat(SerializeInformation floatSerInfo) throws JDipException {
-        if (floatSerInfo == null || !floatSerInfo.isPrimitive() || ! "float".equals(floatSerInfo.getClassName())) {
-            throw new JDipException("Expected a float to be a primitive");
+    private Optional<Float> extractFloat(SerializeInformation floatSerInfo) throws JDipException {
+        if (floatSerInfo == null || !floatSerInfo.isPrimitive()) {
+            throw new JDipException("The argument to extractFloat must be a primitive");
         }
-        return Float.parseFloat(((PrimitiveInformation)floatSerInfo).getValue());
+        if ("null".equals(floatSerInfo.getClassName())) {
+            return Optional.empty();
+        } else {
+            PrimitiveInformation floatInfo = (PrimitiveInformation)floatSerInfo;
+            return Optional.of(Float.valueOf(floatInfo.getValue()));
+        }
     }
 
-    private float extractFloatAttribute(ObjectInformation object, String attributeName) throws JDipException {
-        SerializeInformation attributeSerInfo = object.getAttribute(attributeName);
-        if (attributeSerInfo == null || !attributeSerInfo.isPrimitive() ||
-                !"float".equals(attributeSerInfo.getClassName())) {
-            throw new JDipException(new StringBuilder("Expected the ").append(object.getClassName())
-                    .append(" to contain a float attribute with the name ").append(attributeName).toString());
-        }
-        PrimitiveInformation attributeInfo = (PrimitiveInformation)attributeSerInfo;
-        return Float.parseFloat(attributeInfo.getValue());
-    }
-
-    private int extractInt(SerializeInformation intSerInfo) throws JDipException {
+    private Optional<Integer> extractInt(SerializeInformation intSerInfo) throws JDipException {
         if (intSerInfo == null || !intSerInfo.isPrimitive() || ! "int".equals(intSerInfo.getClassName())) {
-            throw new JDipException("Expected an int to be a primitive");
+            Optional.empty();
         }
-        return Integer.parseInt(((PrimitiveInformation)intSerInfo).getValue());
+        return Optional.of(Integer.valueOf(((PrimitiveInformation)intSerInfo).getValue()));
     }
 
     private int extractIntAttribute(ObjectInformation object, String attributeName) throws JDipException {
@@ -854,42 +923,31 @@ public class WorldImporter {
         return Boolean.parseBoolean(attributeInfo.getValue());
     }
 
-    /**
-     * Extract an URI from the given object with the given attribute name. May return null if either the URI is null or
-     * the URI is invalid.
-     *
-     * @param object the object containing the URI
-     * @param attributeName the name of the URI attribute
-     * @return the URI or null
-     * @throws JDipException if an error occurs
-     */
-    private URI extractURIAttribute(ObjectInformation object, String attributeName) throws JDipException {
-        URI result;
-        SerializeInformation uriSerInfo = object.getAttribute(attributeName);
-        // the attribute uri must either be null or an object of the class java.net.URI
-        if (!((uriSerInfo.isPrimitive() && "null".equals(uriSerInfo.getClassName())) ||
-                (uriSerInfo.isObject() && "java.net.URI".equals(uriSerInfo.getClassName())))) {
-            throw new JDipException(new StringBuilder("Expected the ").append(object.getClassName())
-                    .append(" to contain an URI attribute with the name ").append(attributeName).toString());
+    private Optional<URI> extractURI(SerializeInformation uriSerInfo) throws JDipException {
+        if (uriSerInfo == null) {
+            throw new JDipException("The argument to extractURI may not be null");
         }
-        if (uriSerInfo.isPrimitive()) {
+        if (uriSerInfo.isPrimitive() && "null".equals(uriSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        if (!uriSerInfo.isObject() || !"java.net.URI".equals(uriSerInfo.getClassName())) {
+            throw new JDipException("Expected an URI to be an object of class java.net.URI");
+        }
+        URI result;
+        ObjectInformation uriInfo = (ObjectInformation)uriSerInfo;
+        SerializeInformation innerUriSerInfo = uriInfo.getAttribute("string");
+        if (innerUriSerInfo == null || !innerUriSerInfo.isPrimitive() ||
+                !"string".equals(innerUriSerInfo.getClassName())) {
+            // if the class java.net.URI is changed then we ignore it and set the uri to null
             result = null;
         } else {
-            ObjectInformation uriInfo = (ObjectInformation)uriSerInfo;
-            SerializeInformation innerUriSerInfo = uriInfo.getAttribute("string");
-            if (innerUriSerInfo == null || !innerUriSerInfo.isPrimitive() ||
-                    !"string".equals(innerUriSerInfo.getClassName())) {
-                // if the class java.net.URI is changed then we ignore it and set the uri to null
+            try {
+                result = new URI(((PrimitiveInformation)innerUriSerInfo).getValue());
+            } catch (URISyntaxException usex) {
                 result = null;
-            } else {
-                try {
-                    result = new URI(((PrimitiveInformation)innerUriSerInfo).getValue());
-                } catch (URISyntaxException usex) {
-                    result = null;
-                }
             }
         }
-        return result;
+        return Optional.ofNullable(result);
     }
 
 
@@ -1083,6 +1141,60 @@ public class WorldImporter {
             adjacencyLocations.entrySet().forEach((adjacencyLocation) -> {
                 adjacency.setLocations(adjacencyLocation.getKey(), adjacencyLocation.getValue());
             });
+        }
+
+    }
+
+
+    private static class NonTurnDataProxy {
+
+        /** The player metadata per power. */
+        private Map<Power, PlayerMetadata> playerMetadata;
+
+        /** The victory conditions. */
+        private VictoryConditions victoryConditions;
+
+        /** The game metadata. */
+        private GameMetadata gameMetadata;
+
+        /** The game setup. */
+        private GameSetup gameSetup;
+
+        /** The variant info. */
+        private World.VariantInfo variantInfo;
+
+        public NonTurnDataProxy() {
+            playerMetadata = new LinkedHashMap<>();
+        }
+
+        public void addPlayerMetadata(Power power, PlayerMetadata playerMetadata) {
+            this.playerMetadata.put(power, playerMetadata);
+        }
+
+        public void setVictoryConditions(VictoryConditions victoryConditions) {
+            this.victoryConditions = victoryConditions;
+        }
+
+        public void setGameMetadata(GameMetadata gameMetadata) {
+            this.gameMetadata = gameMetadata;
+        }
+
+        public void setGameSetup(GameSetup gameSetup) {
+            this.gameSetup = gameSetup;
+        }
+
+        public void setVariantInfo(World.VariantInfo variantInfo) {
+            this.variantInfo = variantInfo;
+        }
+
+        public void transferNonTurnData(World world) {
+            for (Map.Entry<Power, PlayerMetadata> playerData: playerMetadata.entrySet()) {
+                world.setPlayerMetadata(playerData.getKey(), playerData.getValue());
+            }
+            world.setVictoryConditions(victoryConditions);
+            world.setGameMetadata(gameMetadata);
+            world.setGameSetup(gameSetup);
+            world.setVariantInfo(variantInfo);
         }
 
     }
