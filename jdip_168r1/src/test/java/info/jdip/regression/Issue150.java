@@ -4,7 +4,6 @@ import info.jdip.misc.Case;
 import info.jdip.misc.TestCaseRunner;
 import info.jdip.test.builder.standard.StandardLocation;
 import info.jdip.test.builder.standard.StandardPower;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +20,6 @@ import static info.jdip.world.Phase.SeasonType.SPRING;
 
 public class Issue150 {
     @Test
-    @Disabled("To not fail pipeline, this test has to be fix for the issue 150 to be closed")
     @DisplayName("Gitlab Issue 150: Should be possible to move from Prussia to Silesia in crowded Milan")
     public void shouldMoveFromPrussiaToSilesiaInCrowdedMilan() throws Exception {
         Case testCase = crowdedMilan(SPRING, 1901, MOVEMENT)
@@ -34,7 +32,6 @@ public class Issue150 {
     }
 
     @Test
-    @Disabled("To not fail pipeline, this test has to be fix for the issue 150 to be closed")
     @DisplayName("Gitlab Issue 150: Should be possible to move from Prussia to Warsaw in crowded Milan")
     public void shouldMoveFromPrussiaToWarsawInCrowdedMilan() throws Exception {
         Case testCase = crowdedMilan(SPRING, 1901, MOVEMENT)
@@ -96,7 +93,6 @@ public class Issue150 {
     }
 
     @Test
-    @Disabled("To not fail pipeline, this test has to be fix for the issue 150 to be closed")
     @DisplayName("Gitlab Issue 150: Should be possible to move from Prussia to Silesia in Milan")
     public void shouldMoveFromPrussiaToSilesiaInMilan() throws Exception {
         Case testCase = milan(SPRING, 1901, MOVEMENT)
@@ -109,7 +105,6 @@ public class Issue150 {
     }
 
     @Test
-    @Disabled("To not fail pipeline, this test has to be fix for the issue 150 to be closed")
     @DisplayName("Gitlab Issue 150: Should be possible to move from Prussia to Warsaw in Milan")
     public void shouldMoveFromPrussiaToWarsawInMilan() throws Exception {
         Case testCase = milan(SPRING, 1901, MOVEMENT)
