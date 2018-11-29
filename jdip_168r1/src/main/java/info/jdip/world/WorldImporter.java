@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 import javax.xml.stream.events.Attribute;
 import org.slf4j.Logger;
@@ -272,9 +271,11 @@ public class WorldImporter {
         NonTurnDataProxy nonTurnData = extractNonTurnData(worldInfo.getAttribute("nonTurnData"))
                 .orElseThrow(() -> new JDipException("Found unexpected element in non turn data"));
         nonTurnData.transferNonTurnData(resultWorld);
-
-        extractTurnStates(resultWorld);
-
+        List<TurnState> turnStates = extractSyncTurnStates(worldInfo.getAttribute("turnStates"))
+                .orElseThrow(() -> new JDipException("Found unexpected element in turn states"));
+        for (TurnState turnState: turnStates) {
+            resultWorld.setTurnState(turnState);
+        }
         return Optional.of(resultWorld);
     }
 
@@ -320,7 +321,8 @@ public class WorldImporter {
             power = new Power(extractStringArray(powerInfo.getAttribute("names")),
                     extractString(powerInfo.getAttribute("adjective"))
                         .orElseThrow(() -> new JDipException("The adjective of a power may not be null")),
-                    extractBoolean(powerInfo.getAttribute("isActive")));
+                    extractBoolean(powerInfo.getAttribute("isActive"))
+                        .orElseThrow(() -> new JDipException("The isActive flag of a power may not be null")));
             powers.put(powerInfo.getUuid(), power);
         }
         return Optional.of(power);
@@ -355,8 +357,11 @@ public class WorldImporter {
                     extractStringArray(provinceInfo.getAttribute("shortNames")),
                     extractInt(provinceInfo.getAttribute("index"))
                             .orElseThrow(() -> new JDipException("Expected the province to contain an index")),
-                    extractBoolean(provinceInfo.getAttribute("isConvoyableCoast")));
-            province.setSupplyCenter(extractBoolean(provinceInfo.getAttribute("supplyCenter")));
+                    extractBoolean(provinceInfo.getAttribute("isConvoyableCoast"))
+                            .orElseThrow(() -> new JDipException(
+                                    "The isConvoyableCoast flag of a province may not be null")));
+            province.setSupplyCenter(extractBoolean(provinceInfo.getAttribute("supplyCenter"))
+                    .orElseThrow(() -> new JDipException("The supplyCenter flag may not be null")));
             // TODO extractBorders
             provinces.put(provinceInfo.getUuid(), province);
 
@@ -664,113 +669,127 @@ public class WorldImporter {
         return Optional.of(new DefaultGUIGameSetup());
     }
 
-    private Optional<Map<Phase, TurnState>> extractSyncTurnStates(SerializeInformation turnStateSerInfo)
+    private Optional<List<TurnState>> extractSyncTurnStates(SerializeInformation turnStatesSerInfo)
             throws JDipException {
+        if (turnStatesSerInfo == null || !turnStatesSerInfo.isObject() ||
+                !"java.util.Collections$SynchronizedSortedMap".equals(turnStatesSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation turnStatesInfo = (ObjectInformation)turnStatesSerInfo;
+        return extractTurnStates(turnStatesInfo.getAttribute("m"));
+    }
+
+    private Optional<List<TurnState>> extractTurnStates(SerializeInformation turnStatesSerInfo)
+            throws JDipException {
+        if (turnStatesSerInfo == null || !turnStatesSerInfo.isMap()) {
+            return Optional.empty();
+        }
+        MapInformation turnStatesInfo = (MapInformation)turnStatesSerInfo;
+
+        List<TurnState> turnStates = new LinkedList<>();
+        for (SerializeInformation turnStateSerInfo: turnStatesInfo.getMap().values()) {
+            turnStates.add(extractTurnState(turnStateSerInfo)
+                    .orElseThrow(() -> new JDipException(
+                            "Expected the values of the turn states map to be a TurnState")));
+        }
+        return Optional.of(turnStates);
+    }
+
+    private Optional<TurnState> extractTurnState(SerializeInformation turnStateSerInfo) throws JDipException {
         if (turnStateSerInfo == null || !turnStateSerInfo.isObject() ||
-                !"java.util.Collections$SynchronizedSortedMap".equals(turnStateSerInfo.getClassName())) {
+                !"dip.world.TurnState".equals(turnStateSerInfo.getClassName())) {
             return Optional.empty();
         }
         ObjectInformation turnStateInfo = (ObjectInformation)turnStateSerInfo;
-        return extractTurnStates(turnStateInfo.getAttribute("m"));
+
+        TurnState turnState = new TurnState(extractPhase(turnStateInfo.getAttribute("phase"))
+                .orElseThrow(() -> new JDipException("Expected a turn state to contain a phase")));
+
+        // TODO orderMap
+        Map<Power, List<Orderable>> orderMap = extractOrderMap(turnStateInfo.getAttribute("orderMap"))
+                .orElseThrow(() -> new JDipException("Expected a turn state to contain an orderMap"));
+        // TODO resultList
+        // TODO position
+
+        turnState.setSCOwnerChanged(extractBoolean(turnStateInfo.getAttribute("isSCOwnerChanged"))
+                .orElseThrow(() -> new JDipException("Expected a turn state to contain isSCOwnerChanged")));
+        turnState.setEnded(extractBoolean(turnStateInfo.getAttribute("isEnded"))
+                .orElseThrow(() -> new JDipException("Expected a turn state to contain isEnded")));
+        turnState.setResolved(extractBoolean(turnStateInfo.getAttribute("isResolved"))
+                .orElseThrow(() -> new JDipException("Expected a turn state to contain isResolved")));
+
+        return Optional.of(turnState);
     }
 
-    private Optional<Map<Phase, TurnState>> extractTurnStates(SerializeInformation turnStateSerInfo)
-            throws JDipException {
-        if (turnStateSerInfo == null || !turnStateSerInfo.isMap()) {
-            return Optional.empty();
-        }
-        MapInformation turnStateInfo = (MapInformation)turnStateSerInfo;
-        return Optional.empty();
-    }
-
-    private void extractTurnStates(World resultWorld) throws JDipException {
-        SerializeInformation turnStatesSyncMapSerInfo = world.getAttribute("turnStates");
-        if (turnStatesSyncMapSerInfo == null || !turnStatesSyncMapSerInfo.isObject()) {
-            throw new JDipException("Expected the world to have a synchronized map of turnStates");
-        }
-        ObjectInformation turnStatesSyncMapInfo = (ObjectInformation)turnStatesSyncMapSerInfo;
-
-        SerializeInformation turnStatesMapSerInfo = turnStatesSyncMapInfo.getAttribute("m");
-        if (turnStatesMapSerInfo == null || !turnStatesMapSerInfo.isMap()) {
-            throw new JDipException("Expected the synchronized map to contain a map");
-        }
-        MapInformation turnStatesMapInfo = (MapInformation)turnStatesMapSerInfo;
-
-        for (Map.Entry<SerializeInformation, SerializeInformation> turnStateEntry:
-                turnStatesMapInfo.getMap().entrySet()) {
-            TurnState turnState = new TurnState(extractPhase(turnStateEntry.getKey()));
-
-            SerializeInformation turnStateSerInfo = turnStateEntry.getValue();
-            if (!turnStateSerInfo.isObject() || !"dip.world.TurnState".equals(turnStateSerInfo.getClassName())) {
-                throw new JDipException("Expected a turn state to be an object of type dip.world.TurnState");
-            }
-            ObjectInformation turnStateInfo = (ObjectInformation)turnStateSerInfo;
-
-            Map<Power, List<Orderable>> orderMap = extractOrderMap(turnStateInfo.getAttribute("orderMap"));
-            turnState.setResultList(extractResultList(turnStateInfo.getAttribute("resultList")));
-            // TODO orderMap
-
-            turnState.setSCOwnerChanged(extractBooleanAttribute(turnStateInfo, "isSCOwnerChanged"));
-
-            // TODO position
-
-            turnState.setEnded(extractBooleanAttribute(turnStateInfo, "isEnded"));
-            turnState.setResolved(extractBooleanAttribute(turnStateInfo, "isResolved"));
-        }
-    }
-
-    private Phase extractPhase(SerializeInformation phaseSerInfo) throws JDipException {
+    private Optional<Phase> extractPhase(SerializeInformation phaseSerInfo) throws JDipException {
         if (phaseSerInfo == null || !phaseSerInfo.isObject() ||
                 !"dip.world.Phase".equals(phaseSerInfo.getClassName())) {
-            throw new JDipException("Expected a phase to be an object of type dip.world.Phase");
+            return Optional.empty();
         }
         ObjectInformation phaseInfo = (ObjectInformation)phaseSerInfo;
 
-        SerializeInformation seasonTypeSerInfo = phaseInfo.getAttribute("seasonType");
+        Phase.SeasonType seasonType = extractSeasonType(phaseInfo.getAttribute("seasonType"))
+                .orElseThrow(() -> new JDipException("Expected a phase to contain a seasonType"));
+        Phase.YearType yearType = extractYearType(phaseInfo.getAttribute("yearType"))
+                .orElseThrow(() -> new JDipException("Expected a phase to contain a yearType"));
+        Phase.PhaseType phaseType = extractPhaseType(phaseInfo.getAttribute("phaseType"))
+                .orElseThrow(() -> new JDipException("Expected a phase to contain a phaseType"));
+        return Optional.of(new Phase(seasonType, yearType, phaseType));
+    }
+
+    private Optional<Phase.SeasonType> extractSeasonType(SerializeInformation seasonTypeSerInfo) throws JDipException {
         if (seasonTypeSerInfo == null || !seasonTypeSerInfo.isObject() ||
                 !"dip.world.Phase$SeasonType".equals(seasonTypeSerInfo.getClassName())) {
-            throw new JDipException("Expected a phase to contain an object of type dip.world.Phase$SeasonType");
+            return Optional.empty();
         }
         ObjectInformation seasonTypeInfo = (ObjectInformation)seasonTypeSerInfo;
 
-        int seasonTypePosition = extractIntAttribute(seasonTypeInfo, "position");
+        int seasonTypePosition = extractInt(seasonTypeInfo.getAttribute("position"))
+                .orElseThrow(() -> new JDipException("Expected a season type to contain a position"));
         Phase.SeasonType seasonType;
         if (seasonTypePosition == 1000) {
             seasonType = Phase.SeasonType.SPRING;
         } else {
             seasonType = Phase.SeasonType.FALL;
         }
+        return Optional.of(seasonType);
+    }
 
-        SerializeInformation yearTypeSerInfo = phaseInfo.getAttribute("yearType");
+    private Optional<Phase.YearType> extractYearType(SerializeInformation yearTypeSerInfo) throws JDipException {
         if (yearTypeSerInfo == null || !yearTypeSerInfo.isObject() ||
                 !"dip.world.Phase$YearType".equals(yearTypeSerInfo.getClassName())) {
             throw new JDipException("Expected a phase to contain an object of type dip.world.Phase$YearType");
         }
         ObjectInformation yearTypeInfo = (ObjectInformation)yearTypeSerInfo;
 
-        int yearTypeYear = extractIntAttribute(yearTypeInfo, "year");
-        Phase.YearType yearType = new Phase.YearType(yearTypeYear);
+        int yearTypeYear = extractInt(yearTypeInfo.getAttribute("year"))
+                .orElseThrow(() -> new JDipException("Expected a year type to contain a year"));
+        return Optional.of(new Phase.YearType(yearTypeYear));
+    }
 
-        SerializeInformation phaseTypeSerInfo = phaseInfo.getAttribute("phaseType");
+    private Optional<Phase.PhaseType> extractPhaseType(SerializeInformation phaseTypeSerInfo) throws JDipException {
         if (phaseTypeSerInfo == null || !phaseTypeSerInfo.isObject() ||
                 !"dip.world.Phase$PhaseType".equals(phaseTypeSerInfo.getClassName())) {
             throw new JDipException("Expected a phase to contain an object of type dip.world.Phase$PhaseType");
         }
         ObjectInformation phaseTypeInfo = (ObjectInformation)phaseTypeSerInfo;
 
-        Phase.PhaseType phaseType = Phase.PhaseType.parse(extractStringAttribute(phaseTypeInfo, "constName"));
-
-        return new Phase(seasonType, yearType, phaseType);
+        return Optional.of(Phase.PhaseType.parse(extractString(phaseTypeInfo.getAttribute("constName"))
+                .orElseThrow(() -> new JDipException("Expected a phase type to contain a constName"))));
     }
 
-    private Map<Power, List<Orderable>> extractOrderMap(SerializeInformation orderMapSerInfo)
+    private Optional<Map<Power, List<Orderable>>> extractOrderMap(SerializeInformation orderMapSerInfo)
             throws JDipException {
         if (orderMapSerInfo == null || !orderMapSerInfo.isMap() ||
                 !"java.util.HashMap".equals(orderMapSerInfo.getClassName())) {
-            throw new JDipException("Expected the order map to be an object of type java.util.HashMap");
+            return Optional.empty();
         }
-        ObjectInformation orderMapInfo = (ObjectInformation)orderMapSerInfo;
-        return null;
+        MapInformation orderMapInfo = (MapInformation)orderMapSerInfo;
+
+        for (Map.Entry<SerializeInformation, SerializeInformation> orderMapEntry: orderMapInfo.getMap().entrySet()) {
+            
+        }
+        return Optional.empty();
     }
 
     private List<Result> extractResultList(SerializeInformation resultListSerInfo)
@@ -904,12 +923,12 @@ public class WorldImporter {
         return Integer.parseInt(attributeInfo.getValue());
     }
 
-    private boolean extractBoolean(SerializeInformation booleanSerInfo) throws JDipException {
+    private Optional<Boolean> extractBoolean(SerializeInformation booleanSerInfo) throws JDipException {
         if (booleanSerInfo == null || !booleanSerInfo.isPrimitive() ||
                 ! "boolean".equals(booleanSerInfo.getClassName())) {
-            throw new JDipException("Expected a boolean to be a primitive");
+            return Optional.empty();
         }
-        return Boolean.parseBoolean(((PrimitiveInformation)booleanSerInfo).getValue());
+        return Optional.of(Boolean.valueOf(((PrimitiveInformation)booleanSerInfo).getValue()));
     }
 
     private boolean extractBooleanAttribute(ObjectInformation object, String attributeName) throws JDipException {
