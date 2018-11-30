@@ -19,6 +19,10 @@ package info.jdip.world;
 
 import info.jdip.JDipException;
 import info.jdip.gui.DefaultGUIGameSetup;
+import info.jdip.gui.order.GUIMove;
+import info.jdip.gui.order.GUIOrderFactory;
+import info.jdip.order.Move;
+import info.jdip.order.OrderFactory;
 import info.jdip.order.Orderable;
 import info.jdip.order.result.Result;
 import info.jdip.world.Province.Adjacency;
@@ -705,9 +709,11 @@ public class WorldImporter {
         TurnState turnState = new TurnState(extractPhase(turnStateInfo.getAttribute("phase"))
                 .orElseThrow(() -> new JDipException("Expected a turn state to contain a phase")));
 
-        // TODO orderMap
         Map<Power, List<Orderable>> orderMap = extractOrderMap(turnStateInfo.getAttribute("orderMap"))
                 .orElseThrow(() -> new JDipException("Expected a turn state to contain an orderMap"));
+        for (Map.Entry<Power, List<Orderable>> orderMapEntry: orderMap.entrySet()) {
+            turnState.setOrders(orderMapEntry.getKey(), orderMapEntry.getValue());
+        }
         // TODO resultList
         // TODO position
 
@@ -786,10 +792,204 @@ public class WorldImporter {
         }
         MapInformation orderMapInfo = (MapInformation)orderMapSerInfo;
 
+        Map<Power, List<Orderable>> orderMap = new LinkedHashMap<>();
         for (Map.Entry<SerializeInformation, SerializeInformation> orderMapEntry: orderMapInfo.getMap().entrySet()) {
-            
+            Power orderMapKey = extractPower(orderMapEntry.getKey())
+                    .orElseThrow(() -> new JDipException("Expected the key of an orderMap to be a Power"));
+            List<Orderable> orderMapValue = extractOrderList(orderMapEntry.getValue())
+                    .orElseThrow(() -> new JDipException(
+                            "Expected the value of an orderMap to be a list of Orderable"));
+            orderMap.put(orderMapKey, orderMapValue);
         }
-        return Optional.empty();
+        return Optional.of(orderMap);
+    }
+
+    private Optional<List<Orderable>> extractOrderList(SerializeInformation orderListSerInfo) throws JDipException {
+        if (orderListSerInfo == null || !orderListSerInfo.isCollection() ||
+                !"java.util.ArrayList".equals(orderListSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        CollectionInformation orderListInfo = (CollectionInformation)orderListSerInfo;
+
+        List<Orderable> ordersInfo = new LinkedList<>();
+        for (SerializeInformation orderSerInfo: orderListInfo.getCollectionEntries()) {
+            ordersInfo.add(extractOrder(orderSerInfo)
+                    .orElseThrow(() -> new JDipException("Expected the orders list to contain orders")));
+        }
+        return Optional.of(ordersInfo);
+    }
+
+    private Optional<Orderable> extractOrder(SerializeInformation orderSerInfo) throws JDipException {
+        if (orderSerInfo == null || !orderSerInfo.isObject()) {
+            return Optional.empty();
+        }
+        ObjectInformation orderInfo = (ObjectInformation)orderSerInfo;
+
+        Orderable order = orders.get(orderInfo.getUuid());
+        if (order == null) {
+            switch (orderInfo.getClassName()) {
+                case "dip.gui.order.GUIBuild":
+                    order = extractGuiBuild(orderInfo)
+                            .orElseThrow(() -> new JDipException("Expected a build order"));
+                    break;
+                case "dip.gui.order.GUIConvoy":
+                    order = extractGuiConvoy(orderInfo)
+                            .orElseThrow(() -> new JDipException("Expected a convoy order"));
+                    break;
+                case "dip.gui.order.GUIDisband":
+                    order = extractGuiDisband(orderInfo)
+                            .orElseThrow(() -> new JDipException("Expected a disband order"));
+                    break;
+                case "dip.gui.order.GUIHold":
+                    order = extractGuiHold(orderInfo)
+                            .orElseThrow(() -> new JDipException("Expected a hold order"));
+                    break;
+                case "dip.gui.order.GUIMove":
+                    order = extractGuiMove(orderInfo)
+                            .orElseThrow(() -> new JDipException("Expected a move order"));
+                    break;
+                // TODO GUIMoveExplicit
+                case "dip.gui.order.GUIRemove":
+                    order = extractGuiRemove(orderInfo)
+                            .orElseThrow(() -> new JDipException("Expected a remove order"));
+                    break;
+                case "dip.gui.order.GUIRetreat":
+                    order = extractGuiRetreat(orderInfo)
+                            .orElseThrow(() -> new JDipException("Expected a retreat order"));
+                    break;
+                case "dip.gui.order.GUISupport":
+                    order = extractGuiSupport(orderInfo)
+                            .orElseThrow(() -> new JDipException("Expected a support order"));
+                    break;
+                // TODO GUIWave
+                default:
+                    return Optional.empty();
+            }
+            orders.put(orderInfo.getUuid(), order);
+        }
+        return Optional.of(order);
+    }
+
+    private Optional<Orderable> extractGuiBuild(ObjectInformation orderInfo) throws JDipException {
+        Power power = extractPower(orderInfo.getAttribute("power"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a power"));
+        Location src = extractLocation(orderInfo.getAttribute("src"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a source location"));
+        Unit.Type srcUnitType = extractUnitType(orderInfo.getAttribute("srcUnitType"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
+
+        return Optional.of(GUIOrderFactory.getDefault().createBuild(power, src, srcUnitType));
+    }
+
+    private Optional<Orderable> extractGuiConvoy(ObjectInformation orderInfo) throws JDipException {
+        Power power = extractPower(orderInfo.getAttribute("power"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a power"));
+        Location src = extractLocation(orderInfo.getAttribute("src"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a source location"));
+        Unit.Type srcUnitType = extractUnitType(orderInfo.getAttribute("srcUnitType"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
+        Location convoySrc = extractLocation(orderInfo.getAttribute("convoySrc"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a convoy source"));
+        Location convoyDest = extractLocation(orderInfo.getAttribute("convoyDest"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a convoy destination"));
+        Unit.Type convoyUnitType = extractUnitType(orderInfo.getAttribute("convoyUnitType"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a supported unit type"));
+        Power convoyPower = extractPower(orderInfo.getAttribute("convoyPower"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a supported power"));
+
+        return Optional.of(GUIOrderFactory.getDefault().createConvoy(power, src, srcUnitType, convoySrc, convoyPower,
+                convoyUnitType, convoyDest));
+    }
+
+    private Optional<Orderable> extractGuiHold(ObjectInformation orderInfo) throws JDipException {
+        Power power = extractPower(orderInfo.getAttribute("power"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a power"));
+        Location src = extractLocation(orderInfo.getAttribute("src"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a source location"));
+        Unit.Type unitType = extractUnitType(orderInfo.getAttribute("srcUnitType"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
+
+        return Optional.of(GUIOrderFactory.getDefault().createHold(power, src, unitType));
+    }
+
+    private Optional<Orderable> extractGuiDisband(ObjectInformation orderInfo) throws JDipException {
+        Power power = extractPower(orderInfo.getAttribute("power"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a power"));
+        Location src = extractLocation(orderInfo.getAttribute("src"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a source location"));
+        Unit.Type srcUnitType = extractUnitType(orderInfo.getAttribute("srcUnitType"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
+
+        return Optional.of(GUIOrderFactory.getDefault().createDisband(power, src, srcUnitType));
+    }
+
+    private Optional<Orderable> extractGuiMove(ObjectInformation orderInfo) throws JDipException {
+        Power power = extractPower(orderInfo.getAttribute("power"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a power"));
+        Location src = extractLocation(orderInfo.getAttribute("src"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a source location"));
+        Unit.Type srcUnitType = extractUnitType(orderInfo.getAttribute("srcUnitType"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
+        Location dest = extractLocation(orderInfo.getAttribute("dest"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a destination location"));
+        // TODO extractConvoys
+
+        return Optional.of(GUIOrderFactory.getDefault().createMove(power, src, srcUnitType, dest));
+    }
+
+    private Optional<Orderable> extractGuiRemove(ObjectInformation orderInfo) throws JDipException {
+        Power power = extractPower(orderInfo.getAttribute("power"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a power"));
+        Location src = extractLocation(orderInfo.getAttribute("src"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a source location"));
+        Unit.Type srcUnitType = extractUnitType(orderInfo.getAttribute("srcUnitType"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
+
+        return Optional.of(GUIOrderFactory.getDefault().createRemove(power, src, srcUnitType));
+    }
+
+    private Optional<Orderable> extractGuiRetreat(ObjectInformation orderInfo) throws JDipException {
+        Power power = extractPower(orderInfo.getAttribute("power"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a power"));
+        Location src = extractLocation(orderInfo.getAttribute("src"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a source location"));
+        Unit.Type srcUnitType = extractUnitType(orderInfo.getAttribute("srcUnitType"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
+        Location dest = extractLocation(orderInfo.getAttribute("dest"))
+                .orElse(null);
+
+        return Optional.of(GUIOrderFactory.getDefault().createRetreat(power, src, srcUnitType, dest));
+    }
+
+    private Optional<Orderable> extractGuiSupport(ObjectInformation orderInfo) throws JDipException {
+        Power power = extractPower(orderInfo.getAttribute("power"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a power"));
+        Location src = extractLocation(orderInfo.getAttribute("src"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a source location"));
+        Unit.Type srcUnitType = extractUnitType(orderInfo.getAttribute("srcUnitType"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
+        Location supSrc = extractLocation(orderInfo.getAttribute("supSrc"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a supported source"));
+        Location supDest = extractLocation(orderInfo.getAttribute("supDest"))
+                .orElse(null);
+        Unit.Type supUnitType = extractUnitType(orderInfo.getAttribute("supUnitType"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a supported unit type"));
+        Power supPower = extractPower(orderInfo.getAttribute("supPower"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a supported power"));
+
+        return Optional.of(GUIOrderFactory.getDefault().createSupport(power, src, srcUnitType, supSrc, supPower,
+                supUnitType, supDest));
+    }
+
+    private Optional<Unit.Type> extractUnitType(SerializeInformation unitTypeSerInfo) throws JDipException {
+        if (unitTypeSerInfo == null || !unitTypeSerInfo.isObject() ||
+                !"dip.world.Unit$Type".equals(unitTypeSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation unitTypeInfo = (ObjectInformation)unitTypeSerInfo;
+
+        return Optional.of(Unit.Type.parse(extractString(unitTypeInfo.getAttribute("internalName"))
+                .orElseThrow(() -> new JDipException("Expected an unit type to contain an internal name"))));
     }
 
     private List<Result> extractResultList(SerializeInformation resultListSerInfo)
