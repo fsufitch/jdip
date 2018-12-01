@@ -116,9 +116,11 @@
 		</PROVINCE>
 		<PROVINCE shortname="cre" fullname="Crete">
 			<ADJACENCY type="xc" refs="aeg min egy lib mes" />
+			<ADJACENCY type="mv" refs="cre" />
 		</PROVINCE>
 		<PROVINCE shortname="cyp" fullname="Cyprus">
 			<ADJACENCY type="xc" refs="cil syr egy" />
+			<ADJACENCY type="mv" refs="cyp" />
 		</PROVINCE>
 		<PROVINCE shortname="cyr" fullname="Cyrene">
 			<ADJACENCY type="mv" refs="ale mar lep mem" />

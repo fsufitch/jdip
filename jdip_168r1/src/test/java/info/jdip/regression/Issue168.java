@@ -2,7 +2,6 @@ package info.jdip.regression;
 
 import info.jdip.misc.Case;
 import info.jdip.misc.TestCaseRunner;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +19,6 @@ import static info.jdip.world.Phase.SeasonType.SPRING;
 
 public class Issue168 {
     @Test
-    @Disabled
     @DisplayName("Issue 168: Army should be able to convoy to Crete in ancient mediterranean")
     public void shouldConvoyArmyOntoCrete() throws Exception {
         Case testCase = ancientMediterranean(SPRING, 1, MOVEMENT).
@@ -36,7 +34,6 @@ public class Issue168 {
     }
 
     @Test
-    @Disabled
     @DisplayName("Issue 168: Army should be able to convoy to Cyprus in ancient mediterranean")
     public void shouldConvoyArmyOntoCyprus() throws Exception {
         Case testCase = ancientMediterranean(SPRING, 1, MOVEMENT).
