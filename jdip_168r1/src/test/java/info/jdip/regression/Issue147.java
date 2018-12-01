@@ -38,4 +38,46 @@ public class Issue147 {
 
         TestCaseRunner.runCase(testCase);
     }
+
+    @Test
+    @DisplayName("Issue 147: 2v1 in constantinople should dislodge")
+    public void shouldDislodgeConstantinopleTwoVersusOne() throws Exception {
+        Case testCase = standard(SPRING, 1901, MOVEMENT)
+                .army(RUSSIA, BULGARIA)
+                .army(RUSSIA, GREECE)
+                .army(RUSSIA, ANKARA)
+                .army(TURKEY, CONSTANTINOPLE)
+                .order(CONSTANTINOPLE).moveTo(BULGARIA)
+                .order(BULGARIA).moveTo(CONSTANTINOPLE)
+//                .order(GREECE).supportMove(CONSTANTINOPLE, BULGARIA)
+                .order(ANKARA).supportMove(BULGARIA, CONSTANTINOPLE)
+                .expectArmy(RUSSIA, CONSTANTINOPLE)
+                .expectArmy(RUSSIA, GREECE)
+                .expectArmy(RUSSIA, ANKARA)
+                .expectDislodgedArmy(TURKEY, CONSTANTINOPLE)
+                .build();
+
+        TestCaseRunner.runCase(testCase);
+    }
+
+    @Test
+    @DisplayName("Issue 147: 2v1 in bulgaria should not dislodge - russia cannot help dislodge russian unit")
+    public void shouldNotDislodgeBulgariaTwoVersusOne() throws Exception {
+        Case testCase = standard(SPRING, 1901, MOVEMENT)
+                .army(RUSSIA, BULGARIA)
+                .army(RUSSIA, GREECE)
+                .army(RUSSIA, ANKARA)
+                .army(TURKEY, CONSTANTINOPLE)
+                .order(CONSTANTINOPLE).moveTo(BULGARIA)
+                .order(BULGARIA).moveTo(CONSTANTINOPLE)
+                .order(GREECE).supportMove(CONSTANTINOPLE, BULGARIA)
+//                .order(ANKARA).supportMove(BULGARIA, CONSTANTINOPLE)
+                .expectArmy(RUSSIA, BULGARIA)
+                .expectArmy(RUSSIA, GREECE)
+                .expectArmy(RUSSIA, ANKARA)
+                .expectArmy(TURKEY, CONSTANTINOPLE)
+                .build();
+
+        TestCaseRunner.runCase(testCase);
+    }
 }
