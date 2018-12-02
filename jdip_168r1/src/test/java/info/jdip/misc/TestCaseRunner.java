@@ -105,18 +105,19 @@ public class TestCaseRunner {
         //
         Set<TestSuite.UnitPos> intersection = new HashSet<>(caseUnits);
         intersection.retainAll(resolvedUnits);
-
         // now, create subtraction sets
         Set<TestSuite.UnitPos> added = new HashSet<>(resolvedUnits);
         added.removeAll(caseUnits);
-
         Set<TestSuite.UnitPos> missing = new HashSet<>(caseUnits);
         missing.removeAll(resolvedUnits);
 
-        // if subtraction sets have no units, we are done. Otherwise, we must print
-        // the differences.
-        //
+        if (!added.isEmpty()){
+            logger.info("The following units have not been expected: {}", added);
+        }
+        if (!missing.isEmpty()){
+            logger.info("Missing the following units: {}", missing);
+        }
         return missing.isEmpty() && added.isEmpty();
-    }// compareState()
+    }
 
 }
