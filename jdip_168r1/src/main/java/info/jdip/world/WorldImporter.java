@@ -24,7 +24,14 @@ import info.jdip.gui.order.GUIOrderFactory;
 import info.jdip.order.Move;
 import info.jdip.order.OrderFactory;
 import info.jdip.order.Orderable;
+import info.jdip.order.result.BouncedResult;
+import info.jdip.order.result.ConvoyPathResult;
+import info.jdip.order.result.DependentMoveFailedResult;
+import info.jdip.order.result.DislodgedResult;
+import info.jdip.order.result.OrderResult;
 import info.jdip.order.result.Result;
+import info.jdip.order.result.SubstitutedResult;
+import info.jdip.order.result.TimeResult;
 import info.jdip.world.Province.Adjacency;
 import info.jdip.world.metadata.GameMetadata;
 import info.jdip.world.metadata.PlayerMetadata;
@@ -70,7 +77,7 @@ public class WorldImporter {
 
     private Deque<XMLEvent> eventStack;
 
-    private Map<String, ObjectInformation> objectLookup;
+    private Map<String, SerializeInformation> objectLookup;
 
     private final Map<UUID, Power> powers = new LinkedHashMap();
 
@@ -180,18 +187,18 @@ public class WorldImporter {
 
     private void handleReference(StartElement startElement) throws XMLStreamException, JDipException {
         String idref = startElement.getAttributeByName(new QName("idref")).getValue();
-        ObjectInformation objectInformation = objectLookup.get(idref);
+        SerializeInformation serializeInformation = objectLookup.get(idref);
         Attribute fieldAttr = startElement.getAttributeByName(new QName("field"));
         if (!objectStack.isEmpty()) {
             ObjectInformation enclosingObject = objectStack.peekFirst();
             if (fieldAttr != null) {
-                enclosingObject.addAttribute(fieldAttr.getValue(), objectInformation);
+                enclosingObject.addAttribute(fieldAttr.getValue(), serializeInformation);
             } else if (enclosingObject.isMap()) {
                 MapInformation map = (MapInformation)enclosingObject;
-                map.addValue(objectInformation);
+                map.addValue(serializeInformation);
             } else if (enclosingObject.isCollection()) {
                 CollectionInformation collection = (CollectionInformation)enclosingObject;
-                collection.addValue(objectInformation);
+                collection.addValue(serializeInformation);
             } else {
                 throw new JDipException("Reference is neither field nor value of collection or map...");
             }
@@ -251,14 +258,18 @@ public class WorldImporter {
             }
         }
         primitiveInformation.setValue(startElement.getAttributeByName(new QName("value")).getValue());
+        if ("string".equals(typeName)) {
+            objectLookup.put(startElement.getAttributeByName(new QName("id")).getValue(),
+                    primitiveInformation);
+        }
     }
 
     private void handleNull(StartElement startElement) throws XMLStreamException {
-        PrimitiveInformation objectInformation = new PrimitiveInformation("null");
+        PrimitiveInformation primitiveInformation = new PrimitiveInformation("null");
         Attribute fieldAttr = startElement.getAttributeByName(new QName("field"));
         if (!objectStack.isEmpty() && fieldAttr != null) {
             ObjectInformation enclosingObject = objectStack.peekFirst();
-            enclosingObject.addAttribute(fieldAttr.getValue(), objectInformation);
+            enclosingObject.addAttribute(fieldAttr.getValue(), primitiveInformation);
         }
     }
 
@@ -714,7 +725,8 @@ public class WorldImporter {
         for (Map.Entry<Power, List<Orderable>> orderMapEntry: orderMap.entrySet()) {
             turnState.setOrders(orderMapEntry.getKey(), orderMapEntry.getValue());
         }
-        // TODO resultList
+        turnState.setResultList(extractResultList(turnStateInfo.getAttribute("resultList"))
+                .orElseThrow(() -> new JDipException("Expected a turn state to contain a resultList")));
         // TODO position
 
         turnState.setSCOwnerChanged(extractBoolean(turnStateInfo.getAttribute("isSCOwnerChanged"))
@@ -861,7 +873,7 @@ public class WorldImporter {
                     order = extractGuiSupport(orderInfo)
                             .orElseThrow(() -> new JDipException("Expected a support order"));
                     break;
-                // TODO GUIWave
+                // TODO GUIWaive
                 default:
                     return Optional.empty();
             }
@@ -992,59 +1004,159 @@ public class WorldImporter {
                 .orElseThrow(() -> new JDipException("Expected an unit type to contain an internal name"))));
     }
 
-    private List<Result> extractResultList(SerializeInformation resultListSerInfo)
+    private Optional<List<Result>> extractResultList(SerializeInformation resultListSerInfo)
             throws JDipException {
         if (resultListSerInfo == null || !resultListSerInfo.isCollection() ||
                 !"java.util.ArrayList".equals(resultListSerInfo.getClassName())) {
-            throw new JDipException("Expected the result list to be a collection of type java.util.ArrayList");
+            return Optional.empty();
         }
         CollectionInformation resultListInfo = (CollectionInformation)resultListSerInfo;
 
         List<Result> results = new LinkedList<>();
         for (SerializeInformation resultListEntrySerInfo: resultListInfo.getCollectionEntries()) {
-            if (!resultListEntrySerInfo.isObject()) {
-                throw new JDipException("Expected the content of a result list to be an object");
-            }
-            ObjectInformation resultListEntryInfo = (ObjectInformation)resultListEntrySerInfo;
-
-//            results.add(extractResult(resultListEntryInfo, powers));
+            results.add(extractResult(resultListEntrySerInfo)
+                    .orElseThrow(() -> new JDipException("Expected a result list to contain a result")));
         }
 
-        return results;
+        return Optional.of(results);
     }
 
-//    private Result extractResult(ObjectInformation resultInfo, Map<UUID, Power> powers) throws JDipException {
-//        Result result;
-//        Power power;
-//        SerializeInformation powerSerInfo = resultInfo.getAttribute("power");
-//        if (powerSerInfo.isPrimitive() && "null".equals(powerSerInfo.getClassName())) {
-//            power = null;
-//        } else {
-//            power = powers.get(powerSerInfo.getUuid());
-//        }
-//        switch (resultInfo.getClassName()) {
-//            case "dip.order.result.Result":
-//                result = new Result(power, extractStringAttribute(resultInfo, "message"));
-//                break;
-//            case "dip.order.result.TimeResult":
-//                break;
-//            case "dip.order.result.OrderResult":
-//                break;
-//            case "dip.order.result.BouncedResult":
-//                break;
-//            case "dip.order.result.ConvoyPathResult":
-//                break;
-//            case "dip.order.result.DependentMoveFailedResult":
-//                break;
-//            case "dip.order.result.DislodgedResult":
-//                break;
-//            case "dip.order.result.SubstitutedResult":
-//                break;
-//            default:
-//                throw new JDipException("The class of the result list entry is unknown");
-//        }
-//        return result;
-//    }
+    private Optional<Result> extractResult(SerializeInformation resultSerInfo) throws JDipException {
+        if (resultSerInfo == null || !resultSerInfo.isObject()) {
+            return Optional.empty();
+        }
+        ObjectInformation resultInfo = (ObjectInformation)resultSerInfo;
+
+        Power power = extractPower(resultInfo.getAttribute("power")).orElse(null);
+        String message = extractString(resultInfo.getAttribute("message")).orElse(null);
+        Optional<Result> result;
+        switch (resultInfo.getClassName()) {
+            case "dip.order.result.Result":
+                result = Optional.of(new Result(power, message));
+                break;
+            case "dip.order.result.TimeResult":
+                result = Optional.of(new TimeResult(power, message,
+                        extractLong(resultInfo.getAttribute("timeStamp"))
+                                .orElseThrow(() -> new JDipException("Expected a time result to contain a timeStamp")))
+                );
+                break;
+            case "dip.order.result.OrderResult":
+                result = Optional.of(new OrderResult(
+                        extractOrder(resultInfo.getAttribute("order"))
+                                .orElseThrow(() -> new JDipException("Expected an order result to contain an order")),
+                        extractResultType(resultInfo.getAttribute("resultType"))
+                                .orElseThrow(() -> new JDipException(
+                                        "Expected an order result to contain an'result type")),
+                        message));
+                break;
+            case "dip.order.result.BouncedResult":
+                result = extractBouncedResult(resultInfo);
+                break;
+            case "dip.order.result.ConvoyPathResult":
+                result = Optional.of(new ConvoyPathResult(extractOrder(resultInfo.getAttribute("order"))
+                            .orElseThrow(() -> new JDipException("Expected a convoy path result to contain an order")),
+                        extractProvinces(resultInfo.getAttribute("convoyPath"))
+                            .orElseThrow(() -> new JDipException(
+                                "Expected a convoy path result to contain a convoy path"))
+                ));
+                break;
+            case "dip.order.result.DependentMoveFailedResult":
+                result = Optional.of(new DependentMoveFailedResult(
+                        extractOrder(resultInfo.getAttribute("order"))
+                            .orElseThrow(() -> new JDipException(
+                                "Expected a dependent move failed result to contain an order")),
+                        extractOrder(resultInfo.getAttribute("dependentOrder"))
+                            .orElseThrow(() -> new JDipException(
+                                    "Expected a dependent move failed result to contain a dependentOrder"))
+                ));
+                break;
+            case "dip.order.result.DislodgedResult":
+                result = extractDislodgedResult(resultInfo);
+                break;
+            case "dip.order.result.SubstitutedResult":
+                result = Optional.of(new SubstitutedResult(
+                        extractOrder(resultInfo.getAttribute("order")).orElse(null),
+                        extractOrder(resultInfo.getAttribute("newOrder"))
+                            .orElseThrow(() -> new JDipException(
+                                "Expected a substituted result to contain a new order")),
+                        message));
+                break;
+            default:
+                throw new JDipException("The class of the result list entry is unknown");
+        }
+        return result;
+    }
+
+    private Optional<Result> extractBouncedResult(SerializeInformation bouncedResultSerInfo) throws JDipException {
+        if (bouncedResultSerInfo == null || !bouncedResultSerInfo.isObject() ||
+                !"dip.order.result.BouncedResult".equals(bouncedResultSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation bouncedResultInfo = (ObjectInformation)bouncedResultSerInfo;
+
+        BouncedResult result = new BouncedResult(extractOrder(bouncedResultInfo.getAttribute("order"))
+                .orElseThrow(() -> new JDipException("Expected a bounced result to contain an order")));
+        result.setBouncer(extractProvince(bouncedResultInfo.getAttribute("bouncer"))
+                .orElseThrow(() -> new JDipException("Expected a bounced result to contain a bouncer")));
+        result.setAttackStrength(extractInt(bouncedResultInfo.getAttribute("atkStrength"))
+                .orElseThrow(() -> new JDipException("Expected a bounced result to contain an atkStrength")));
+        result.setDefenseStrength(extractInt(bouncedResultInfo.getAttribute("defStrength"))
+                .orElseThrow(() -> new JDipException("Expected a bounced result to contain a defStrength")));
+        return Optional.of(result);
+    }
+
+    private Optional<Result> extractDislodgedResult(SerializeInformation dislodgedResultSerInfo)
+            throws JDipException {
+        if (dislodgedResultSerInfo == null || !dislodgedResultSerInfo.isObject() ||
+                !"dip.order.result.DislodgedResult".equals(dislodgedResultSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation dislodgedResultInfo = (ObjectInformation)dislodgedResultSerInfo;
+
+        DislodgedResult result = new DislodgedResult(
+                extractOrder(dislodgedResultInfo.getAttribute("order"))
+                    .orElseThrow(() -> new JDipException("Expected a dislodged result to contain an order")),
+                extractString(dislodgedResultInfo.getAttribute("message")).orElse(null),
+                extractLocations(dislodgedResultInfo.getAttribute("retreatLocations")).orElse(null)
+        );
+        result.setDislodger(extractProvince(dislodgedResultInfo.getAttribute("dislodger")).orElse(null));
+        result.setAttackStrength(extractInt(dislodgedResultInfo.getAttribute("atkStrength"))
+                .orElseThrow(() -> new JDipException("Expected a dislodged result to contain an atkStrength")));
+        result.setDefenseStrength(extractInt(dislodgedResultInfo.getAttribute("defStrength"))
+                .orElseThrow(() -> new JDipException("Expected a dislodged result to contain a defStrength")));
+
+        return Optional.of(result);
+    }
+
+    private Optional<OrderResult.ResultType> extractResultType(SerializeInformation resultTypeSerInfo)
+            throws JDipException {
+        if (resultTypeSerInfo == null || !resultTypeSerInfo.isObject() ||
+                !"dip.order.result.OrderResult$ResultType".equals(resultTypeSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation resultTypeInfo = (ObjectInformation)resultTypeSerInfo;
+
+        int ordering = extractInt(resultTypeInfo.getAttribute("ordering"))
+                .orElseThrow(() -> new JDipException("Expected a result type to contain an ordering"));
+        switch (ordering) {
+            case 10:
+                return Optional.of(OrderResult.ResultType.VALIDATION_FAILURE);
+            case 20:
+                return Optional.of(OrderResult.ResultType.SUCCESS);
+            case 30:
+                return Optional.of(OrderResult.ResultType.FAILURE);
+            case 40:
+                return Optional.of(OrderResult.ResultType.DISLODGED);
+            case 50:
+                return Optional.of(OrderResult.ResultType.CONVOY_PATH_TAKEN);
+            case 60:
+                return Optional.of(OrderResult.ResultType.TEXT);
+            case 70:
+                return Optional.of(OrderResult.ResultType.SUBSTITUTED);
+            default:
+                return Optional.empty();
+        }
+    }
 
     private String[] extractStringArray(SerializeInformation stringArraySerInfo) throws JDipException {
         if (stringArraySerInfo == null || !stringArraySerInfo.isCollection() ||
@@ -1073,26 +1185,6 @@ public class WorldImporter {
         }
     }
 
-    /**
-     * Extract a string from the given object with the given attribute name. May return null if the string is null.
-     *
-     * @param object the object containing the string
-     * @param attributeName the name of the string attribute
-     * @return the string or null
-     * @throws JDipException if an error occurs
-     */
-    private String extractStringAttribute(ObjectInformation object, String attributeName) throws JDipException {
-        SerializeInformation attributeSerInfo = object.getAttribute(attributeName);
-        if (attributeSerInfo == null || !attributeSerInfo.isPrimitive() ||
-                (!"string".equals(attributeSerInfo.getClassName()) &&
-                    !"null".equals(attributeSerInfo.getClassName()))) {
-            throw new JDipException(new StringBuilder("Expected the ").append(object.getClassName())
-                    .append(" to contain a string attribute with the name ").append(attributeName).toString());
-        }
-        PrimitiveInformation attributeInfo = (PrimitiveInformation)attributeSerInfo;
-        return attributeInfo.getValue();
-    }
-
     private Optional<Float> extractFloat(SerializeInformation floatSerInfo) throws JDipException {
         if (floatSerInfo == null || !floatSerInfo.isPrimitive()) {
             throw new JDipException("The argument to extractFloat must be a primitive");
@@ -1112,15 +1204,11 @@ public class WorldImporter {
         return Optional.of(Integer.valueOf(((PrimitiveInformation)intSerInfo).getValue()));
     }
 
-    private int extractIntAttribute(ObjectInformation object, String attributeName) throws JDipException {
-        SerializeInformation attributeSerInfo = object.getAttribute(attributeName);
-        if (attributeSerInfo == null || !attributeSerInfo.isPrimitive() ||
-                !"int".equals(attributeSerInfo.getClassName())) {
-            throw new JDipException(new StringBuilder("Expected the ").append(object.getClassName())
-                    .append(" to contain an int attribute with the name ").append(attributeName).toString());
+    private Optional<Long> extractLong(SerializeInformation longSerInfo) throws JDipException {
+        if (longSerInfo == null || !longSerInfo.isPrimitive() || ! "long".equals(longSerInfo.getClassName())) {
+            Optional.empty();
         }
-        PrimitiveInformation attributeInfo = (PrimitiveInformation)attributeSerInfo;
-        return Integer.parseInt(attributeInfo.getValue());
+        return Optional.of(Long.valueOf(((PrimitiveInformation)longSerInfo).getValue()));
     }
 
     private Optional<Boolean> extractBoolean(SerializeInformation booleanSerInfo) throws JDipException {
@@ -1129,17 +1217,6 @@ public class WorldImporter {
             return Optional.empty();
         }
         return Optional.of(Boolean.valueOf(((PrimitiveInformation)booleanSerInfo).getValue()));
-    }
-
-    private boolean extractBooleanAttribute(ObjectInformation object, String attributeName) throws JDipException {
-        SerializeInformation attributeSerInfo = object.getAttribute(attributeName);
-        if (attributeSerInfo == null || !attributeSerInfo.isPrimitive() ||
-                !"boolean".equals(attributeSerInfo.getClassName())) {
-            throw new JDipException(new StringBuilder("Expected the ").append(object.getClassName())
-                    .append(" to contain a boolean attribute with the name ").append(attributeName).toString());
-        }
-        PrimitiveInformation attributeInfo = (PrimitiveInformation)attributeSerInfo;
-        return Boolean.parseBoolean(attributeInfo.getValue());
     }
 
     private Optional<URI> extractURI(SerializeInformation uriSerInfo) throws JDipException {
