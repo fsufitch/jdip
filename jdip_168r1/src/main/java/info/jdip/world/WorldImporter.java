@@ -907,7 +907,7 @@ public class WorldImporter {
         Unit.Type srcUnitType = extractUnitType(orderInfo.getAttribute("srcUnitType"))
                 .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
 
-        return Optional.of(GUIOrderFactory.getDefault().createBuild(power, src, srcUnitType));
+        return Optional.of(new GUIOrderFactory().createBuild(power, src, srcUnitType));
     }
 
     private Optional<Orderable> extractGuiConvoy(ObjectInformation orderInfo) throws JDipException {
@@ -925,7 +925,7 @@ public class WorldImporter {
                 .orElseThrow(() -> new JDipException("Expected an order to contain a supported unit type"));
         Power convoyPower = extractPower(orderInfo.getAttribute("convoyPower")).orElse(null);
 
-        return Optional.of(GUIOrderFactory.getDefault().createConvoy(power, src, srcUnitType, convoySrc, convoyPower,
+        return Optional.of(new GUIOrderFactory().createConvoy(power, src, srcUnitType, convoySrc, convoyPower,
                 convoyUnitType, convoyDest));
     }
 
@@ -937,7 +937,7 @@ public class WorldImporter {
         Unit.Type unitType = extractUnitType(orderInfo.getAttribute("srcUnitType"))
                 .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
 
-        return Optional.of(GUIOrderFactory.getDefault().createHold(power, src, unitType));
+        return Optional.of(new GUIOrderFactory().createHold(power, src, unitType));
     }
 
     private Optional<Orderable> extractGuiDisband(ObjectInformation orderInfo) throws JDipException {
@@ -948,7 +948,7 @@ public class WorldImporter {
         Unit.Type srcUnitType = extractUnitType(orderInfo.getAttribute("srcUnitType"))
                 .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
 
-        return Optional.of(GUIOrderFactory.getDefault().createDisband(power, src, srcUnitType));
+        return Optional.of(new GUIOrderFactory().createDisband(power, src, srcUnitType));
     }
 
     private Optional<Orderable> extractGuiMove(ObjectInformation orderInfo) throws JDipException {
@@ -962,7 +962,7 @@ public class WorldImporter {
                 .orElseThrow(() -> new JDipException("Expected an order to contain a destination location"));
         // TODO extractConvoyRoutes
 
-        return Optional.of(GUIOrderFactory.getDefault().createMove(power, src, srcUnitType, dest));
+        return Optional.of(new GUIOrderFactory().createMove(power, src, srcUnitType, dest));
     }
 
     private Optional<Orderable> extractGuiRemove(ObjectInformation orderInfo) throws JDipException {
@@ -973,7 +973,7 @@ public class WorldImporter {
         Unit.Type srcUnitType = extractUnitType(orderInfo.getAttribute("srcUnitType"))
                 .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
 
-        return Optional.of(GUIOrderFactory.getDefault().createRemove(power, src, srcUnitType));
+        return Optional.of(new GUIOrderFactory().createRemove(power, src, srcUnitType));
     }
 
     private Optional<Orderable> extractGuiRetreat(ObjectInformation orderInfo) throws JDipException {
@@ -986,7 +986,7 @@ public class WorldImporter {
         Location dest = extractLocation(orderInfo.getAttribute("dest"))
                 .orElse(null);
 
-        return Optional.of(GUIOrderFactory.getDefault().createRetreat(power, src, srcUnitType, dest));
+        return Optional.of(new GUIOrderFactory().createRetreat(power, src, srcUnitType, dest));
     }
 
     private Optional<Orderable> extractGuiSupport(ObjectInformation orderInfo) throws JDipException {
@@ -1005,7 +1005,7 @@ public class WorldImporter {
         Power supPower = extractPower(orderInfo.getAttribute("supPower"))
                 .orElseThrow(() -> new JDipException("Expected an order to contain a supported power"));
 
-        return Optional.of(GUIOrderFactory.getDefault().createSupport(power, src, srcUnitType, supSrc, supPower,
+        return Optional.of(new GUIOrderFactory().createSupport(power, src, srcUnitType, supSrc, supPower,
                 supUnitType, supDest));
     }
 
