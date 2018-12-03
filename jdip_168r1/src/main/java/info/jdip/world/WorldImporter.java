@@ -923,8 +923,7 @@ public class WorldImporter {
                 .orElseThrow(() -> new JDipException("Expected an order to contain a convoy destination"));
         Unit.Type convoyUnitType = extractUnitType(orderInfo.getAttribute("convoyUnitType"))
                 .orElseThrow(() -> new JDipException("Expected an order to contain a supported unit type"));
-        Power convoyPower = extractPower(orderInfo.getAttribute("convoyPower"))
-                .orElseThrow(() -> new JDipException("Expected an order to contain a supported power"));
+        Power convoyPower = extractPower(orderInfo.getAttribute("convoyPower")).orElse(null);
 
         return Optional.of(GUIOrderFactory.getDefault().createConvoy(power, src, srcUnitType, convoySrc, convoyPower,
                 convoyUnitType, convoyDest));
