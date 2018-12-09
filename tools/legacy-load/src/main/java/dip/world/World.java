@@ -74,6 +74,7 @@ public class World implements Serializable {
     private final dip.world.Map map;                        // the actual map (constant)
     // instance variables
     private SortedMap<Phase, TurnState> turnStates = null;            // turn data
+    @IgnoreComparisonResult
     private Map<Object, Object> nonTurnData = null;            // non-turn data (misc data & per-player data)
 
 

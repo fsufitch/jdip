@@ -8,6 +8,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -15,40 +16,56 @@ import java.util.Set;
 
 public class WorldComparator {
     private static final Logger logger = LoggerFactory.getLogger(WorldComparator.class);
+    static HashMap<Object, HashSet<Object>> ok = new HashMap<>();
+    static HashMap<Object, HashSet<Object>> bad = new HashMap<>();
+    static HashSet<Object> investigating = new HashSet<>();
 
-    static Set<Object> visited;
 
     static boolean compareWorlds(World legacyWorld, info.jdip.world.World newWorld) throws Exception {
-        visited = new HashSet<>();
-        return deepCompare("root", legacyWorld, newWorld);
+        return deepCompare("World", legacyWorld, newWorld);
     }
 
     private static boolean deepCompare(String path, Object legacyObject, Object newObject) throws IllegalAccessException {
-        if (visited.contains(legacyObject)) {
+        if (ok.get(legacyObject) != null && ok.get(legacyObject).contains(newObject)) {
             return true;
         }
+        if (bad.get(legacyObject) != null && bad.get(legacyObject).contains(newObject)) {
+            return false;
+        }
+        if (investigating.contains(legacyObject)){
+            return true;
+        }
+        investigating.add(legacyObject);
         if (legacyObject == null) {
             return newObject == null;
         }
         if (newObject == null) {
             return false;
         }
-        visited.add(legacyObject);
+        boolean result = true;
         if (legacyObject instanceof String) {
-            return String.valueOf(legacyObject).compareToIgnoreCase(String.valueOf(newObject)) == 0;
+            result = String.valueOf(legacyObject).compareToIgnoreCase(String.valueOf(newObject)) == 0;
+        } else if (primitiveType(legacyObject)) {
+            result = legacyObject.equals(newObject);
+        } else if (legacyObject.getClass().isArray()) {
+            result = compareArrays(path, legacyObject, newObject);
+        } else if (legacyObject instanceof Map) {
+            result = compareMaps(path, (Map) legacyObject, (Map) newObject);
+        } else if (legacyObject instanceof List) {
+            result = compareLists(path, (List) legacyObject, (List) newObject);
+        } else {
+            result = compareObjects(path, legacyObject, newObject);
         }
-        if (primitiveType(legacyObject)) {
-            return legacyObject.equals(newObject);
+        investigating.remove(legacyObject);
+        if (result) {
+            ok.computeIfAbsent(legacyObject, o -> new HashSet<>()).add(newObject);
+        } else{
+            bad.computeIfAbsent(legacyObject, o -> new HashSet<>()).add(newObject);
         }
-        if (legacyObject.getClass().isArray()) {
-            return compareArrays(path, legacyObject, newObject);
-        }
-        if (legacyObject instanceof Map) {
-            return compareMaps(path, (Map) legacyObject, (Map) newObject);
-        }
-        if (legacyObject instanceof List){
-            return compareLists(path, (List) legacyObject, (List)newObject);
-        }
+        return result;
+    }
+
+    private static boolean compareObjects(String path, Object legacyObject, Object newObject) throws IllegalAccessException {
         boolean result = true;
         Field[] fields = legacyObject.getClass().getDeclaredFields();
         for (Field field : fields) {
@@ -64,14 +81,18 @@ public class WorldComparator {
                 Object newFieldValue = newField.get(newObject);
                 if (!deepCompare(fieldPath, legacyFieldValue, newFieldValue)) {
                     if (isNotIgnored(field)) {
-                        logger.warn("{} does not match. Legacy ({}): {} New ({}): {}",
-                                fieldPath, field.getType(), legacyFieldValue, newField.getType(), newFieldValue);
+                        if (fieldPath.startsWith("World")) {
+                            logger.warn("{} does not match. Legacy ({}): {} New ({}): {}",
+                                    fieldPath, field.getType(), legacyFieldValue, newField.getType(), newFieldValue);
+                        }
                         result = false;
                     }
                 }
             } catch (NoSuchFieldException e) {
                 if (isNotIgnored(field)) {
-                    logger.warn("{} is missing", fieldPath);
+                    if (fieldPath.startsWith("World")) {
+                        logger.warn("{} is missing", fieldPath);
+                    }
                     result = false;
                 }
             }
@@ -81,13 +102,15 @@ public class WorldComparator {
 
     private static boolean compareLists(String path, List legacyList, List newList) throws IllegalAccessException {
         if (legacyList.size() != newList.size()) {
-            logger.warn("lists have different size {}", path);
+            if (path.startsWith("World")) {
+                logger.warn("lists have different size {} != {} ({})", legacyList.size(), newList.size(), path);
+            }
             return false;
         }
         boolean result = true;
         for (int i = 0; i < legacyList.size(); i++) {
             String fieldPath = path + "[" + i + "]";
-            if(!deepCompare(fieldPath,legacyList.get(i),newList.get(i))){
+            if (!deepCompare(fieldPath, legacyList.get(i), newList.get(i))) {
                 logger.warn("{} does not match. Legacy: {} New: {}",
                         fieldPath, legacyList.get(i), newList.get(i));
                 result = false;
@@ -124,7 +147,9 @@ public class WorldComparator {
                 }
             }
             if (!found) {
-                logger.warn("Could not find key {}", legacyKey);
+                if (path.startsWith("World")) {
+                    logger.debug("Could not find key {} on path {}", legacyKey, path);
+                }
                 result = false;
             }
         }
