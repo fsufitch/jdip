@@ -27,6 +27,7 @@ import dip.world.Location;
 import dip.world.Power;
 import dip.world.Province;
 import dip.world.Unit;
+import info.jdip.test.loading.IgnoreComparisonResult;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
@@ -46,9 +47,13 @@ public class GUIMove extends Move implements GUIOrder {
     public transient static final MoveParameter BY_CONVOY = new MoveParameter("BY_CONVOY");
 
     // i18n keys
+    @IgnoreComparisonResult
     private final static String CLICK_TO_SET_DEST = "GUIMove.set.dest";
+    @IgnoreComparisonResult
     private final static String CANNOT_MOVE_TO_ORIGIN = "GUIMove.cannot_to_origin";
+    @IgnoreComparisonResult
     private final static String NO_CONVOY_ROUTE = "GUIMove.no_convoy_route";
+    @IgnoreComparisonResult
     private final static String CANNOT_MOVE_HERE = "GUIMove.cannot_move_here";
 
     // instance variables

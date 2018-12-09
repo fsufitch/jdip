@@ -26,6 +26,7 @@ import dip.order.Support;
 import dip.world.Location;
 import dip.world.Power;
 import dip.world.Unit;
+import info.jdip.test.loading.IgnoreComparisonResult;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
@@ -37,17 +38,30 @@ import java.awt.geom.Point2D;
  */
 public class GUISupport extends Support implements GUIOrder {
     // i18n keys
+
+    @IgnoreComparisonResult
     private final static String CLICK_TO_SUPPORT_UNIT = "GUISupport.click_to_sup";
+    @IgnoreComparisonResult
     private final static String NO_UNIT_TO_SUPPORT = "GUISupport.no_unit_to_sup";
+    @IgnoreComparisonResult
     private final static String CANNOT_SUPPORT_SELF = "GUISupport.no_self_sup";
+    @IgnoreComparisonResult
     private final static String CLICK_TO_SUPPORT_FROM = "GUISupport.click_to_sup_from";
+    @IgnoreComparisonResult
     private final static String CLICK_TO_SUPPORT_HOLD = "GUISupport.click_to_sup_hold";
+    @IgnoreComparisonResult
     private final static String SUP_DEST_NOT_ADJACENT = "GUISupport.sup_dest_not_adj";
+    @IgnoreComparisonResult
     private final static String SUPPORTING_THIS_UNIT = "GUISupport.sup_this_unit";
+    @IgnoreComparisonResult
     private final static String CLICK_TO_SUPPORT_MOVE = "GUISupport.click_to_sup_move";
+    @IgnoreComparisonResult
     private final static String CLICK_TO_SUPPORT_CONVOYED_MOVE = "GUISupport.click_to_sup_conv_move";
+    @IgnoreComparisonResult
     private final static String CANNOT_SUPPORT_MOVE_NONADJACENT = "GUISupport.move_nonadj";
+    @IgnoreComparisonResult
     private final static String CANNOT_SUPPORT_MOVE_GENERAL = "GUISupport.move_bad";
+    @IgnoreComparisonResult
     private final static String CANNOT_SUPPORT_ACROSS_DPB = "GUISupport.over_dpb";
 
 

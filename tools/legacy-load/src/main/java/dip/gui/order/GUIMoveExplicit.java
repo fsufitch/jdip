@@ -24,6 +24,7 @@ package dip.gui.order;
 
 import dip.order.Move;
 import dip.world.Province;
+import info.jdip.test.loading.IgnoreComparisonResult;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
@@ -41,17 +42,27 @@ import java.util.LinkedList;
 public class GUIMoveExplicit extends Move implements GUIOrder {
 
     // i18n keys
+    @IgnoreComparisonResult
     private final static String CLICK_TO_SET_DEST = "GUIMove.set.dest";
+    @IgnoreComparisonResult
     private final static String CANNOT_MOVE_TO_ORIGIN = "GUIMove.cannot_to_origin";
+    @IgnoreComparisonResult
     private final static String NO_CONVOY_ROUTE = "GUIMove.no_convoy_route";
+    @IgnoreComparisonResult
     private final static String CANNOT_MOVE_HERE = "GUIMove.cannot_move_here";
 
     // i18n keys for convoys
+    @IgnoreComparisonResult
     private final static String CANNOT_BACKTRACK = "GUIMoveExplicit.convoy.backtrack";
+    @IgnoreComparisonResult
     private final static String FINAL_DESTINATION = "GUIMoveExplicit.convoy.location.destination";
+    @IgnoreComparisonResult
     private final static String OK_CONVOY_LOCATION = "GUIMoveExplicit.convoy.location.ok";
+    @IgnoreComparisonResult
     private final static String BAD_CONVOY_LOCATION = "GUIMoveExplicit.convoy.location.bad";
+    @IgnoreComparisonResult
     private final static String NONADJACENT_CONVOY_LOCATION = "GUIMoveExplicit.convoy.location.nonadjacent";
+    @IgnoreComparisonResult
     private final static String ADDED_CONVOY_LOCATION = "GUIMoveExplicit.convoy.location.added";
 
     // instance variables

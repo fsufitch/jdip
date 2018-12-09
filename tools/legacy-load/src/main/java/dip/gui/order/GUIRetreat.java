@@ -26,6 +26,7 @@ import dip.order.Retreat;
 import dip.world.Location;
 import dip.world.Power;
 import dip.world.Unit;
+import info.jdip.test.loading.IgnoreComparisonResult;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
@@ -35,9 +36,13 @@ import java.awt.geom.Point2D;
  */
 public class GUIRetreat extends Retreat implements GUIOrder {
     // i18n keys
+    @IgnoreComparisonResult
     private final static String UNIT_MUST_DISBAND = "GUIRetreat.must_disband";
+    @IgnoreComparisonResult
     private final static String CLICK_TO_SET_DEST = "GUIRetreat.set_dest";
+    @IgnoreComparisonResult
     private final static String CANNOT_RETREAT_HERE = "GUIRetreat.bad_dest";
+    @IgnoreComparisonResult
     private final static String VALID_RETREAT_LOCS = "GUIRetreat.valid_locs";
 
     // instance variables

@@ -25,6 +25,7 @@ package dip.gui.order;
 import dip.order.Waive;
 import dip.world.Location;
 import dip.world.Power;
+import info.jdip.test.loading.IgnoreComparisonResult;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
@@ -35,12 +36,19 @@ import java.awt.geom.Point2D;
 public class GUIWaive extends Waive implements GUIOrder {
 
     // i18n keys
+    @IgnoreComparisonResult
     private static final String NOWAIVE_MUST_BE_AN_OWNED_SC = "GUIWaive.bad.must_own_sc";
+    @IgnoreComparisonResult
     private static final String NOWAIVE_NOT_OWNED_HOME_SC = "GUIWaive.bad.now_owned_home_sc";
+    @IgnoreComparisonResult
     private static final String NOWAIVE_NEED_ONE_OWNED_SC = "GUIWaive.bad.need_one_owned_sc";
+    @IgnoreComparisonResult
     private static final String NOWAIVE_NO_BUILDS_AVAILABLE = "GUIWaive.bad.no_builds_available";
+    @IgnoreComparisonResult
     private static final String NOWAIVE_SC_NOT_CONTROLLED = "GUIWaive.bad.sc_not_controlled";
+    @IgnoreComparisonResult
     private static final String NOWAIVE_UNIT_PRESENT = "GUIWaive.bad.unit_already_present";
+    @IgnoreComparisonResult
     private static final String NOWAIVE_UNOWNED_SC = "GUIWaive.bad.unowned_sc";
 
     // instance variables

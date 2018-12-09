@@ -23,6 +23,8 @@
 package dip.world;
 
 
+import info.jdip.test.loading.IgnoreComparisonResult;
+
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -43,13 +45,16 @@ public class Phase implements Serializable, Comparable {
     // ordering: (for a given year)
     //		spring movement, spring retreat, fall movement, fall retreat, fall adjustment
     // both these constants correspond, and must have equal sizes
+    @IgnoreComparisonResult
     private static final SeasonType[] ORDER_SEASON = {SeasonType.SPRING, SeasonType.SPRING,
             SeasonType.FALL, SeasonType.FALL, SeasonType.FALL};
 
+    @IgnoreComparisonResult
     private static final PhaseType[] ORDER_PHASE = {PhaseType.MOVEMENT, PhaseType.RETREAT,
             PhaseType.MOVEMENT, PhaseType.RETREAT, PhaseType.ADJUSTMENT};
 
     // formatter to always 4-digit format a year
+    @IgnoreComparisonResult
     private static final DecimalFormat YEAR_FORMAT = new DecimalFormat("0000");
 
 
@@ -362,17 +367,25 @@ public class Phase implements Serializable, Comparable {
      */
     public static class SeasonType implements Serializable, Comparable {
         // always-accepted english constants for SeasonTypes
+        @IgnoreComparisonResult
         protected static final String CONST_SPRING = "SPRING";
+        @IgnoreComparisonResult
         protected static final String CONST_FALL = "FALL";
+        @IgnoreComparisonResult
         protected static final String CONST_SUMMER = "SUMMER";
+        @IgnoreComparisonResult
         protected static final String CONST_WINTER = "WINTER";
 
         // internal constants
-        protected static final String IL8N_SPRING = "SEASONTYPE_SPRING";
-        protected static final String IL8N_FALL = "SEASONTYPE_FALL";
+        @IgnoreComparisonResult
+        protected static final String IL8N_SPRING = "Spring";
+        @IgnoreComparisonResult
+        protected static final String IL8N_FALL = "Fall";
 
         // positions are spaced such that other seasons can be inserted easily
+        @IgnoreComparisonResult
         protected static final int POS_SPRING = 1000;
+        @IgnoreComparisonResult
         protected static final int POS_FALL = 2000;
 
         // Season Type Constants

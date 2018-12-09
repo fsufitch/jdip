@@ -26,6 +26,7 @@ import dip.order.Convoy;
 import dip.world.Location;
 import dip.world.Power;
 import dip.world.Unit;
+import info.jdip.test.loading.IgnoreComparisonResult;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
@@ -35,14 +36,23 @@ import java.awt.geom.Point2D;
  */
 public class GUIConvoy extends Convoy implements GUIOrder {
     // i18n keys
+    @IgnoreComparisonResult
     private final static String ONLY_SEA_OR_CC_FLEETS_CAN_CONVOY = "GUIConvoy.only_fleets_can_convoy";
+    @IgnoreComparisonResult
     private final static String CLICK_TO_CONVOY = "GUIConvoy.click_to_convoy";
+    @IgnoreComparisonResult
     private final static String NO_UNIT = "GUIConvoy.no_unit";
+    @IgnoreComparisonResult
     private final static String CLICK_TO_CONVOY_ARMY = "GUIConvoy.click_to_convoy_army";
+    @IgnoreComparisonResult
     private final static String CANNOT_CONVOY_LANDLOCKED = "GUIConvoy.no_convoy_landlocked";
+    @IgnoreComparisonResult
     private final static String MUST_CONVOY_FROM_COAST = "GUIConvoy.must_convoy_from_coast";
+    @IgnoreComparisonResult
     private final static String CLICK_TO_CONVOY_FROM = "GUIConvoy.click_to_convoy_from";
+    @IgnoreComparisonResult
     private final static String NO_POSSIBLE_CONVOY_PATH = "GUIConvoy.no_path";
+    @IgnoreComparisonResult
     private final static String MUST_CONVOY_TO_COAST = "GUIConvoy.must_convoy_to_coast";
 
     // instance variables

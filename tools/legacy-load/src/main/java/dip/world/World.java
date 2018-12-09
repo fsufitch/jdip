@@ -24,6 +24,7 @@ package dip.world;
 
 import dip.world.metadata.GameMetadata;
 import dip.world.metadata.PlayerMetadata;
+import info.jdip.test.loading.IgnoreComparisonResult;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -57,12 +58,18 @@ import java.util.zip.GZIPOutputStream;
  */
 public class World implements Serializable {
     // constants for non-turn-data lookup
+    @IgnoreComparisonResult
     private static final String KEY_GLOBAL_DATA = "_global_data_";
+    @IgnoreComparisonResult
     private static final String KEY_VICTORY_CONDITIONS = "_victory_conditions_";
 
+    @IgnoreComparisonResult
     private static final String KEY_WORLD_METADATA = "_world_metadata_";
+    @IgnoreComparisonResult
     private static final String KEY_UNDOREDOMANAGER = "_undo_redo_manager_";
+    @IgnoreComparisonResult
     private static final String KEY_GAME_SETUP = "_game_setup_";
+    @IgnoreComparisonResult
     private static final String KEY_VARIANT_INFO = "_variant_info_";
     private final dip.world.Map map;                        // the actual map (constant)
     // instance variables
