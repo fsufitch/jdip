@@ -72,96 +72,6 @@ public class OrderResult extends Result {
         this.order = order;
     }// OrderResult()
 
-    /**
-     * Get the ResultType. Never returns null.
-     */
-    public ResultType getResultType() {
-        return resultType;
-    }// getResultType()
-
-    /**
-     * Get the Order. Never return null.
-     */
-    public Orderable getOrder() {
-        return order;
-    }// getOrder()
-
-    /**
-     * For debugging
-     */
-    public String toString() {
-        StringBuilder sb = new StringBuilder(180);
-        sb.append(power);
-        sb.append(": [");
-        sb.append(resultType);
-        sb.append("] [order: ");
-        sb.append(order);
-        sb.append("] ");
-        sb.append(message);
-        return sb.toString();
-    }// toString()
-
-
-    /**
-     * Compare in the following order:
-     * <ol>
-     * <li>Power (null first)
-     * <li>Orderable source province	[null first]
-     * <li>ResultType	[never null]
-     * <li>message [never null, but may be empty]
-     * </ol>
-     * <p>
-     * If power is null, it will be first in ascending order.
-     * If message may be empty, but never is null.
-     */
-    public int compareTo(Result o) {
-        if (o instanceof OrderResult) {
-            OrderResult result = (OrderResult) o;
-
-            // 1: compare powers
-            int compareResult = 0;
-            if (result.power == null && this.power == null) {
-                compareResult = 0;
-            } else if (this.power == null && result.power != null) {
-                return -1;
-            } else if (this.power != null && result.power == null) {
-                return +1;
-            } else {
-                // if these are equal, could be 0
-                compareResult = this.power.compareTo(result.power);
-            }
-
-            if (compareResult != 0) {
-                return compareResult;
-            }
-
-            // 2: compare Order Source province
-            // null orders come first.
-            if (this.order == null && result.order != null) {
-                return -1;
-            } else if (this.order != null && result.order == null) {
-                return +1;
-            } else if (this.order != null && result.order != null) {
-                // neither are null
-                compareResult = this.order.getSource().getProvince().compareTo(result.order.getSource().getProvince());
-                if (compareResult != 0) {
-                    return compareResult;
-                }
-            }
-
-            // 3: compare ResultType
-            compareResult = this.resultType.compareTo(result.resultType);
-            if (compareResult != 0) {
-                return compareResult;
-            }
-
-            // 4: compare message
-            return this.message.compareTo(result.message);
-        } else {
-            return super.compareTo(o);
-        }
-    }// compareTo()
-
 
     /**
      * Type-Safe enumerated categories of OrderResults.
@@ -219,13 +129,13 @@ public class OrderResult extends Result {
             this.key = key;
         }// ResultType()
 		
-		
+
 		/*
 			equals():
-			
-			We use Object.equals(), which just does a test of 
-			referential equality. 
-			
+
+			We use Object.equals(), which just does a test of
+			referential equality.
+
 		*/
 
         /**

@@ -23,7 +23,6 @@
 package dip.world;
 
 import dip.order.Orderable;
-import dip.order.result.OrderResult;
 import dip.order.result.Result;
 
 import java.io.Serializable;
@@ -152,17 +151,6 @@ public class TurnState implements Serializable {
     }// getResultList()
 
 
-    /**
-     * Sets the Result list, erasing any previously existing result list.
-     */
-    public void setResultList(List<Result> list) {
-        if (list == null) {
-            throw new IllegalArgumentException("null result list");
-        }
-
-        resultList = list;
-    }// setResultList()
-
 
     /**
      * A flag indicating if, after adjudication, any supply centers
@@ -173,128 +161,9 @@ public class TurnState implements Serializable {
     }// getSCOwnerChanged()
 
 
-    /**
-     * Sets the flag indicating if, after adjudication, any supply centers
-     * have changed ownership.
-     */
-    public void setSCOwnerChanged(boolean value) {
-        isSCOwnerChanged = value;
-    }// setSCOwnerChanged()
 
 
-    /**
-     * Returns a List of orders for all powers.
-     * <p>
-     * Manipulations to this list will not be reflected in the TurnState object.
-     */
-    public List<Orderable> getAllOrders() {
-        List<Orderable> list = new ArrayList<>(75);
-
-        for (Map.Entry<Power, List<Orderable>> mapEntry : orderMap.entrySet()) {
-            List<Orderable> orders = mapEntry.getValue();
-
-            for (Orderable order : orders) {
-                list.add(order);
-            }
-        }
-
-        return list;
-    }// getOrderList()
 
 
-    /**
-     * Clear all Orders, for all Powers.
-     */
-    public void clearAllOrders() {
-        orderMap.clear();
-    }// clearAllOrders()
-
-
-    /**
-     * Returns the List of orders for a given Power.
-     * <p>
-     * Note that modifications to the returned order List will be reflected
-     * in the TurnState.
-     */
-    public List<Orderable> getOrders(Power power) {
-        if (power == null) {
-            throw new IllegalArgumentException("null power");
-        }
-
-        List<Orderable> orderList = orderMap.get(power);
-        if (orderList == null) {
-            orderList = new ArrayList<>(15);
-            orderMap.put(power, orderList);
-        }
-
-        return orderList;
-    }// getOrders()
-
-    /**
-     * Sets the orders for the given Power, deleting any existing orders for the power
-     */
-    public void setOrders(Power power, List<Orderable> list) {
-        if (power == null || list == null) {
-            throw new IllegalArgumentException("power or list null");
-        }
-
-        orderMap.put(power, list);
-    }// setOrders()
-
-    /**
-     * Returns <code>true</code> if game has ended
-     */
-    public boolean isEnded() {
-        return isEnded;
-    }
-
-    /**
-     * Set if game has ended for any reason
-     */
-    public void setEnded(boolean value) {
-        isEnded = value;
-    }
-
-    /**
-     * Returns the turn has been adjudicated
-     */
-    public boolean isResolved() {
-        return isResolved;
-    }
-
-    /**
-     * Set if the turn has been adjudicated.
-     */
-    public void setResolved(boolean value) {
-        isResolved = value;
-    }
-
-    /**
-     * Returns if an order has failed, based on results. Note that
-     * this only applies once the turnstate has been resolved. If
-     * the TurnState is not resolved, this will always return true.
-     */
-    public boolean isOrderSuccessful(Orderable o) {
-        if (!isResolved) {
-            return true;
-        }
-
-        if (resultMap == null) {
-            resultMap = new HashMap<>(53);
-            for (Result obj : getResultList()) {
-                if (obj instanceof OrderResult) {
-                    OrderResult ordRes = (OrderResult) obj;
-
-                    // we only map SUCCESSFULL orders.
-                    if (ordRes.getResultType() == OrderResult.ResultType.SUCCESS) {
-                        resultMap.put(ordRes.getOrder(), Boolean.TRUE);
-                    }
-                }
-            }
-        }
-
-        return resultMap.get(o) == Boolean.TRUE;
-
-    }// isFailedOrder()
 
 }// class TurnState

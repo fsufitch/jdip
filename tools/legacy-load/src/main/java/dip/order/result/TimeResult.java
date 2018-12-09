@@ -22,7 +22,6 @@
 package dip.order.result;
 
 
-import dip.order.OrderFormatOptions;
 import dip.world.Power;
 
 import java.util.Date;
@@ -70,7 +69,7 @@ public class TimeResult extends Result {
      * Converts the Resource to a properly-internationlized text message.
      * argument {0} is always the time.
      */
-    public String getMessage(OrderFormatOptions ofo) {
+    public String getMessage() {
         return message+ new Date(timeStamp);
     }// getMessage()
 

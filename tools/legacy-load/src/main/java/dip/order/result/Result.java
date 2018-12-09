@@ -85,47 +85,6 @@ public class Result implements Serializable, Comparable<Result> {
 
 
     /**
-     * Get the message. Never returns null. This is equivalent to calling
-     * <code>getMessage(OrderFormatOptions.DEFAULT)</code>.
-     * <p>
-     * This method is marked <code>final</code> so that subclasses more
-     * properly override the <code>getMessage(OrderFormatOptions)</code>
-     * method.
-     */
-    public final String getMessage() {
-        return getMessage(DEFAULT_OFO);
-    }// getMessage()
-
-    /**
-     * Get the message. <b>Never</b> returns <code>null</code>.
-     * <p>
-     * Uses the given order format
-     * options (if applicable) for formatting Province and Order names.
-     * Subclasses must override this method to implement this.
-     */
-    public String getMessage(OrderFormatOptions ofo) {
-        return message;
-    }// getMessage()
-
-    /**
-     * For debugging. Use getPower() and getMessage() for general use.
-     */
-    public String toString() {
-        StringBuilder sb = new StringBuilder(128);
-
-        if (power == null) {
-            sb.append("(none)");
-        } else {
-            sb.append(power);
-        }
-
-        sb.append(": ");
-        sb.append(message);
-        return sb.toString();
-    }// toString()
-
-
-    /**
      * Compare first by Power, then by Message.
      * <p>
      * If power is null, it will be first in ascending order.
