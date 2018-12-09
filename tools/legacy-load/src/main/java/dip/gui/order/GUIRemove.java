@@ -26,6 +26,7 @@ import dip.order.Remove;
 import dip.world.Location;
 import dip.world.Power;
 import dip.world.Unit;
+import info.jdip.test.loading.IgnoreComparisonResult;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
@@ -35,6 +36,7 @@ import java.awt.geom.Point2D;
  */
 public class GUIRemove extends Remove implements GUIOrder {
     // i18n
+    @IgnoreComparisonResult
     public static final String NO_UNITS_TO_REMOVE = "GUIRemove.no_removes";
 
     // instance variables
