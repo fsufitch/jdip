@@ -21,8 +21,8 @@ public class TestLoadingSave {
 
     @Ignore
     @Test
-    public void load_1902_winter() throws Exception {
-        String name = "info/jdip/legacy/saves/1902_winter.jdip";
+    public void load_bug_147() throws Exception {
+        String name = "info/jdip/legacy/saves/bug_147.jdip";
         InputStream in = this.getClass().getClassLoader().getResourceAsStream(name);
         World legacyWorld = LegacyWorldLoader.readGameFile(in);
         in = this.getClass().getClassLoader().getResourceAsStream(name);
@@ -32,8 +32,8 @@ public class TestLoadingSave {
 
     @Ignore
     @Test
-    public void load_bug_147() throws Exception {
-        String name = "info/jdip/legacy/saves/bug_147.jdip";
+    public void load_1902_winter() throws Exception {
+        String name = "info/jdip/legacy/saves/1902_winter.jdip";
         InputStream in = this.getClass().getClassLoader().getResourceAsStream(name);
         World legacyWorld = LegacyWorldLoader.readGameFile(in);
         in = this.getClass().getClassLoader().getResourceAsStream(name);
