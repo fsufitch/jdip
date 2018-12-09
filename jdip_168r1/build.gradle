@@ -3,10 +3,6 @@ apply plugin: 'application'
 
 
 
-repositories {
-
-    jcenter()
-}
 
 
 dependencies {

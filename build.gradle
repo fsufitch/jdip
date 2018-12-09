@@ -4,4 +4,8 @@ allprojects {
             options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
         }
     }
+    repositories {
+
+        jcenter()
+    }
 }
