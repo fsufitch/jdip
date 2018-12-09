@@ -11,6 +11,8 @@ public class LegacyWorldLoader {
     // reads in a game file
     static public World readGameFile(InputStream inputStream)
             throws Exception {
+
+
         World w = dip.world.World.open(inputStream);
 
         // check if variant is available; if not, inform user.

@@ -10,6 +10,7 @@ import java.io.InputStream;
 public class NewWorldLoader {
 
     static public World importGameFile(InputStream inputStream) throws Exception {
+
         WorldImporter wi = new WorldImporter();
         World w = wi.importGame(inputStream);
 
