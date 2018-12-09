@@ -393,14 +393,192 @@ public class WorldImporter {
                                     "The isConvoyableCoast flag of a province may not be null")));
             province.setSupplyCenter(extractBoolean(provinceInfo.getAttribute("supplyCenter"))
                     .orElseThrow(() -> new JDipException("The supplyCenter flag may not be null")));
-            // TODO extractBorders
             provinces.put(provinceInfo.getUuid(), province);
+            Optional<Border[]> borders = extractBorders(provinceInfo.getAttribute("borders"));
+            if (borders.isPresent()) {
+                province.setBorders(borders.get());
+            }
 
             extractAdjacency(provinceInfo.getAttribute("adjacency"))
                         .orElseThrow(() -> new JDipException("Expected a province to contain adjacency information"))
                     .transferToAdjacency(province.getAdjacency());
         }
         return Optional.of(province);
+    }
+
+    private Optional<Border[]> extractBorders(SerializeInformation bordersSerInfo) throws JDipException {
+        if (bordersSerInfo == null || !bordersSerInfo.isCollection() ||
+                !"dip.world.Border".equals(bordersSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        CollectionInformation bordersInfo = (CollectionInformation)bordersSerInfo;
+
+        List<Border> borders = new LinkedList<>();
+        for (SerializeInformation borderSerInfo: bordersInfo.getCollectionEntries()) {
+            borders.add(extractBorder(borderSerInfo)
+                    .orElseThrow(() -> new JDipException("Expected borders to contain a border")));
+        }
+        return Optional.of(borders.toArray(new Border[borders.size()]));
+    }
+
+    private Optional<Border> extractBorder(SerializeInformation borderSerInfo) throws JDipException {
+        if (borderSerInfo == null || !borderSerInfo.isObject() ||
+                !"dip.world.Border".equals(borderSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation borderInfo = (ObjectInformation)borderSerInfo;
+
+        try {
+            return Optional.of(new Border(
+                    extractString(borderInfo.getAttribute("id"))
+                        .orElseThrow(() -> new JDipException("Expected a border to contain an id")),
+                    extractString(borderInfo.getAttribute("description"))
+                        .orElseThrow(() -> new JDipException("Expected a border to contain a description")),
+                    extractUnitTypesAsString(borderInfo.getAttribute("unitTypes")).orElse(""),
+                    extractLocations(borderInfo.getAttribute("from")).orElse(null),
+                    extractClassesArrayAsString(borderInfo.getAttribute("orderClasses")).orElse(""),
+                    extractBaseMoveModifier(borderInfo.getAttribute("baseMoveModifier"))
+                        .orElseThrow(() -> new JDipException("Expected a border to contain a base move modifier")),
+                    extractSeasonTypesAsString(borderInfo.getAttribute("seasons")).orElse(""),
+                    extractPhaseTypesAsString(borderInfo.getAttribute("phases")).orElse(""),
+                    extractBorderYear(borderInfo.getAttribute("yearMin"), borderInfo.getAttribute("yearMax"),
+                            borderInfo.getAttribute("yearModifier"))
+                        .orElseThrow(() -> new JDipException("Expected the border to contain year informations"))
+            ));
+        } catch (InvalidBorderException ibex) {
+            throw new JDipException(ibex);
+        }
+    }
+
+    private Optional<String> extractUnitTypesAsString(SerializeInformation unitsSerInfo) throws JDipException {
+        if (unitsSerInfo == null || !unitsSerInfo.isCollection() ||
+                !"dip.world.Unit$Type".equals(unitsSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+
+        Optional<Unit.Type[]> unitTypesArray = extractUnitTypeArray(unitsSerInfo);
+        if (unitTypesArray.isPresent()) {
+            Unit.Type[] unitTypes = unitTypesArray.get();
+            StringBuilder sb = new StringBuilder(unitTypes[0].getInternalName());
+            if (unitTypes.length > 1) {
+                for (int i = 1; i < unitTypes.length; i++) {
+                    sb.append(",");
+                    sb.append(unitTypes[i].getInternalName());
+                }
+            }
+            return Optional.of(sb.toString());
+        }
+
+        return Optional.empty();
+    }
+
+    private Optional<String> extractClassesArrayAsString(SerializeInformation classesArraySerInfo)
+            throws JDipException {
+        if (classesArraySerInfo == null || !classesArraySerInfo.isCollection() ||
+                !"java.lang.Class".equals(classesArraySerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        CollectionInformation classesArrayInfo = (CollectionInformation)classesArraySerInfo;
+
+        StringBuilder sb = new StringBuilder("");
+        for (SerializeInformation classSerInfo: classesArrayInfo.getCollectionEntries()) {
+            String className = extractClassString(classSerInfo)
+                    .orElseThrow(() -> new JDipException("Expected a classes array to contain class names"));
+            if (sb.length() > 0) {
+                sb.append(",");
+            }
+            sb.append(className);
+        }
+        return Optional.of(sb.toString());
+    }
+
+    private Optional<String> extractClassString(SerializeInformation classSerInfo) throws JDipException {
+        if (classSerInfo == null || !classSerInfo.isObject() ||
+                !"java.lang.Class".equals(classSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation classInfo = (ObjectInformation)classSerInfo;
+
+        return extractString(classInfo.getAttribute("name"));
+    }
+
+    private Optional<String> extractBaseMoveModifier(SerializeInformation baseMoveModifierSerInfo)
+            throws JDipException {
+        int baseMoveModifier = extractInt(baseMoveModifierSerInfo)
+                .orElseThrow(() -> new JDipException("Expected the base move modifier to be an int"));
+        return Optional.of(Integer.toString(baseMoveModifier));
+    }
+
+    private Optional<String> extractSeasonTypesAsString(SerializeInformation seasonTypesSerInfo) throws JDipException {
+        Optional<List<Phase.SeasonType>> seasonTypes = extractSeasonTypes(seasonTypesSerInfo);
+        if (seasonTypes.isPresent()) {
+            StringBuilder sb = new StringBuilder("");
+            for (Phase.SeasonType seasonType: seasonTypes.get()) {
+                if (sb.length() > 0) {
+                    sb.append(",");
+                }
+                sb.append(seasonType.getBriefName());
+            }
+            return Optional.of(sb.toString());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<String> extractPhaseTypesAsString(SerializeInformation phaseTypesSerInfo) throws JDipException {
+        Optional<List<Phase.PhaseType>> phaseTypes = extractPhaseTypes(phaseTypesSerInfo);
+        if (phaseTypes.isPresent()) {
+            StringBuilder sb = new StringBuilder("");
+            for (Phase.PhaseType phaseType: phaseTypes.get()) {
+                if (sb.length() > 0) {
+                    sb.append(",");
+                }
+                sb.append(phaseType.getBriefName());
+            }
+            return Optional.of(sb.toString());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<String> extractBorderYear(SerializeInformation yearMinSerInfo, SerializeInformation yearMaxSerInfo,
+            SerializeInformation yearModifierSerInfo) throws JDipException {
+        if (yearMinSerInfo == null || !yearMinSerInfo.isPrimitive() ||
+                yearMaxSerInfo == null || !yearMaxSerInfo.isPrimitive() ||
+                yearModifierSerInfo == null || !yearModifierSerInfo.isPrimitive()) {
+            return Optional.empty();
+        }
+
+        StringBuilder result = new StringBuilder();
+        Integer yearModifier = extractInt(yearModifierSerInfo)
+                .orElseThrow(() -> new JDipException("Expected the border to contain a year modifier"));
+        switch (yearModifier) {
+            case 0:
+                result.append("");
+                break;
+            case 1:
+                int yearMin = extractInt(yearMinSerInfo).orElseThrow(
+                        () -> new JDipException("Cannot parse min year of border"));
+                int yearMax = extractInt(yearMaxSerInfo).orElseThrow(
+                        () -> new JDipException("Cannot parse max year of border"));
+                if (yearMin > Integer.MIN_VALUE) {
+                    result.append(Integer.toString(yearMin));
+                }
+                if (yearMax < Integer.MAX_VALUE) {
+                    result.append(",");
+                    result.append(Integer.toString(yearMax));
+                }
+                break;
+            case 2:
+                result.append("odd");
+                break;
+            case 3:
+                result.append("even");
+                break;
+            default:
+                throw new JDipException("Unknown year modifier in border");
+        }
+        return Optional.of(result.toString());
     }
 
     private Optional<AdjacencyProxy> extractAdjacency(SerializeInformation adjacencySerInfo) throws JDipException {
@@ -772,6 +950,23 @@ public class WorldImporter {
         return Optional.of(new Phase(seasonType, yearType, phaseType));
     }
 
+    private Optional<List<Phase.SeasonType>> extractSeasonTypes(SerializeInformation seasonTypesSerInfo)
+            throws JDipException {
+        if (seasonTypesSerInfo == null || !seasonTypesSerInfo.isCollection() ||
+                !"dip.world.Phase$SeasonType".equals(seasonTypesSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        CollectionInformation seasonTypesInfo = (CollectionInformation)seasonTypesSerInfo;
+
+        List<Phase.SeasonType> result = new LinkedList<>();
+        for (SerializeInformation seasonTypeSerInfo: seasonTypesInfo.getCollectionEntries()) {
+            result.add(extractSeasonType(seasonTypeSerInfo).orElseThrow(
+                    () -> new JDipException("Expected a collection of season types to contain season types"))
+            );
+        }
+        return Optional.of(result);
+    }
+
     private Optional<Phase.SeasonType> extractSeasonType(SerializeInformation seasonTypeSerInfo) throws JDipException {
         if (seasonTypeSerInfo == null || !seasonTypeSerInfo.isObject() ||
                 !"dip.world.Phase$SeasonType".equals(seasonTypeSerInfo.getClassName())) {
@@ -800,6 +995,23 @@ public class WorldImporter {
         int yearTypeYear = extractInt(yearTypeInfo.getAttribute("year"))
                 .orElseThrow(() -> new JDipException("Expected a year type to contain a year"));
         return Optional.of(new Phase.YearType(yearTypeYear));
+    }
+
+    private Optional<List<Phase.PhaseType>> extractPhaseTypes(SerializeInformation phaseTypesSerInfo)
+            throws JDipException {
+        if (phaseTypesSerInfo == null || !phaseTypesSerInfo.isCollection() ||
+                !"dip.world.Phase$PhaseType".equals(phaseTypesSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        CollectionInformation phaseTypesInfo = (CollectionInformation)phaseTypesSerInfo;
+
+        List<Phase.PhaseType> result = new LinkedList<>();
+        for (SerializeInformation phaseTypeSerInfo: phaseTypesInfo.getCollectionEntries()) {
+            result.add(extractPhaseType(phaseTypeSerInfo)
+                    .orElseThrow(() -> new JDipException("Expected a collection of phase types to contain phase types"))
+            );
+        }
+        return Optional.of(result);
     }
 
     private Optional<Phase.PhaseType> extractPhaseType(SerializeInformation phaseTypeSerInfo) throws JDipException {
@@ -1007,6 +1219,21 @@ public class WorldImporter {
 
         return Optional.of(new GUIOrderFactory().createSupport(power, src, srcUnitType, supSrc, supPower,
                 supUnitType, supDest));
+    }
+
+    private Optional<Unit.Type[]> extractUnitTypeArray(SerializeInformation unitTypeArraySerInfo) throws JDipException {
+        if (unitTypeArraySerInfo == null || !unitTypeArraySerInfo.isCollection() ||
+                !"dip.world.Unit$Type".equals(unitTypeArraySerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        CollectionInformation unitTypeArrayInfo = (CollectionInformation)unitTypeArraySerInfo;
+
+        List<Unit.Type> unitTypeArray = new LinkedList<>();
+        for (SerializeInformation unitTypeSerInfo: unitTypeArrayInfo.getCollectionEntries()) {
+            unitTypeArray.add(extractUnitType(unitTypeSerInfo)
+                    .orElseThrow(() -> new JDipException("Expected the content of a unit type array not to be null")));
+        }
+        return Optional.of(unitTypeArray.toArray(new Unit.Type[unitTypeArray.size()]));
     }
 
     private Optional<Unit.Type> extractUnitType(SerializeInformation unitTypeSerInfo) throws JDipException {

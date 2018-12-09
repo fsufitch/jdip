@@ -240,6 +240,10 @@ public class Unit implements java.io.Serializable {
             return null;
         }// parse()
 
+        public String getInternalName() {
+            return internalName;
+        }
+
         /**
          * Get the full name of this type (e.g., 'Army')
          */
