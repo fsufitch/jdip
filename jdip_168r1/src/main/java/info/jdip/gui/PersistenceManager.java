@@ -44,6 +44,7 @@ import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -610,7 +611,7 @@ public class PersistenceManager {
     // reads in an old game file
     private World importGameFile(File file) throws Exception {
         WorldImporter wi = new WorldImporter();
-        World w = wi.importGame(file);
+        World w = wi.importGame(new FileInputStream(file));
 
         // check if variant is available; if not, inform user.
         World.VariantInfo vi = w.getVariantInfo();

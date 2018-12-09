@@ -27,9 +27,9 @@ import dip.world.metadata.PlayerMetadata;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,12 +82,12 @@ public class World implements Serializable {
     /**
      * Reads a World object from a file.
      */
-    public static World open(File file)
+    public static World open(InputStream inputStream)
             throws IOException {
         JSX.ObjectReader in = null;
 
         try {
-            GZIPInputStream gzi = new GZIPInputStream(new BufferedInputStream(new FileInputStream(file), 4096));
+            GZIPInputStream gzi = new GZIPInputStream(new BufferedInputStream(inputStream, 4096));
             in = new JSX.ObjectReader(gzi);
             return (World) in.readObject();
         } catch (IOException ioe) {

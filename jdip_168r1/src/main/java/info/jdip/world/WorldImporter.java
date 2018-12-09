@@ -19,10 +19,7 @@ package info.jdip.world;
 
 import info.jdip.JDipException;
 import info.jdip.gui.DefaultGUIGameSetup;
-import info.jdip.gui.order.GUIMove;
 import info.jdip.gui.order.GUIOrderFactory;
-import info.jdip.order.Move;
-import info.jdip.order.OrderFactory;
 import info.jdip.order.Orderable;
 import info.jdip.order.result.BouncedResult;
 import info.jdip.order.result.ConvoyPathResult;
@@ -35,17 +32,20 @@ import info.jdip.order.result.TimeResult;
 import info.jdip.world.Province.Adjacency;
 import info.jdip.world.metadata.GameMetadata;
 import info.jdip.world.metadata.PlayerMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -58,9 +58,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
-import javax.xml.stream.events.Attribute;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class is not thread safe.
@@ -90,7 +87,7 @@ public class WorldImporter {
     public WorldImporter() {
     }
 
-    public World importGame(File file) throws IOException, XMLStreamException, JDipException {
+    public World importGame(InputStream inputStream) throws IOException, XMLStreamException, JDipException {
         isRecognizedFile = false;
         world = null;
         objectStack = new LinkedList<>();
@@ -101,7 +98,7 @@ public class WorldImporter {
         orders = new LinkedHashMap<>();
         map = null;
 
-        GZIPInputStream gis = new GZIPInputStream(new BufferedInputStream(new FileInputStream(file), 8192));
+        GZIPInputStream gis = new GZIPInputStream(new BufferedInputStream(inputStream, 8192));
         XMLInputFactory inputFactory = XMLInputFactory.newFactory();
         XMLEventReader eventReader = inputFactory.createXMLEventReader(gis);
         boolean isDone = false;
@@ -180,10 +177,10 @@ public class WorldImporter {
             if (fieldAttr != null) {
                 enclosingObject.addAttribute(fieldAttr.getValue(), objectInformation);
             } else if (enclosingObject.isMap()) {
-                MapInformation map = (MapInformation)enclosingObject;
+                MapInformation map = (MapInformation) enclosingObject;
                 map.addValue(objectInformation);
             } else if (enclosingObject.isCollection()) {
-                CollectionInformation collection = (CollectionInformation)enclosingObject;
+                CollectionInformation collection = (CollectionInformation) enclosingObject;
                 collection.addValue(objectInformation);
             } else {
                 throw new JDipException("Object is neither field nor value of collection or map...");
@@ -203,10 +200,10 @@ public class WorldImporter {
             if (fieldAttr != null) {
                 enclosingObject.addAttribute(fieldAttr.getValue(), serializeInformation);
             } else if (enclosingObject.isMap()) {
-                MapInformation map = (MapInformation)enclosingObject;
+                MapInformation map = (MapInformation) enclosingObject;
                 map.addValue(serializeInformation);
             } else if (enclosingObject.isCollection()) {
-                CollectionInformation collection = (CollectionInformation)enclosingObject;
+                CollectionInformation collection = (CollectionInformation) enclosingObject;
                 collection.addValue(serializeInformation);
             } else {
                 throw new JDipException("Reference is neither field nor value of collection or map...");
@@ -228,10 +225,10 @@ public class WorldImporter {
             if (fieldAttr != null) {
                 enclosingObject.addAttribute(fieldAttr.getValue(), objectInformation);
             } else if (enclosingObject.isMap()) {
-                MapInformation map = (MapInformation)enclosingObject;
+                MapInformation map = (MapInformation) enclosingObject;
                 map.addValue(objectInformation);
             } else if (enclosingObject.isCollection()) {
-                CollectionInformation collection = (CollectionInformation)enclosingObject;
+                CollectionInformation collection = (CollectionInformation) enclosingObject;
                 collection.addValue(objectInformation);
             } else {
                 throw new JDipException("Collection is neither field nor value of collection or map...");
@@ -257,10 +254,10 @@ public class WorldImporter {
             if (fieldAttr != null) {
                 enclosingObject.addAttribute(fieldAttr.getValue(), primitiveInformation);
             } else if (enclosingObject.isMap()) {
-                MapInformation map = (MapInformation)enclosingObject;
+                MapInformation map = (MapInformation) enclosingObject;
                 map.addValue(primitiveInformation);
             } else if (enclosingObject.isCollection()) {
-                CollectionInformation collection = (CollectionInformation)enclosingObject;
+                CollectionInformation collection = (CollectionInformation) enclosingObject;
                 collection.addValue(primitiveInformation);
             } else {
                 throw new JDipException("Primitive is neither field nor value of collection or map...");
@@ -281,7 +278,7 @@ public class WorldImporter {
             if (fieldAttr != null) {
                 enclosingObject.addAttribute(fieldAttr.getValue(), primitiveInformation);
             } else if (objectStack.peekFirst().isCollection()) {
-                ((CollectionInformation)enclosingObject).addValue(null);
+                ((CollectionInformation) enclosingObject).addValue(null);
             }
         }
     }
@@ -291,7 +288,7 @@ public class WorldImporter {
                 !"dip.world.World".equals(worldSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation worldInfo = (ObjectInformation)worldSerInfo;
+        ObjectInformation worldInfo = (ObjectInformation) worldSerInfo;
         map = extractMap(worldInfo.getAttribute("map")).orElseThrow(
                 () -> new JDipException("Expected a world to contain a map"));
         World resultWorld = new World(map);
@@ -301,7 +298,7 @@ public class WorldImporter {
         nonTurnData.transferNonTurnData(resultWorld);
         List<TurnState> turnStates = extractSyncTurnStates(worldInfo.getAttribute("turnStates"))
                 .orElseThrow(() -> new JDipException("Found unexpected element in turn states"));
-        for (TurnState turnState: turnStates) {
+        for (TurnState turnState : turnStates) {
             resultWorld.setTurnState(turnState);
         }
         return Optional.of(resultWorld);
@@ -311,14 +308,14 @@ public class WorldImporter {
         if (mapSerInfo == null || !mapSerInfo.isObject() || !"dip.world.Map".equals(mapSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation mapInfo = (ObjectInformation)mapSerInfo;
+        ObjectInformation mapInfo = (ObjectInformation) mapSerInfo;
 
         if (map == null) {
             map = new info.jdip.world.Map(
                     extractPowers(mapInfo.getAttribute("powers"))
-                        .orElseThrow(() -> new JDipException("Expected the map to contain an array of powers")),
+                            .orElseThrow(() -> new JDipException("Expected the map to contain an array of powers")),
                     extractProvinces(mapInfo.getAttribute("provinces"))
-                        .orElseThrow(() -> new JDipException("Expected the map to contain an array of provinces"))
+                            .orElseThrow(() -> new JDipException("Expected the map to contain an array of provinces"))
             );
         }
         return Optional.of(map);
@@ -329,9 +326,9 @@ public class WorldImporter {
                 !"dip.world.Power".equals(powersSerInfo.getClassName())) {
             return Optional.empty();
         }
-        CollectionInformation powersInfo = (CollectionInformation)powersSerInfo;
+        CollectionInformation powersInfo = (CollectionInformation) powersSerInfo;
         List<Power> powersList = new LinkedList<>();
-        for (SerializeInformation powerSerInfo: powersInfo.getCollectionEntries()) {
+        for (SerializeInformation powerSerInfo : powersInfo.getCollectionEntries()) {
             Optional<Power> power = extractPower(powerSerInfo);
             if (power.isPresent()) {
                 powersList.add(power.get());
@@ -347,13 +344,13 @@ public class WorldImporter {
         }
         Power power = powers.get(powerSerInfo.getUuid());
         if (power == null) {
-            ObjectInformation powerInfo = (ObjectInformation)powerSerInfo;
+            ObjectInformation powerInfo = (ObjectInformation) powerSerInfo;
 
             power = new Power(extractStringArray(powerInfo.getAttribute("names")),
                     extractString(powerInfo.getAttribute("adjective"))
-                        .orElseThrow(() -> new JDipException("The adjective of a power may not be null")),
+                            .orElseThrow(() -> new JDipException("The adjective of a power may not be null")),
                     extractBoolean(powerInfo.getAttribute("isActive"))
-                        .orElseThrow(() -> new JDipException("The isActive flag of a power may not be null")));
+                            .orElseThrow(() -> new JDipException("The isActive flag of a power may not be null")));
             powers.put(powerInfo.getUuid(), power);
         }
         return Optional.of(power);
@@ -364,9 +361,9 @@ public class WorldImporter {
                 !"dip.world.Province".equals(provincesSerInfo.getClassName())) {
             return Optional.empty();
         }
-        CollectionInformation provincesInfo = (CollectionInformation)provincesSerInfo;
+        CollectionInformation provincesInfo = (CollectionInformation) provincesSerInfo;
         List<Province> provincesList = new LinkedList<>();
-        for (SerializeInformation provinceSerInfo: provincesInfo.getCollectionEntries()) {
+        for (SerializeInformation provinceSerInfo : provincesInfo.getCollectionEntries()) {
             Optional<Province> province = extractProvince(provinceSerInfo);
             if (province.isPresent()) {
                 provincesList.add(province.get());
@@ -382,9 +379,9 @@ public class WorldImporter {
         }
         Province province = provinces.get(provinceSerInfo.getUuid());
         if (province == null) {
-            ObjectInformation provinceInfo = (ObjectInformation)provinceSerInfo;
+            ObjectInformation provinceInfo = (ObjectInformation) provinceSerInfo;
             province = new Province(extractString(provinceInfo.getAttribute("fullName"))
-                        .orElseThrow(() -> new JDipException("The fullName of a province may not be null")),
+                    .orElseThrow(() -> new JDipException("The fullName of a province may not be null")),
                     extractStringArray(provinceInfo.getAttribute("shortNames")),
                     extractInt(provinceInfo.getAttribute("index"))
                             .orElseThrow(() -> new JDipException("Expected the province to contain an index")),
@@ -400,7 +397,7 @@ public class WorldImporter {
             }
 
             extractAdjacency(provinceInfo.getAttribute("adjacency"))
-                        .orElseThrow(() -> new JDipException("Expected a province to contain adjacency information"))
+                    .orElseThrow(() -> new JDipException("Expected a province to contain adjacency information"))
                     .transferToAdjacency(province.getAdjacency());
         }
         return Optional.of(province);
@@ -586,7 +583,7 @@ public class WorldImporter {
                 !"dip.world.Province$Adjacency".equals(adjacencySerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation adjacencyInfo = (ObjectInformation)adjacencySerInfo;
+        ObjectInformation adjacencyInfo = (ObjectInformation) adjacencySerInfo;
         return extractAdjacencyMap(adjacencyInfo.getAttribute("adjLoc"));
     }
 
@@ -596,14 +593,14 @@ public class WorldImporter {
                 !"java.util.HashMap".equals(adjacencyMapSerInfo.getClassName())) {
             return Optional.empty();
         }
-        MapInformation adjacencyMapInfo = (MapInformation)adjacencyMapSerInfo;
+        MapInformation adjacencyMapInfo = (MapInformation) adjacencyMapSerInfo;
         AdjacencyProxy adjacency = new AdjacencyProxy();
-        for (Map.Entry<SerializeInformation, SerializeInformation> adjacencyMapEntrySerInfo:
+        for (Map.Entry<SerializeInformation, SerializeInformation> adjacencyMapEntrySerInfo :
                 adjacencyMapInfo.getMap().entrySet()) {
             adjacency.addAdjacency(extractCoast(adjacencyMapEntrySerInfo.getKey())
-                        .orElseThrow(() -> new JDipException("Expected a known coast in adjacency")),
+                            .orElseThrow(() -> new JDipException("Expected a known coast in adjacency")),
                     extractLocations(adjacencyMapEntrySerInfo.getValue())
-                        .orElseThrow(() -> new JDipException("Expected alocation array in adjacency"))
+                            .orElseThrow(() -> new JDipException("Expected alocation array in adjacency"))
             );
         }
         return Optional.of(adjacency);
@@ -614,7 +611,7 @@ public class WorldImporter {
                 !"dip.world.Coast".equals(coastSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation coastInfo = (ObjectInformation)coastSerInfo;
+        ObjectInformation coastInfo = (ObjectInformation) coastSerInfo;
         return Optional.ofNullable(Coast.getCoast(extractInt(coastInfo.getAttribute("index"))
                 .orElseThrow(() -> new JDipException("Expected the coast to contain an index"))));
     }
@@ -624,9 +621,9 @@ public class WorldImporter {
                 !"dip.world.Location".equals(locationsSerInfo.getClassName())) {
             return Optional.empty();
         }
-        CollectionInformation locationsInfo = (CollectionInformation)locationsSerInfo;
+        CollectionInformation locationsInfo = (CollectionInformation) locationsSerInfo;
         List<Location> locations = new LinkedList<>();
-        for (SerializeInformation locationSerInfo: locationsInfo.getCollectionEntries()) {
+        for (SerializeInformation locationSerInfo : locationsInfo.getCollectionEntries()) {
             Optional<Location> location = extractLocation(locationSerInfo);
             if (location.isPresent()) {
                 locations.add(location.get());
@@ -636,16 +633,16 @@ public class WorldImporter {
     }
 
     private Optional<Location> extractLocation(SerializeInformation locationSerInfo) throws JDipException {
-        if (locationSerInfo == null || !locationSerInfo.isObject()||
+        if (locationSerInfo == null || !locationSerInfo.isObject() ||
                 !"dip.world.Location".equals(locationSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation locationInfo = (ObjectInformation)locationSerInfo;
+        ObjectInformation locationInfo = (ObjectInformation) locationSerInfo;
         return Optional.of(new Location(
                 extractProvince(locationInfo.getAttribute("province"))
-                    .orElseThrow(() -> new JDipException("Expected a location to contain a province")),
+                        .orElseThrow(() -> new JDipException("Expected a location to contain a province")),
                 extractCoast(locationInfo.getAttribute("coast"))
-                    .orElseThrow(() -> new JDipException("Expected a location to contain a coast"))
+                        .orElseThrow(() -> new JDipException("Expected a location to contain a coast"))
         ));
     }
 
@@ -655,10 +652,10 @@ public class WorldImporter {
                 !"java.util.HashMap".equals(nonTurnDataSerInfo.getClassName())) {
             return Optional.empty();
         }
-        MapInformation nonTurnDataInfo = (MapInformation)nonTurnDataSerInfo;
+        MapInformation nonTurnDataInfo = (MapInformation) nonTurnDataSerInfo;
 
         NonTurnDataProxy nonTurnDataProxy = new NonTurnDataProxy();
-        for (Map.Entry<SerializeInformation, SerializeInformation> nonTurnData: nonTurnDataInfo.getMap().entrySet()) {
+        for (Map.Entry<SerializeInformation, SerializeInformation> nonTurnData : nonTurnDataInfo.getMap().entrySet()) {
             SerializeInformation keySerInfo = nonTurnData.getKey();
             if (keySerInfo.isObject()) {
                 if ("dip.world.Power".equals(keySerInfo.getClassName())) {
@@ -673,7 +670,7 @@ public class WorldImporter {
                 }
             } else if (keySerInfo.isPrimitive()) {
                 if ("string".equals(keySerInfo.getClassName())) {
-                    PrimitiveInformation keyInfo = (PrimitiveInformation)keySerInfo;
+                    PrimitiveInformation keyInfo = (PrimitiveInformation) keySerInfo;
                     switch (keyInfo.getValue()) {
                         case "_variant_info_":
                             nonTurnDataProxy.setVariantInfo(extractVariantInfo(nonTurnData.getValue())
@@ -711,11 +708,11 @@ public class WorldImporter {
 
     private Optional<PlayerMetadata> extractPlayerMetadata(SerializeInformation playerMetadataSerInfo)
             throws JDipException {
-        if (playerMetadataSerInfo == null || !playerMetadataSerInfo.isObject()||
+        if (playerMetadataSerInfo == null || !playerMetadataSerInfo.isObject() ||
                 !"dip.world.metadata.PlayerMetadata".equals(playerMetadataSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation playerMetadataInfo = (ObjectInformation)playerMetadataSerInfo;
+        ObjectInformation playerMetadataInfo = (ObjectInformation) playerMetadataSerInfo;
 
         PlayerMetadata playerMetadata = new PlayerMetadata();
         playerMetadata.setName(extractString(playerMetadataInfo.getAttribute("name"))
@@ -734,7 +731,7 @@ public class WorldImporter {
                 !"dip.world.World$VariantInfo".equals(variantInfoSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation variantInfoInfo = (ObjectInformation)variantInfoSerInfo;
+        ObjectInformation variantInfoInfo = (ObjectInformation) variantInfoSerInfo;
 
         World.VariantInfo variantInfo = new World.VariantInfo();
         variantInfo.setVariantName(extractString(variantInfoInfo.getAttribute("variantName"))
@@ -758,19 +755,19 @@ public class WorldImporter {
                 !"dip.world.RuleOptions".equals(ruleOptionsSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation ruleOptionsInfo = (ObjectInformation)ruleOptionsSerInfo;
+        ObjectInformation ruleOptionsInfo = (ObjectInformation) ruleOptionsSerInfo;
         return extractOptionMap(ruleOptionsInfo.getAttribute("optionMap"));
     }
 
     private Optional<RuleOptions> extractOptionMap(SerializeInformation optionMapSerInfo) throws JDipException {
-        if (optionMapSerInfo == null || !optionMapSerInfo.isMap()||
+        if (optionMapSerInfo == null || !optionMapSerInfo.isMap() ||
                 !"java.util.HashMap".equals(optionMapSerInfo.getClassName())) {
             return Optional.empty();
         }
-        MapInformation optionMapInfo = (MapInformation)optionMapSerInfo;
+        MapInformation optionMapInfo = (MapInformation) optionMapSerInfo;
 
         RuleOptions ruleOptions = new RuleOptions();
-        for (Map.Entry<SerializeInformation, SerializeInformation> optionSerInfo: optionMapInfo.getMap().entrySet()) {
+        for (Map.Entry<SerializeInformation, SerializeInformation> optionSerInfo : optionMapInfo.getMap().entrySet()) {
             RuleOptions.Option option = extractOption(optionSerInfo.getKey())
                     .orElseThrow(() -> new JDipException("Expected the option map to contain an option as key"));
             RuleOptions.OptionValue optionValue = extractOptionValue(optionSerInfo.getValue()).orElseThrow(
@@ -785,7 +782,7 @@ public class WorldImporter {
                 !"dip.world.RuleOptions$Option".equals(optionSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation optionInfo = (ObjectInformation)optionSerInfo;
+        ObjectInformation optionInfo = (ObjectInformation) optionSerInfo;
 
         String optionName = extractString(optionInfo.getAttribute("name"))
                 .orElseThrow(() -> new JDipException("Expected an option to contain a name"));
@@ -802,10 +799,10 @@ public class WorldImporter {
                 !"dip.world.RuleOptions$OptionValue".equals(optionValuesSerInfo.getClassName())) {
             return Optional.empty();
         }
-        CollectionInformation optionValuesInfo = (CollectionInformation)optionValuesSerInfo;
+        CollectionInformation optionValuesInfo = (CollectionInformation) optionValuesSerInfo;
 
         List<RuleOptions.OptionValue> optionValues = new LinkedList<>();
-        for (SerializeInformation optionValueSerInfo: optionValuesInfo.getCollectionEntries()) {
+        for (SerializeInformation optionValueSerInfo : optionValuesInfo.getCollectionEntries()) {
             Optional<RuleOptions.OptionValue> optionValue = extractOptionValue(optionValueSerInfo);
             if (optionValue.isPresent()) {
                 optionValues.add(optionValue.get());
@@ -820,7 +817,7 @@ public class WorldImporter {
                 !"dip.world.RuleOptions$OptionValue".equals(optionValueSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation optionValueInfo = (ObjectInformation)optionValueSerInfo;
+        ObjectInformation optionValueInfo = (ObjectInformation) optionValueSerInfo;
 
         return Optional.of(new RuleOptions.OptionValue(extractString(optionValueInfo.getAttribute("name"))
                 .orElseThrow(() -> new JDipException("Expected an option value to contain a name"))));
@@ -832,7 +829,7 @@ public class WorldImporter {
                 !"dip.world.VictoryConditions".equals(victoryConditionsSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation victoryConditionsInfo = (ObjectInformation)victoryConditionsSerInfo;
+        ObjectInformation victoryConditionsInfo = (ObjectInformation) victoryConditionsSerInfo;
 
         int numSCForVictory = extractInt(victoryConditionsInfo.getAttribute("numSCForVictory"))
                 .orElseThrow(() -> new JDipException("Expected the victory conditions to contain numSCForVictory"));
@@ -852,7 +849,7 @@ public class WorldImporter {
                 !"dip.world.metadata.GameMetadata".equals(gameMetadataSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation gameMetadataInfo = (ObjectInformation)gameMetadataSerInfo;
+        ObjectInformation gameMetadataInfo = (ObjectInformation) gameMetadataSerInfo;
 
         GameMetadata gameMetadata = new GameMetadata();
         gameMetadata.setComment(extractString(gameMetadataInfo.getAttribute("comment"))
@@ -884,7 +881,7 @@ public class WorldImporter {
                 !"java.util.Collections$SynchronizedSortedMap".equals(turnStatesSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation turnStatesInfo = (ObjectInformation)turnStatesSerInfo;
+        ObjectInformation turnStatesInfo = (ObjectInformation) turnStatesSerInfo;
         return extractTurnStates(turnStatesInfo.getAttribute("m"));
     }
 
@@ -893,10 +890,10 @@ public class WorldImporter {
         if (turnStatesSerInfo == null || !turnStatesSerInfo.isMap()) {
             return Optional.empty();
         }
-        MapInformation turnStatesInfo = (MapInformation)turnStatesSerInfo;
+        MapInformation turnStatesInfo = (MapInformation) turnStatesSerInfo;
 
         List<TurnState> turnStates = new LinkedList<>();
-        for (SerializeInformation turnStateSerInfo: turnStatesInfo.getMap().values()) {
+        for (SerializeInformation turnStateSerInfo : turnStatesInfo.getMap().values()) {
             turnStates.add(extractTurnState(turnStateSerInfo)
                     .orElseThrow(() -> new JDipException(
                             "Expected the values of the turn states map to be a TurnState")));
@@ -909,14 +906,14 @@ public class WorldImporter {
                 !"dip.world.TurnState".equals(turnStateSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation turnStateInfo = (ObjectInformation)turnStateSerInfo;
+        ObjectInformation turnStateInfo = (ObjectInformation) turnStateSerInfo;
 
         TurnState turnState = new TurnState(extractPhase(turnStateInfo.getAttribute("phase"))
                 .orElseThrow(() -> new JDipException("Expected a turn state to contain a phase")));
 
         Map<Power, List<Orderable>> orderMap = extractOrderMap(turnStateInfo.getAttribute("orderMap"))
                 .orElseThrow(() -> new JDipException("Expected a turn state to contain an orderMap"));
-        for (Map.Entry<Power, List<Orderable>> orderMapEntry: orderMap.entrySet()) {
+        for (Map.Entry<Power, List<Orderable>> orderMapEntry : orderMap.entrySet()) {
             turnState.setOrders(orderMapEntry.getKey(), orderMapEntry.getValue());
         }
         turnState.setResultList(extractResultList(turnStateInfo.getAttribute("resultList"))
@@ -939,7 +936,7 @@ public class WorldImporter {
                 !"dip.world.Phase".equals(phaseSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation phaseInfo = (ObjectInformation)phaseSerInfo;
+        ObjectInformation phaseInfo = (ObjectInformation) phaseSerInfo;
 
         Phase.SeasonType seasonType = extractSeasonType(phaseInfo.getAttribute("seasonType"))
                 .orElseThrow(() -> new JDipException("Expected a phase to contain a seasonType"));
@@ -972,7 +969,7 @@ public class WorldImporter {
                 !"dip.world.Phase$SeasonType".equals(seasonTypeSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation seasonTypeInfo = (ObjectInformation)seasonTypeSerInfo;
+        ObjectInformation seasonTypeInfo = (ObjectInformation) seasonTypeSerInfo;
 
         int seasonTypePosition = extractInt(seasonTypeInfo.getAttribute("position"))
                 .orElseThrow(() -> new JDipException("Expected a season type to contain a position"));
@@ -990,7 +987,7 @@ public class WorldImporter {
                 !"dip.world.Phase$YearType".equals(yearTypeSerInfo.getClassName())) {
             throw new JDipException("Expected a phase to contain an object of type dip.world.Phase$YearType");
         }
-        ObjectInformation yearTypeInfo = (ObjectInformation)yearTypeSerInfo;
+        ObjectInformation yearTypeInfo = (ObjectInformation) yearTypeSerInfo;
 
         int yearTypeYear = extractInt(yearTypeInfo.getAttribute("year"))
                 .orElseThrow(() -> new JDipException("Expected a year type to contain a year"));
@@ -1019,7 +1016,7 @@ public class WorldImporter {
                 !"dip.world.Phase$PhaseType".equals(phaseTypeSerInfo.getClassName())) {
             throw new JDipException("Expected a phase to contain an object of type dip.world.Phase$PhaseType");
         }
-        ObjectInformation phaseTypeInfo = (ObjectInformation)phaseTypeSerInfo;
+        ObjectInformation phaseTypeInfo = (ObjectInformation) phaseTypeSerInfo;
 
         return Optional.of(Phase.PhaseType.parse(extractString(phaseTypeInfo.getAttribute("constName"))
                 .orElseThrow(() -> new JDipException("Expected a phase type to contain a constName"))));
@@ -1031,10 +1028,10 @@ public class WorldImporter {
                 !"java.util.HashMap".equals(orderMapSerInfo.getClassName())) {
             return Optional.empty();
         }
-        MapInformation orderMapInfo = (MapInformation)orderMapSerInfo;
+        MapInformation orderMapInfo = (MapInformation) orderMapSerInfo;
 
         Map<Power, List<Orderable>> orderMap = new LinkedHashMap<>();
-        for (Map.Entry<SerializeInformation, SerializeInformation> orderMapEntry: orderMapInfo.getMap().entrySet()) {
+        for (Map.Entry<SerializeInformation, SerializeInformation> orderMapEntry : orderMapInfo.getMap().entrySet()) {
             Power orderMapKey = extractPower(orderMapEntry.getKey())
                     .orElseThrow(() -> new JDipException("Expected the key of an orderMap to be a Power"));
             List<Orderable> orderMapValue = extractOrderList(orderMapEntry.getValue())
@@ -1050,10 +1047,10 @@ public class WorldImporter {
                 !"java.util.ArrayList".equals(orderListSerInfo.getClassName())) {
             return Optional.empty();
         }
-        CollectionInformation orderListInfo = (CollectionInformation)orderListSerInfo;
+        CollectionInformation orderListInfo = (CollectionInformation) orderListSerInfo;
 
         List<Orderable> ordersInfo = new LinkedList<>();
-        for (SerializeInformation orderSerInfo: orderListInfo.getCollectionEntries()) {
+        for (SerializeInformation orderSerInfo : orderListInfo.getCollectionEntries()) {
             ordersInfo.add(extractOrder(orderSerInfo)
                     .orElseThrow(() -> new JDipException("Expected the orders list to contain orders")));
         }
@@ -1064,7 +1061,7 @@ public class WorldImporter {
         if (orderSerInfo == null || !orderSerInfo.isObject()) {
             return Optional.empty();
         }
-        ObjectInformation orderInfo = (ObjectInformation)orderSerInfo;
+        ObjectInformation orderInfo = (ObjectInformation) orderSerInfo;
 
         Orderable order = orders.get(orderInfo.getUuid());
         if (order == null) {
@@ -1241,7 +1238,7 @@ public class WorldImporter {
                 !"dip.world.Unit$Type".equals(unitTypeSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation unitTypeInfo = (ObjectInformation)unitTypeSerInfo;
+        ObjectInformation unitTypeInfo = (ObjectInformation) unitTypeSerInfo;
 
         return Optional.of(Unit.Type.parse(extractString(unitTypeInfo.getAttribute("internalName"))
                 .orElseThrow(() -> new JDipException("Expected an unit type to contain an internal name"))));
@@ -1253,10 +1250,10 @@ public class WorldImporter {
                 !"java.util.ArrayList".equals(resultListSerInfo.getClassName())) {
             return Optional.empty();
         }
-        CollectionInformation resultListInfo = (CollectionInformation)resultListSerInfo;
+        CollectionInformation resultListInfo = (CollectionInformation) resultListSerInfo;
 
         List<Result> results = new LinkedList<>();
-        for (SerializeInformation resultListEntrySerInfo: resultListInfo.getCollectionEntries()) {
+        for (SerializeInformation resultListEntrySerInfo : resultListInfo.getCollectionEntries()) {
             results.add(extractResult(resultListEntrySerInfo)
                     .orElseThrow(() -> new JDipException("Expected a result list to contain a result")));
         }
@@ -1268,7 +1265,7 @@ public class WorldImporter {
         if (resultSerInfo == null || !resultSerInfo.isObject()) {
             return Optional.empty();
         }
-        ObjectInformation resultInfo = (ObjectInformation)resultSerInfo;
+        ObjectInformation resultInfo = (ObjectInformation) resultSerInfo;
 
         Power power = extractPower(resultInfo.getAttribute("power")).orElse(null);
         String message = extractString(resultInfo.getAttribute("message")).orElse(null);
@@ -1297,20 +1294,20 @@ public class WorldImporter {
                 break;
             case "dip.order.result.ConvoyPathResult":
                 result = Optional.of(new ConvoyPathResult(extractOrder(resultInfo.getAttribute("order"))
-                            .orElseThrow(() -> new JDipException("Expected a convoy path result to contain an order")),
+                        .orElseThrow(() -> new JDipException("Expected a convoy path result to contain an order")),
                         extractProvinces(resultInfo.getAttribute("convoyPath"))
-                            .orElseThrow(() -> new JDipException(
-                                "Expected a convoy path result to contain a convoy path"))
+                                .orElseThrow(() -> new JDipException(
+                                        "Expected a convoy path result to contain a convoy path"))
                 ));
                 break;
             case "dip.order.result.DependentMoveFailedResult":
                 result = Optional.of(new DependentMoveFailedResult(
                         extractOrder(resultInfo.getAttribute("order"))
-                            .orElseThrow(() -> new JDipException(
-                                "Expected a dependent move failed result to contain an order")),
+                                .orElseThrow(() -> new JDipException(
+                                        "Expected a dependent move failed result to contain an order")),
                         extractOrder(resultInfo.getAttribute("dependentOrder"))
-                            .orElseThrow(() -> new JDipException(
-                                    "Expected a dependent move failed result to contain a dependentOrder"))
+                                .orElseThrow(() -> new JDipException(
+                                        "Expected a dependent move failed result to contain a dependentOrder"))
                 ));
                 break;
             case "dip.order.result.DislodgedResult":
@@ -1320,8 +1317,8 @@ public class WorldImporter {
                 result = Optional.of(new SubstitutedResult(
                         extractOrder(resultInfo.getAttribute("order")).orElse(null),
                         extractOrder(resultInfo.getAttribute("newOrder"))
-                            .orElseThrow(() -> new JDipException(
-                                "Expected a substituted result to contain a new order")),
+                                .orElseThrow(() -> new JDipException(
+                                        "Expected a substituted result to contain a new order")),
                         message));
                 break;
             default:
@@ -1335,7 +1332,7 @@ public class WorldImporter {
                 !"dip.order.result.BouncedResult".equals(bouncedResultSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation bouncedResultInfo = (ObjectInformation)bouncedResultSerInfo;
+        ObjectInformation bouncedResultInfo = (ObjectInformation) bouncedResultSerInfo;
 
         BouncedResult result = new BouncedResult(extractOrder(bouncedResultInfo.getAttribute("order"))
                 .orElseThrow(() -> new JDipException("Expected a bounced result to contain an order")));
@@ -1354,11 +1351,11 @@ public class WorldImporter {
                 !"dip.order.result.DislodgedResult".equals(dislodgedResultSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation dislodgedResultInfo = (ObjectInformation)dislodgedResultSerInfo;
+        ObjectInformation dislodgedResultInfo = (ObjectInformation) dislodgedResultSerInfo;
 
         DislodgedResult result = new DislodgedResult(
                 extractOrder(dislodgedResultInfo.getAttribute("order"))
-                    .orElseThrow(() -> new JDipException("Expected a dislodged result to contain an order")),
+                        .orElseThrow(() -> new JDipException("Expected a dislodged result to contain an order")),
                 extractString(dislodgedResultInfo.getAttribute("message")).orElse(null),
                 extractLocations(dislodgedResultInfo.getAttribute("retreatLocations")).orElse(null)
         );
@@ -1377,7 +1374,7 @@ public class WorldImporter {
                 !"dip.order.result.OrderResult$ResultType".equals(resultTypeSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation resultTypeInfo = (ObjectInformation)resultTypeSerInfo;
+        ObjectInformation resultTypeInfo = (ObjectInformation) resultTypeSerInfo;
 
         int ordering = extractInt(resultTypeInfo.getAttribute("ordering"))
                 .orElseThrow(() -> new JDipException("Expected a result type to contain an ordering"));
@@ -1403,11 +1400,11 @@ public class WorldImporter {
 
     private Optional<Position> extractPosition(SerializeInformation positionSerInfo)
             throws JDipException {
-        if (positionSerInfo == null || !positionSerInfo.isObject()||
+        if (positionSerInfo == null || !positionSerInfo.isObject() ||
                 !"dip.world.Position".equals(positionSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation positionInfo = (ObjectInformation)positionSerInfo;
+        ObjectInformation positionInfo = (ObjectInformation) positionSerInfo;
 
         info.jdip.world.Map positionMap = extractMap(positionInfo.getAttribute("map"))
                 .orElseThrow(() -> new JDipException("Expected a position to contain a map"));
@@ -1420,12 +1417,12 @@ public class WorldImporter {
                 !"dip.world.Position$ProvinceData".equals(provArraySerInfo.getClassName())) {
             throw new JDipException("Expected a position to contain a provArray");
         }
-        CollectionInformation provArrayInfo = (CollectionInformation)provArraySerInfo;
+        CollectionInformation provArrayInfo = (CollectionInformation) provArraySerInfo;
         for (int i = 0; i < provArrayInfo.getCollectionEntries().size(); i++) {
             SerializeInformation provinceDataSerInfo = provArrayInfo.getCollectionEntries().get(i);
             if (provinceDataSerInfo != null && provinceDataSerInfo.isObject() &&
                     "dip.world.Position$ProvinceData".equals(provinceDataSerInfo.getClassName())) {
-                ObjectInformation provinceDataInfo = (ObjectInformation)provinceDataSerInfo;
+                ObjectInformation provinceDataInfo = (ObjectInformation) provinceDataSerInfo;
                 Province province = positionMap.getProvinces()[i];
 
                 Optional<Unit> unit = extractUnit(provinceDataInfo.getAttribute("unit"));
@@ -1460,8 +1457,8 @@ public class WorldImporter {
                 !"java.util.HashMap".equals(powerMapSerInfo.getClassName())) {
             throw new JDipException("Expected a position to contain a power map");
         }
-        MapInformation powerMapInfo = (MapInformation)powerMapSerInfo;
-        for (Map.Entry<SerializeInformation, SerializeInformation> powerMapEntry: powerMapInfo.getMap().entrySet()) {
+        MapInformation powerMapInfo = (MapInformation) powerMapSerInfo;
+        for (Map.Entry<SerializeInformation, SerializeInformation> powerMapEntry : powerMapInfo.getMap().entrySet()) {
             Power power = extractPower(powerMapEntry.getKey())
                     .orElseThrow(() -> new JDipException("Expected the key of a power map to be a power"));
             SerializeInformation powerDataSerInfo = powerMapEntry.getValue();
@@ -1469,7 +1466,7 @@ public class WorldImporter {
                     !"dip.world.Position$PowerData".equals(powerDataSerInfo.getClassName())) {
                 throw new JDipException("Expected the value of a power map to be a power data");
             }
-            ObjectInformation powerDataInfo = (ObjectInformation)powerDataSerInfo;
+            ObjectInformation powerDataInfo = (ObjectInformation) powerDataSerInfo;
             Boolean isEliminated = extractBoolean(powerDataInfo.getAttribute("isEliminated"))
                     .orElseThrow(() -> new JDipException("Expected a power data to contain a isEliminated flag"));
             position.setEliminated(power, isEliminated);
@@ -1482,12 +1479,12 @@ public class WorldImporter {
         if (unitSerInfo == null || !unitSerInfo.isObject() || !"dip.world.Unit".equals(unitSerInfo.getClassName())) {
             return Optional.empty();
         }
-        ObjectInformation unitInfo = (ObjectInformation)unitSerInfo;
+        ObjectInformation unitInfo = (ObjectInformation) unitSerInfo;
 
         Unit unit = new Unit(extractPower(unitInfo.getAttribute("owner"))
-                    .orElseThrow(() -> new JDipException("Expected a unit to contain an owner")),
+                .orElseThrow(() -> new JDipException("Expected a unit to contain an owner")),
                 extractUnitType(unitInfo.getAttribute("type"))
-                    .orElseThrow(() -> new JDipException("Expected a unit to contain a type")));
+                        .orElseThrow(() -> new JDipException("Expected a unit to contain a type")));
         unit.setCoast(extractCoast(unitInfo.getAttribute("coast"))
                 .orElseThrow(() -> new JDipException("Expected a unit to contain a coast")));
         return Optional.of(unit);
@@ -1498,10 +1495,10 @@ public class WorldImporter {
                 !"java.lang.String".equals(stringArraySerInfo.getClassName())) {
             throw new JDipException("Expected the string array to be a collection of type java.lang.String");
         }
-        CollectionInformation stringArrayInfo = (CollectionInformation)stringArraySerInfo;
+        CollectionInformation stringArrayInfo = (CollectionInformation) stringArraySerInfo;
 
         List<String> stringArray = new LinkedList<>();
-        for (SerializeInformation stringSerInfo: stringArrayInfo.getCollectionEntries()) {
+        for (SerializeInformation stringSerInfo : stringArrayInfo.getCollectionEntries()) {
             stringArray.add(extractString(stringSerInfo)
                     .orElseThrow(() -> new JDipException("Expected the content of a string array not to be null")));
         }
@@ -1515,7 +1512,7 @@ public class WorldImporter {
         if ("null".equals(stringSerInfo.getClassName())) {
             return Optional.empty();
         } else {
-            PrimitiveInformation stringInfo = (PrimitiveInformation)stringSerInfo;
+            PrimitiveInformation stringInfo = (PrimitiveInformation) stringSerInfo;
             return Optional.of(stringInfo.getValue());
         }
     }
@@ -1527,31 +1524,31 @@ public class WorldImporter {
         if ("null".equals(floatSerInfo.getClassName())) {
             return Optional.empty();
         } else {
-            PrimitiveInformation floatInfo = (PrimitiveInformation)floatSerInfo;
+            PrimitiveInformation floatInfo = (PrimitiveInformation) floatSerInfo;
             return Optional.of(Float.valueOf(floatInfo.getValue()));
         }
     }
 
     private Optional<Integer> extractInt(SerializeInformation intSerInfo) throws JDipException {
-        if (intSerInfo == null || !intSerInfo.isPrimitive() || ! "int".equals(intSerInfo.getClassName())) {
+        if (intSerInfo == null || !intSerInfo.isPrimitive() || !"int".equals(intSerInfo.getClassName())) {
             Optional.empty();
         }
-        return Optional.of(Integer.valueOf(((PrimitiveInformation)intSerInfo).getValue()));
+        return Optional.of(Integer.valueOf(((PrimitiveInformation) intSerInfo).getValue()));
     }
 
     private Optional<Long> extractLong(SerializeInformation longSerInfo) throws JDipException {
-        if (longSerInfo == null || !longSerInfo.isPrimitive() || ! "long".equals(longSerInfo.getClassName())) {
+        if (longSerInfo == null || !longSerInfo.isPrimitive() || !"long".equals(longSerInfo.getClassName())) {
             Optional.empty();
         }
-        return Optional.of(Long.valueOf(((PrimitiveInformation)longSerInfo).getValue()));
+        return Optional.of(Long.valueOf(((PrimitiveInformation) longSerInfo).getValue()));
     }
 
     private Optional<Boolean> extractBoolean(SerializeInformation booleanSerInfo) throws JDipException {
         if (booleanSerInfo == null || !booleanSerInfo.isPrimitive() ||
-                ! "boolean".equals(booleanSerInfo.getClassName())) {
+                !"boolean".equals(booleanSerInfo.getClassName())) {
             return Optional.empty();
         }
-        return Optional.of(Boolean.valueOf(((PrimitiveInformation)booleanSerInfo).getValue()));
+        return Optional.of(Boolean.valueOf(((PrimitiveInformation) booleanSerInfo).getValue()));
     }
 
     private Optional<URI> extractURI(SerializeInformation uriSerInfo) throws JDipException {
@@ -1565,7 +1562,7 @@ public class WorldImporter {
             throw new JDipException("Expected an URI to be an object of class java.net.URI");
         }
         URI result;
-        ObjectInformation uriInfo = (ObjectInformation)uriSerInfo;
+        ObjectInformation uriInfo = (ObjectInformation) uriSerInfo;
         SerializeInformation innerUriSerInfo = uriInfo.getAttribute("string");
         if (innerUriSerInfo == null || !innerUriSerInfo.isPrimitive() ||
                 !"string".equals(innerUriSerInfo.getClassName())) {
@@ -1573,7 +1570,7 @@ public class WorldImporter {
             result = null;
         } else {
             try {
-                result = new URI(((PrimitiveInformation)innerUriSerInfo).getValue());
+                result = new URI(((PrimitiveInformation) innerUriSerInfo).getValue());
             } catch (URISyntaxException usex) {
                 result = null;
             }
@@ -1680,7 +1677,9 @@ public class WorldImporter {
 
         private SerializeInformation key;
 
-        /** This contains the number of int values that can be ignored (meta information of the map). */
+        /**
+         * This contains the number of int values that can be ignored (meta information of the map).
+         */
         private int ignorableMetaData;
 
         public MapInformation(String className) throws JDipException {
@@ -1779,19 +1778,29 @@ public class WorldImporter {
 
     private static class NonTurnDataProxy {
 
-        /** The player metadata per power. */
+        /**
+         * The player metadata per power.
+         */
         private Map<Power, PlayerMetadata> playerMetadata;
 
-        /** The victory conditions. */
+        /**
+         * The victory conditions.
+         */
         private VictoryConditions victoryConditions;
 
-        /** The game metadata. */
+        /**
+         * The game metadata.
+         */
         private GameMetadata gameMetadata;
 
-        /** The game setup. */
+        /**
+         * The game setup.
+         */
         private GameSetup gameSetup;
 
-        /** The variant info. */
+        /**
+         * The variant info.
+         */
         private World.VariantInfo variantInfo;
 
         public NonTurnDataProxy() {
@@ -1819,7 +1828,7 @@ public class WorldImporter {
         }
 
         public void transferNonTurnData(World world) {
-            for (Map.Entry<Power, PlayerMetadata> playerData: playerMetadata.entrySet()) {
+            for (Map.Entry<Power, PlayerMetadata> playerData : playerMetadata.entrySet()) {
                 world.setPlayerMetadata(playerData.getKey(), playerData.getValue());
             }
             world.setVictoryConditions(victoryConditions);

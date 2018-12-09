@@ -1,17 +1,17 @@
 package info.jdip.test.loading;
 
-import dip.world.World;
-import dip.world.variant.VariantManager;
-import dip.world.variant.data.Variant;
+import info.jdip.world.World;
+import info.jdip.world.WorldImporter;
+import info.jdip.world.variant.VariantManager;
+import info.jdip.world.variant.data.Variant;
 
 import java.io.InputStream;
 
-public class LegacyWorldLoader {
+public class NewWorldLoader {
 
-    // reads in a game file
-    static public World readGameFile(InputStream inputStream)
-            throws Exception {
-        World w = dip.world.World.open(inputStream);
+    static public World importGameFile(InputStream inputStream) throws Exception {
+        WorldImporter wi = new WorldImporter();
+        World w = wi.importGame(inputStream);
 
         // check if variant is available; if not, inform user.
         World.VariantInfo vi = w.getVariantInfo();
@@ -23,11 +23,11 @@ public class LegacyWorldLoader {
                 throw new RuntimeException("No variant");
             } else {
                 // try most current version: HOWEVER, warn the user that it might not work
-//                ErrorDialog.displayVariantVersionMismatch(clientFrame, vi, variant.getVersion());
                 vi.setVariantVersion(variant.getVersion());
             }
         }
 
         return w;
     }// readGameFile()
+
 }
