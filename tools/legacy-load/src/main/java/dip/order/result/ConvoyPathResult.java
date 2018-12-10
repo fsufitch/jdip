@@ -21,98 +21,13 @@
 //
 package dip.order.result;
 
-import dip.order.OrderFormat;
-import dip.order.OrderFormatOptions;
-import dip.order.Orderable;
 import dip.world.Province;
 
-import java.util.List;
-
-/**
- * An OrderResult that contains the path taken by a successfully
- * convoyed Move. It has the result type of CONVOY_PATH_TAKEN.
- */
 public class ConvoyPathResult extends OrderResult {
-    // i18n
     private static final String KEY_MESSAGE = "ConvoyPathResult.message";
     private static final String KEY_ARROW = "ConvoyPathResult.arrow";
 
-    // instance fields
     private Province[] convoyPath = null;
 
 
-    /**
-     * Create a ConvoyPathResult
-     */
-    public ConvoyPathResult(Orderable order, List<Province> path) {
-        this(order, path.toArray(new Province[path.size()]));
-    }// ConvoyPathResult()
-
-    /**
-     * Create a ConvoyPathResult
-     */
-    public ConvoyPathResult(Orderable order, Province[] convoyPath) {
-        super();
-        if (convoyPath == null || convoyPath.length < 3) {
-            throw new IllegalArgumentException("bad path (null or length < 3)");
-        }
-
-        this.power = order.getPower();
-        this.message = null;
-        this.order = order;
-        this.resultType = ResultType.CONVOY_PATH_TAKEN;
-        this.convoyPath = convoyPath;
-    }// ConvoyPathResult()
-
-
-    /**
-     * Gets the Convoy Path; path includes source and destination provinces.
-     */
-    public Province[] getConvoyPath() {
-        return convoyPath;
-    }// getConvoyPath()
-
-
-    /**
-     * Creates an appropriate internationalized text message given the
-     * convoy path.
-     */
-    public String getMessage(OrderFormatOptions ofo) {
-		/*
-		arguments:
-			{0}	: convoy path taken.
-		*/
-
-        // create path list
-        StringBuilder sb = new StringBuilder(128);
-
-        sb.append(OrderFormat.format(ofo, convoyPath[0]));
-        for (int i = 1; i < convoyPath.length; i++) {
-            sb.append((KEY_ARROW));
-            sb.append(OrderFormat.format(ofo, convoyPath[i]));
-        }
-
-        // return formatted message
-        return KEY_MESSAGE+ sb.toString();
-    }// getMessage()
-
-
-    /**
-     * Primarily for debugging.
-     */
-    public String toString() {
-        StringBuilder sb = new StringBuilder(256);
-        sb.append(super.toString());
-
-        // add convoy path
-        sb.append(" convoy path: ");
-        sb.append(convoyPath[0].getShortName());
-        for (int i = 1; i < convoyPath.length; i++) {
-            sb.append("-");
-            sb.append(convoyPath[i].getShortName());
-        }
-
-        return sb.toString();
-    }// toString()
-
-}// class ConvoyPathResult
+}

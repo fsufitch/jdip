@@ -22,74 +22,8 @@
 package dip.order.result;
 
 
-import dip.world.Power;
-
-import java.util.Date;
-
-/**
- * TimeResult<p>
- * Timestamp result, with an optional message.
- * Time is always in UTC.
- */
 public class TimeResult extends Result {
-    // instance variables
-    private final long timeStamp;    // milliseconds since midnight, January 1, 1970 UTC.
+    private long timeStamp;    // milliseconds since midnight, January 1, 1970 UTC.
 
 
-    /**
-     * A TimeStamped result, applicable to a particular power.
-     * <p>
-     * Note that resource must correspond to an il8n resource!
-     */
-    public TimeResult(Power power, String resource) {
-        super(power, resource);
-
-        // create timestamp
-        timeStamp = System.currentTimeMillis();
-    }// Result()
-
-
-    /**
-     * A TimeStamped result, applicable to all powers.
-     */
-    public TimeResult(String resource) {
-        this(null, resource);
-    }// Result()
-
-
-    /**
-     * Get the milliseconds since midnight, January 1, 1970 UTC.
-     */
-    public long getGMTMillis() {
-        return timeStamp;
-    }// getGMTMillis()
-
-
-    /**
-     * Converts the Resource to a properly-internationlized text message.
-     * argument {0} is always the time.
-     */
-    public String getMessage() {
-        return message+ new Date(timeStamp);
-    }// getMessage()
-
-
-    /**
-     * Convert the output to a String
-     */
-    public String toString() {
-        StringBuilder sb = new StringBuilder(128);
-
-        if (power == null) {
-            sb.append("(none)");
-        } else {
-            sb.append(power);
-        }
-
-        sb.append(": ");
-        sb.append(getMessage());
-        return sb.toString();
-    }// toString()
-
-
-}// class TimeResult
+}

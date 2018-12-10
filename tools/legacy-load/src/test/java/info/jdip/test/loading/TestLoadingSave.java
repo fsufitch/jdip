@@ -2,8 +2,8 @@ package info.jdip.test.loading;
 
 import dip.world.World;
 import dip.world.variant.VariantManager;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -11,6 +11,7 @@ import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Disabled
 public class TestLoadingSave {
     @BeforeAll
     public static void initVariants() throws Exception{
@@ -19,7 +20,6 @@ public class TestLoadingSave {
         info.jdip.world.variant.VariantManager.init(new File[]{file},false);
     }
 
-    @Ignore
     @Test
     public void load_bug_147() throws Exception {
         String name = "info/jdip/legacy/saves/bug_147.jdip";
@@ -30,7 +30,6 @@ public class TestLoadingSave {
         assertTrue(wordsAreEqual);
     }
 
-    @Ignore
     @Test
     public void load_1902_winter() throws Exception {
         String name = "info/jdip/legacy/saves/1902_winter.jdip";
@@ -41,7 +40,6 @@ public class TestLoadingSave {
         assertTrue(wordsAreEqual);
     }
 
-    @Ignore
     @Test
     public void load_1905_summer_before_retreat() throws Exception {
         String name = "info/jdip/legacy/saves/1905-summer-before-retreat.jdip";
@@ -52,7 +50,6 @@ public class TestLoadingSave {
         assertTrue(wordsAreEqual);
     }
 
-    @Ignore
     @Test
     public void load_1912_fall() throws Exception {
         String name = "info/jdip/legacy/saves/1912-fall.jdip";
@@ -63,7 +60,6 @@ public class TestLoadingSave {
         assertTrue(wordsAreEqual);
     }
 
-    @Ignore
     @Test
     public void load_1913_spring() throws Exception {
         String name = "info/jdip/legacy/saves/1913-spring.jdip";
@@ -74,7 +70,6 @@ public class TestLoadingSave {
         assertTrue(wordsAreEqual);
     }
 
-    @Ignore
     @Test
     public void load_Loeb9_F2F() throws Exception {
         String name = "info/jdip/legacy/saves/Loeb9-F2F.jdip";
@@ -85,7 +80,6 @@ public class TestLoadingSave {
         assertTrue(wordsAreEqual);
     }
 
-    @Ignore
     @Test
     public void load_spring() throws Exception {
         String name = "info/jdip/legacy/saves/spring.jdip";

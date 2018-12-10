@@ -24,17 +24,10 @@ package dip.gui;
 
 import dip.world.Power;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.util.HashMap;
-import java.util.Iterator;
 
 
-/**
- * The F2FOrderDisplayPanel: displayer of orders for Face-to-Face (F2F) games.
- * <p>
- * This is a subclass of ODP that manages F2F games.
- */
+
 public class F2FOrderDisplayPanel  {
 
 
@@ -42,92 +35,10 @@ public class F2FOrderDisplayPanel  {
         private final HashMap<Power, Boolean> submittedMap;
         private Power currentPower;
 
-        /**
-         * Create an F2FState object
-         */
+
         public F2FState() {
             submittedMap = new HashMap<>(11);
         }// F2FState()
-
-        /**
-         * Create an F2FState object from an existing F2FState object
-         */
-        public F2FState(F2FState f2fs) {
-            if (f2fs == null) {
-                throw new IllegalArgumentException();
-            }
-
-            synchronized (f2fs) {
-                currentPower = f2fs.getCurrentPower();
-                submittedMap = new HashMap<>(f2fs.submittedMap);
-            }
-        }// F2FState()
-
-        /**
-         * The current power (or null) who is entering orders.
-         */
-        public synchronized Power getCurrentPower() {
-            return currentPower;
-        }// getCurrentPower()
-
-        /**
-         * Set the current power (or null) who is entering orders.
-         */
-        public synchronized void setCurrentPower(Power power) {
-            currentPower = power;
-        }// setCurrentPower()
-
-        /**
-         * Get if the Power has submitted orders.
-         */
-        public synchronized boolean getSubmitted(Power power) {
-            if (power == null) {
-                throw new IllegalArgumentException();
-            }
-            return Boolean.TRUE.equals(submittedMap.get(power));
-        }// getSubmitted()
-
-        /**
-         * Set if a power has submitted orders
-         */
-        public synchronized void setSubmitted(Power power, boolean value) {
-            if (power == null) {
-                throw new IllegalArgumentException();
-            }
-            submittedMap.put(power, value);
-        }// setSubmitted()
-
-        /**
-         * Reset all powers to "not submitted" state.
-         */
-        public synchronized void clearSubmitted() {
-            submittedMap.clear();
-        }// clearSubmitted()
-
-        /**
-         * Get an iterator. Note that this <b>always</b> returns an iterator
-         * on a <b>copy</b> of the F2FState.
-         */
-        public synchronized Iterator iterator() {
-            final F2FState copy = new F2FState(this);
-            return copy.submittedMap.entrySet().iterator();
-        }// iterator()
-    }// nested class F2FState
-
-
-    /**
-     * Handle Tab Pane events
-     */
-    private class TabListener implements ChangeListener {
-        private boolean isEnabled = true;
-
-
-        @Override
-        public void stateChanged(ChangeEvent e) {
-
-        }
-    }// inner class TabListener
-
-
-}// class F2FOrderDisplayPanel
+    }
+}
 

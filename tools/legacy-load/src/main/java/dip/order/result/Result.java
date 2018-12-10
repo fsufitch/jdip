@@ -26,70 +26,14 @@ import dip.world.Power;
 
 import java.io.Serializable;
 
-/**
- * A Result is a message that is sent from the adjudicator back to a power
- * or all powers concerning turn processing.
- * <p>
- * Result and subclasses have a toString() method, which is intended
- * for debugging. To obtain a properly-formatted localized message, use
- * getMessage().
- */
+
 public class Result implements Serializable, Comparable<Result> {
-    // constants
     private static final OrderFormatOptions DEFAULT_OFO = OrderFormatOptions.createDefault();
 
-    // instance variables
-    /**
-     * The Power to whom this Result applies; null if it applies to everyone
-     */
     protected Power power = null;
-    /**
-     * The Message text; this must <b>never</b> be null
-     */
+
     protected String message = "";    // message is never null
 
-    /**
-     * no-arg constructor for subclasses
-     */
-    protected Result() {
-    }// Result()
-
-    /**
-     * Create a Result, that is for the given Power.
-     * A null Power indicates the result applies to
-     * all Powers.
-     */
-    public Result(Power power, String message) {
-        this.power = power;
-
-        if (message != null) {
-            this.message = message;
-        }
-    }// Result()
-
-
-    /**
-     * Create a Result that is applicable to all
-     * Powers.
-     */
-    public Result(String message) {
-        this(null, message);
-    }// Result()
-
-    /**
-     * Get the Power (or null if none) for whom this result is intended.
-     */
-    public Power getPower() {
-        return power;
-    }
-
-
-    /**
-     * Compare first by Power, then by Message.
-     * <p>
-     * If power is null, it will be first in ascending order.
-     * If message may be empty, but never is null.
-     */
     public int compareTo(Result o) {
 
         // first: compare powers

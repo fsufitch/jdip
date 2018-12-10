@@ -21,26 +21,12 @@
 //
 package dip.order.result;
 
-import dip.order.Orderable;
 import dip.world.Province;
 
 
-/**
- * Similar to an OrderResult, but allows the <b>optional</b> specification of:
- * <ul>
- * <li>the unit with which this unit bounces</li>
- * <li>the attack and defense strengths</li>
- * </ul>
- */
 public class BouncedResult extends OrderResult {
-    // instance fields
     private Province bouncer = null;
     private int atkStrength = -1;
     private int defStrength = -1;
 
-    public BouncedResult(Orderable order) {
-        super(order, ResultType.FAILURE, null);
-    }// BouncedResult()
-
-
-}// class BouncedResult
+}

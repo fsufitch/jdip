@@ -21,62 +21,11 @@
 //
 package dip.order.result;
 
-import dip.order.OrderFormatOptions;
 import dip.order.Orderable;
 
 
-/**
- * An OrderResult that applies specifically to Move orders that
- * fail because they depend upon another Move to succeed (and
- * that move did not succeed).
- * <p>
- * This will print out the Order that caused the failure.
- * <p>
- */
 public class DependentMoveFailedResult extends OrderResult {
-    // instance fields
     private Orderable dependentOrder = null;
 
 
-    public DependentMoveFailedResult(Orderable order, Orderable dependentOrder) {
-        super(order, ResultType.FAILURE, null);
-        if (dependentOrder == null) {
-            throw new IllegalArgumentException();
-        }
-        this.dependentOrder = dependentOrder;
-    }// DependentMoveFailedResult()
-
-
-
-
-
-    /**
-     * Creates an appropriate internationalized text
-     * message given the set and unset parameters.
-     */
-    public String getMessage(OrderFormatOptions ofo) {
-		/*
-		{0} : the dependent order, formatted with OrderFormat
-		*/
-
-        // return formatted message
-        return "DependentMoveFailedResult.message"+
-                dependentOrder.toBriefString();
-    }// getMessage()
-
-
-    /**
-     * Primarily for debugging.
-     */
-    public String toString() {
-        StringBuilder sb = new StringBuilder(256);
-        sb.append(super.toString());
-
-        sb.append("Dependent Order: ");
-        sb.append(dependentOrder);
-
-        return sb.toString();
-    }// toString()
-
-
-}// class DependentMoveFailedResult
+}
