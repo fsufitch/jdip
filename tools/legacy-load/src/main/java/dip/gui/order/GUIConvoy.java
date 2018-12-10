@@ -23,19 +23,14 @@
 package dip.gui.order;
 
 import dip.order.Convoy;
-import dip.world.Location;
-import dip.world.Power;
-import dip.world.Unit;
 import info.jdip.test.loading.IgnoreComparisonResult;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
 
-/**
- * GUIOrder subclass of Convoy order.
- */
+
 public class GUIConvoy extends Convoy implements GUIOrder {
-    // i18n keys
+
     @IgnoreComparisonResult
     private final static String ONLY_SEA_OR_CC_FLEETS_CAN_CONVOY = "GUIConvoy.only_fleets_can_convoy";
     @IgnoreComparisonResult
@@ -55,29 +50,11 @@ public class GUIConvoy extends Convoy implements GUIOrder {
     @IgnoreComparisonResult
     private final static String MUST_CONVOY_TO_COAST = "GUIConvoy.must_convoy_to_coast";
 
-    // instance variables
+
     private transient static final int REQ_LOC = 3;
     private transient int currentLocNum = 0;
     private transient Point2D.Float failPt = null;
     private transient SVGGElement group = null;
 
 
-    /**
-     * Creates a GUIConvoy
-     */
-    protected GUIConvoy() {
-        super();
-    }// GUIConvoy()
-
-    /**
-     * Creates a GUIConvoy
-     */
-    protected GUIConvoy(Power power, Location src, Unit.Type srcUnitType,
-                        Location convoySrc, Power convoyPower, Unit.Type convoySrcUnitType,
-                        Location convoyDest) {
-        super(power, src, srcUnitType, convoySrc, convoyPower,
-                convoySrcUnitType, convoyDest);
-    }// GUIConvoy()
-
-
-}// class GUIConvoy
+}

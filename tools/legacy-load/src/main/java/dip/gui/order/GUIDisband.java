@@ -23,9 +23,6 @@
 package dip.gui.order;
 
 import dip.order.Disband;
-import dip.world.Location;
-import dip.world.Power;
-import dip.world.Unit;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
@@ -34,26 +31,11 @@ import java.awt.geom.Point2D;
  * GUIOrder implementation of Disband order.
  */
 public class GUIDisband extends Disband implements GUIOrder {
-    // instance variables
+
     private transient final static int REQ_LOC = 1;
     private transient int currentLocNum = 0;
     private transient Point2D.Float failPt = null;
     private transient SVGGElement group = null;
 
 
-    /**
-     * Creates a GUIDisband
-     */
-    protected GUIDisband() {
-        super();
-    }// GUIDisband()
-
-    /**
-     * Creates a GUIDisband
-     */
-    protected GUIDisband(Power power, Location source, Unit.Type sourceUnitType) {
-        super(power, source, sourceUnitType);
-    }// GUIDisband()
-
-
-}// class GUIDisband
+}

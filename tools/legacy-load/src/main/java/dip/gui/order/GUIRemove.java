@@ -23,42 +23,21 @@
 package dip.gui.order;
 
 import dip.order.Remove;
-import dip.world.Location;
-import dip.world.Power;
-import dip.world.Unit;
 import info.jdip.test.loading.IgnoreComparisonResult;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
 
-/**
- * GUIOrder implementation of Remove order.
- */
 public class GUIRemove extends Remove implements GUIOrder {
-    // i18n
     @IgnoreComparisonResult
     public static final String NO_UNITS_TO_REMOVE = "GUIRemove.no_removes";
 
-    // instance variables
     private transient final static int REQ_LOC = 1;
     private transient int currentLocNum = 0;
     private transient Point2D.Float failPt = null;
     private transient SVGGElement group = null;
 
 
-    /**
-     * Creates a GUIRemove
-     */
-    protected GUIRemove() {
-        super();
-    }// GUIRemove()
-
-    /**
-     * Creates a GUIRemove
-     */
-    protected GUIRemove(Power power, Location source, Unit.Type sourceUnitType) {
-        super(power, source, sourceUnitType);
-    }// GUIRemove()
 
 
-}// class GUIRemove
+}

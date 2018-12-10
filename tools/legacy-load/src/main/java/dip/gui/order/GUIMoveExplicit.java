@@ -30,18 +30,9 @@ import org.w3c.dom.svg.SVGGElement;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 
-/**
- * GUIOrder subclass of Move order.
- * <p>
- * This differs from GUIMove in that Explicit convoy routes are <b>always</b>
- * created. Implicit convoy routes <b>cannot</b> be created via GUI entry.
- * <p>
- * This should be used instead of GUIMove for games with RuleOptions that
- * enforce explicit convoy routes (such as Judge-based games).
- */
 public class GUIMoveExplicit extends Move implements GUIOrder {
 
-    // i18n keys
+
     @IgnoreComparisonResult
     private final static String CLICK_TO_SET_DEST = "GUIMove.set.dest";
     @IgnoreComparisonResult
@@ -51,7 +42,7 @@ public class GUIMoveExplicit extends Move implements GUIOrder {
     @IgnoreComparisonResult
     private final static String CANNOT_MOVE_HERE = "GUIMove.cannot_move_here";
 
-    // i18n keys for convoys
+
     @IgnoreComparisonResult
     private final static String CANNOT_BACKTRACK = "GUIMoveExplicit.convoy.backtrack";
     @IgnoreComparisonResult
@@ -65,7 +56,7 @@ public class GUIMoveExplicit extends Move implements GUIOrder {
     @IgnoreComparisonResult
     private final static String ADDED_CONVOY_LOCATION = "GUIMoveExplicit.convoy.location.added";
 
-    // instance variables
+
     private transient static final int REQ_LOC = 2;
     private transient boolean isConvoyableArmy = false;
     private transient boolean isComplete = false;
@@ -76,12 +67,6 @@ public class GUIMoveExplicit extends Move implements GUIOrder {
     private transient SVGGElement group = null;
 
 
-    /**
-     * Creates a GUIMoveExplicit
-     */
-    protected GUIMoveExplicit() {
-        super();
-    }// GUIMoveExplicit()
 
 
-}// class GUIMoveExplicit
+}

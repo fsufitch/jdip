@@ -23,25 +23,16 @@
 package dip.gui.order;
 
 import dip.order.Build;
-import dip.world.Location;
-import dip.world.Power;
-import dip.world.Unit;
 import info.jdip.test.loading.IgnoreComparisonResult;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
 
-/**
- * GUIOrder implementation of Build order.
- */
+
 public class GUIBuild extends Build implements GUIOrder {
-    // BuildParameter constants
-    /**
-     * Required. Used to set build Unit.Type. Associated value must be a Unit.Type
-     */
+
     public transient static final BuildParameter BUILD_UNIT = new BuildParameter("BUILD_UNIT");
 
-    // i18n keys
     @IgnoreComparisonResult
     private static final String BUILD_FLEET_OK = "GUIBuild.ok.fleet";
     @IgnoreComparisonResult
@@ -69,38 +60,19 @@ public class GUIBuild extends Build implements GUIOrder {
     @IgnoreComparisonResult
     private static final String NOBUILD_UNOWNED_SC = "GUIBuild.bad.unowned_sc";
 
-    // instance variables
     private transient final static int REQ_LOC = 1;
     private transient int currentLocNum = 0;
     private transient Point2D.Float failPt = null;
     private transient SVGGElement group = null;
 
-    /**
-     * Creates a GUIBuild
-     */
-    protected GUIBuild() {
-        super();
-    }// GUIBuild()
 
-    /**
-     * Creates a GUIBuild
-     */
-    protected GUIBuild(Power power, Location source, Unit.Type sourceUnitType) {
-        super(power, source, sourceUnitType);
-    }// GUIBuild()
 
-    /**
-     * Typesafe Enumerated Parameter class for setting
-     * required Build parameters.
-     */
     protected static class BuildParameter extends Parameter {
-        /**
-         * Creates a BuildParameter
-         */
+
         public BuildParameter(String name) {
             super(name);
-        }// BuildParameter()
-    }// nested class BuildParameter
+        }
+    }
 
 
-}// class GUIBuild
+}

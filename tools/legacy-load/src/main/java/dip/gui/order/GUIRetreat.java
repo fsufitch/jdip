@@ -23,19 +23,13 @@
 package dip.gui.order;
 
 import dip.order.Retreat;
-import dip.world.Location;
-import dip.world.Power;
-import dip.world.Unit;
 import info.jdip.test.loading.IgnoreComparisonResult;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
 
-/**
- * GUIOrder subclass of Retreat order.
- */
+
 public class GUIRetreat extends Retreat implements GUIOrder {
-    // i18n keys
     @IgnoreComparisonResult
     private final static String UNIT_MUST_DISBAND = "GUIRetreat.must_disband";
     @IgnoreComparisonResult
@@ -45,26 +39,12 @@ public class GUIRetreat extends Retreat implements GUIOrder {
     @IgnoreComparisonResult
     private final static String VALID_RETREAT_LOCS = "GUIRetreat.valid_locs";
 
-    // instance variables
+
     private transient static final int REQ_LOC = 2;
     private transient int currentLocNum = 0;
     private transient Point2D.Float failPt = null;
     private transient SVGGElement group = null;
 
 
-    /**
-     * Creates a GUIRetreat
-     */
-    protected GUIRetreat() {
-        super();
-    }// GUIRetreat()
 
-    /**
-     * Creates a GUIRetreat
-     */
-    protected GUIRetreat(Power power, Location source, Unit.Type sourceUnitType, Location dest) {
-        super(power, source, sourceUnitType, dest);
-    }// GUIRetreat()
-
-
-}// class GUIRetreat
+}

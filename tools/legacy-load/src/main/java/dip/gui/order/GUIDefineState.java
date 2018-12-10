@@ -23,34 +23,9 @@
 package dip.gui.order;
 
 import dip.order.DefineState;
-import dip.world.Location;
-import dip.world.Power;
-import dip.world.Unit;
 
-/**
- * GUIOrder subclass of DefineState order.
- * <p>
- * This is essentially a placeholder. It is incomplete, and should only
- * be used (derived from) existing DefineState orders. No locations may
- * be set via GUIOrder methods, and the order will not be valid if
- * created without derivation. This may change in future implementations.
- */
+
 public class GUIDefineState extends DefineState implements GUIOrder {
 
-    /**
-     * Creates a GUIDefineState
-     */
-    protected GUIDefineState() {
-        super();
-    }// GUIDefineState()
 
-
-    /**
-     * Creates a GUIDefineState
-     */
-    protected GUIDefineState(Power power, Location source, Unit.Type sourceUnitType) {
-        super(power, source, sourceUnitType);
-    }// GUIDefineState()
-
-
-}// class GUIDefineState
+}

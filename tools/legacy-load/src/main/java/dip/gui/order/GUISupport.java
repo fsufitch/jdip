@@ -23,21 +23,12 @@
 package dip.gui.order;
 
 import dip.order.Support;
-import dip.world.Location;
-import dip.world.Power;
-import dip.world.Unit;
 import info.jdip.test.loading.IgnoreComparisonResult;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
 
-/**
- * GUIOrder subclass of Support order.
- * <p>
- * Narrowing-order input via the GUI is not yet supported.
- */
 public class GUISupport extends Support implements GUIOrder {
-    // i18n keys
 
     @IgnoreComparisonResult
     private final static String CLICK_TO_SUPPORT_UNIT = "GUISupport.click_to_sup";
@@ -65,7 +56,6 @@ public class GUISupport extends Support implements GUIOrder {
     private final static String CANNOT_SUPPORT_ACROSS_DPB = "GUISupport.over_dpb";
 
 
-    // instance variables
     private transient static final int REQ_LOC = 3;
     private transient int currentLocNum = 0;
     private transient boolean dependentFound = false;    // true associated Move or Support order found
@@ -73,30 +63,5 @@ public class GUISupport extends Support implements GUIOrder {
     private transient SVGGElement group = null;
 
 
-    /**
-     * Creates a GUISupport
-     */
-    protected GUISupport() {
-        super();
-    }// GUISupport()
 
-
-    /**
-     * Creates a GUISupport
-     */
-    protected GUISupport(Power power, Location src, Unit.Type srcUnitType,
-                         Location supSrc, Power supPower, Unit.Type supUnitType) {
-        super(power, src, srcUnitType, supSrc, supPower, supUnitType);
-    }// GUISupport()
-
-
-    /**
-     * Creates a GUISupport
-     */
-    protected GUISupport(Power power, Location src, Unit.Type srcUnitType,
-                         Location supSrc, Power supPower, Unit.Type supUnitType, Location supDest) {
-        super(power, src, srcUnitType, supSrc, supPower, supUnitType, supDest);
-    }// GUISupport()
-
-
-}// class GUISupport
+}

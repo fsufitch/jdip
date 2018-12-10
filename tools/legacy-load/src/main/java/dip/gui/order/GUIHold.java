@@ -23,20 +23,12 @@
 package dip.gui.order;
 
 import dip.order.Hold;
-import dip.world.Location;
-import dip.world.Power;
-import dip.world.Unit;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
 
-/**
- * GUIOrder subclass of Hold order.
- */
 public class GUIHold extends Hold implements GUIOrder {
-    // i18n keys
 
-    // instance variables
     private transient final static int REQ_LOC = 1;
     private transient int currentLocNum = 0;
     private transient int numSupports = -1;    // WARNING: this will become '0' when de-serialized; not -1
@@ -44,19 +36,4 @@ public class GUIHold extends Hold implements GUIOrder {
     private transient SVGGElement group = null;
 
 
-    /**
-     * Creates a GUIHold
-     */
-    protected GUIHold() {
-        super();
-    }// GUIHold()
-
-    /**
-     * Creates a GUIHold
-     */
-    protected GUIHold(Power power, Location source, Unit.Type sourceUnitType) {
-        super(power, source, sourceUnitType);
-    }// GUIHold()
-
-
-}// class GUIHold
+}

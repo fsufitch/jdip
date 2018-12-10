@@ -23,30 +23,15 @@
 package dip.gui.order;
 
 import dip.order.Move;
-import dip.world.Location;
-import dip.world.Power;
-import dip.world.Province;
-import dip.world.Unit;
 import info.jdip.test.loading.IgnoreComparisonResult;
 import org.w3c.dom.svg.SVGGElement;
 
 import java.awt.geom.Point2D;
-import java.util.List;
 
-/**
- * GUIOrder subclass of Move order.
- * <p>
- * Note that GUIMove fully supports moves with explicit convoy routes,
- * but their GUI entry is not supported.
- */
 public class GUIMove extends Move implements GUIOrder {
-    // MoveParameter constants
-    /**
-     * Optional. Sets this Move to be by convoy. Value must be a Boolean object (Boolean.TRUE or Boolean.FALSE)
-     */
+
     public transient static final MoveParameter BY_CONVOY = new MoveParameter("BY_CONVOY");
 
-    // i18n keys
     @IgnoreComparisonResult
     private final static String CLICK_TO_SET_DEST = "GUIMove.set.dest";
     @IgnoreComparisonResult
@@ -56,55 +41,20 @@ public class GUIMove extends Move implements GUIOrder {
     @IgnoreComparisonResult
     private final static String CANNOT_MOVE_HERE = "GUIMove.cannot_move_here";
 
-    // instance variables
     private transient static final int REQ_LOC = 2;
     private transient int currentLocNum = 0;
     private transient int numSupports = -9999;
     private transient Point2D.Float failPt = null;
     private transient SVGGElement group = null;
 
-    /**
-     * Creates a GUIMove
-     */
-    protected GUIMove() {
-        super();
-    }// GUIMove()
-
-    /**
-     * Creates a GUIMove
-     */
-    protected GUIMove(Power power, Location source, Unit.Type srcUnitType, Location dest, boolean isConvoying) {
-        super(power, source, srcUnitType, dest, isConvoying);
-    }// GUIMove()
-
-    /**
-     * Creates a GUIMove
-     */
-    protected GUIMove(Power power, Location src, Unit.Type srcUnitType, Location dest, Province[] convoyRoute) {
-        super(power, src, srcUnitType, dest, convoyRoute);
-    }// GUIMove()
-
-
-    /**
-     * Creates a GUIMove
-     */
-    protected GUIMove(Power power, Location src, Unit.Type srcUnitType, Location dest, List<Province[]> routes) {
-        super(power, src, srcUnitType, dest, routes);
-    }// GUIMove()
-
-
-    /**
-     * Typesafe Enumerated Parameter class for setting
-     * optional Move parameters.
-     */
     protected static class MoveParameter extends Parameter {
         /**
          * Creates a MoveParameter
          */
         public MoveParameter(String name) {
             super(name);
-        }// MoveParameter()
-    }// nested class MoveParameter
+        }
+    }
 
 
-}// class GUIMove
+}
