@@ -1102,7 +1102,10 @@ public class WorldImporter {
                     order = extractGuiSupport(orderInfo)
                             .orElseThrow(() -> new JDipException("Expected a support order"));
                     break;
-                // TODO GUIWaive
+                case "dip.gui.order.GUIWaive":
+                    order = extractGuiWaive(orderInfo)
+                            .orElseThrow(() -> new JDipException("Expected a waive order"));
+                    break;
                 default:
                     return Optional.empty();
             }
@@ -1219,6 +1222,15 @@ public class WorldImporter {
 
         return Optional.of(new GUIOrderFactory().createSupport(power, src, srcUnitType, supSrc, supPower,
                 supUnitType, supDest));
+    }
+
+    private Optional<Orderable> extractGuiWaive(ObjectInformation orderInfo) throws JDipException {
+        Power power = extractPower(orderInfo.getAttribute("power"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a power"));
+        Location src = extractLocation(orderInfo.getAttribute("src"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a source location"));
+
+        return Optional.of(new GUIOrderFactory().createWaive(power, src));
     }
 
     private Optional<Unit.Type[]> extractUnitTypeArray(SerializeInformation unitTypeArraySerInfo) throws JDipException {
