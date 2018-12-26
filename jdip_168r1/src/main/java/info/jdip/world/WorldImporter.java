@@ -359,6 +359,22 @@ public class WorldImporter {
         return Optional.of(power);
     }
 
+    private Optional<List<Province[]>> extractProvincesList(SerializeInformation provincesListSerInfo)
+            throws JDipException {
+        if (provincesListSerInfo == null || !provincesListSerInfo.isCollection() ||
+                !"java.util.ArrayList".equals(provincesListSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        CollectionInformation provincesListInfo = (CollectionInformation)provincesListSerInfo;
+
+        List<Province[]> provincesInfo = new LinkedList<>();
+        for (SerializeInformation provincesSerInfo: provincesListInfo.getCollectionEntries()) {
+            provincesInfo.add(extractProvinces(provincesSerInfo)
+                    .orElseThrow(() -> new JDipException("Expected the provinces list to contain provinces")));
+        }
+        return Optional.of(provincesInfo);
+    }
+
     private Optional<Province[]> extractProvinces(SerializeInformation provincesSerInfo) throws JDipException {
         if (provincesSerInfo == null || !provincesSerInfo.isCollection() ||
                 !"dip.world.Province".equals(provincesSerInfo.getClassName())) {
@@ -1175,9 +1191,12 @@ public class WorldImporter {
                 .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
         Location dest = extractLocation(orderInfo.getAttribute("dest"))
                 .orElseThrow(() -> new JDipException("Expected an order to contain a destination location"));
-        // TODO extractConvoyRoutes
-
-        return Optional.of(new GUIOrderFactory().createMove(power, src, srcUnitType, dest));
+        Optional<List<Province[]>> convoyRoutes = extractProvincesList(orderInfo.getAttribute("convoyRoutes"));
+        if (convoyRoutes.isPresent()) {
+            return Optional.of(new GUIOrderFactory().createMove(power, src, srcUnitType, dest, convoyRoutes.get()));
+        } else {
+            return Optional.of(new GUIOrderFactory().createMove(power, src, srcUnitType, dest));
+        }
     }
 
     private Optional<Orderable> extractGuiRemove(ObjectInformation orderInfo) throws JDipException {
