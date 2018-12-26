@@ -20,6 +20,7 @@ package info.jdip.world;
 import info.jdip.JDipException;
 import info.jdip.gui.DefaultGUIGameSetup;
 import info.jdip.gui.order.GUIMove;
+import info.jdip.gui.order.GUIMoveExplicit;
 import info.jdip.gui.order.GUIOrderFactory;
 import info.jdip.order.Move;
 import info.jdip.order.OrderFactory;
@@ -1105,7 +1106,10 @@ public class WorldImporter {
                     order = extractGuiMove(orderInfo)
                             .orElseThrow(() -> new JDipException("Expected a move order"));
                     break;
-                // TODO GUIMoveExplicit
+                case "dip.gui.order.GUIMoveExplicit":
+                    order = extractGuiMoveExplicit(orderInfo)
+                            .orElseThrow(() -> new JDipException("Expected an explicit move order"));
+                    break;
                 case "dip.gui.order.GUIRemove":
                     order = extractGuiRemove(orderInfo)
                             .orElseThrow(() -> new JDipException("Expected a remove order"));
@@ -1197,6 +1201,22 @@ public class WorldImporter {
         } else {
             return Optional.of(new GUIOrderFactory().createMove(power, src, srcUnitType, dest));
         }
+    }
+
+    private Optional<Orderable> extractGuiMoveExplicit(ObjectInformation orderInfo) throws JDipException {
+        Power power = extractPower(orderInfo.getAttribute("power"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a power"));
+        Location src = extractLocation(orderInfo.getAttribute("src"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a source location"));
+        Unit.Type srcUnitType = extractUnitType(orderInfo.getAttribute("srcUnitType"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a unit type"));
+        Location dest = extractLocation(orderInfo.getAttribute("dest"))
+                .orElseThrow(() -> new JDipException("Expected an order to contain a destination location"));
+        List<Province[]> convoyRoutes = extractProvincesList(orderInfo.getAttribute("convoyRoutes"))
+                .orElseThrow(() -> new JDipException("Expected an explicit move to contain convoy routes"));
+        GUIMoveExplicit moveExplicit = new GUIOrderFactory().createGUIMoveExplicit();
+        moveExplicit.deriveFrom(new GUIOrderFactory().createMove(power, src, srcUnitType, dest, convoyRoutes));
+        return Optional.of(moveExplicit);
     }
 
     private Optional<Orderable> extractGuiRemove(ObjectInformation orderInfo) throws JDipException {
