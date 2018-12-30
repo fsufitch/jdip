@@ -19,6 +19,8 @@ package info.jdip.world;
 
 import info.jdip.JDipException;
 import info.jdip.gui.DefaultGUIGameSetup;
+import info.jdip.gui.F2FGUIGameSetup;
+import info.jdip.gui.F2FOrderDisplayPanel;
 import info.jdip.gui.order.GUIMove;
 import info.jdip.gui.order.GUIMoveExplicit;
 import info.jdip.gui.order.GUIOrderFactory;
@@ -892,7 +894,62 @@ public class WorldImporter {
         if (gameSetupSerInfo == null || !gameSetupSerInfo.isObject()) {
             return Optional.empty();
         }
-        return Optional.of(new DefaultGUIGameSetup());
+        if ("dip.gui.F2FGUIGameSetup".equals(gameSetupSerInfo.getClassName())) {
+            // TODO implement reading of F2FGUIGameSetup
+            return extractF2FGUIGameSetup(gameSetupSerInfo);
+        } else {
+            return Optional.of(new DefaultGUIGameSetup());
+        }
+    }
+
+    private Optional<GameSetup> extractF2FGUIGameSetup(SerializeInformation gameSetupSerInfo)
+            throws JDipException {
+        if (gameSetupSerInfo == null || !gameSetupSerInfo.isObject() ||
+                !"dip.gui.F2FGUIGameSetup".equals(gameSetupSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation gameSetupInfo = (ObjectInformation)gameSetupSerInfo;
+
+        return Optional.of(new F2FGUIGameSetup(extractF2FState(gameSetupInfo.getAttribute("state"))
+                .orElseThrow(() -> new JDipException("Expected a F2FGUIGameSetup to contain a state"))));
+    }
+
+    private Optional<F2FOrderDisplayPanel.F2FState> extractF2FState(SerializeInformation stateSerInfo)
+            throws JDipException {
+        if (stateSerInfo == null || !stateSerInfo.isObject() ||
+                !"dip.gui.F2FOrderDisplayPanel$F2FState".equals(stateSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation stateInfo = (ObjectInformation)stateSerInfo;
+
+        F2FOrderDisplayPanel.F2FState state = new F2FOrderDisplayPanel.F2FState();
+        Map<Power, Boolean> submittedMap = extractSubmittedMap(stateInfo.getAttribute("submittedMap"))
+                .orElseThrow(() -> new JDipException("Expected the F2FState to contain a submittedMap"));
+        for (Map.Entry<Power, Boolean> mapEntry: submittedMap.entrySet()) {
+            state.setSubmitted(mapEntry.getKey(), mapEntry.getValue());
+        }
+        state.setCurrentPower(extractPower(stateInfo.getAttribute("currentPower"))
+                .orElseThrow(() -> new JDipException("Expected the F2FState to contain a currentPower")));
+
+        return Optional.of(state);
+    }
+
+    private Optional<Map<Power, Boolean>> extractSubmittedMap(SerializeInformation submittedMapSerInfo)
+            throws JDipException {
+        if (submittedMapSerInfo == null || !submittedMapSerInfo.isMap()) {
+            return Optional.empty();
+        }
+        MapInformation submittedMapInfo = (MapInformation)submittedMapSerInfo;
+
+        Map<Power, Boolean> submittedMap = new LinkedHashMap<>();
+        for (Map.Entry<SerializeInformation, SerializeInformation> mapEntry: submittedMapInfo.getMap().entrySet()) {
+            Power power = extractPower(mapEntry.getKey())
+                    .orElseThrow(() -> new JDipException("Expected a power as key of a submittedMap"));
+            Boolean value = extractBooleanObject(mapEntry.getValue())
+                    .orElseThrow(() -> new JDipException("Expected a boolean as value of a submittedMap"));
+            submittedMap.put(power, value);
+        }
+        return Optional.of(submittedMap);
     }
 
     private Optional<List<TurnState>> extractSyncTurnStates(SerializeInformation turnStatesSerInfo)
@@ -1595,6 +1652,16 @@ public class WorldImporter {
             Optional.empty();
         }
         return Optional.of(Long.valueOf(((PrimitiveInformation)longSerInfo).getValue()));
+    }
+
+    private Optional<Boolean> extractBooleanObject(SerializeInformation booleanSerInfo) throws JDipException {
+        if (booleanSerInfo == null || !booleanSerInfo.isObject()||
+                ! "java.lang.Boolean".equals(booleanSerInfo.getClassName())) {
+            return Optional.empty();
+        }
+        ObjectInformation booleanInfo = (ObjectInformation)booleanSerInfo;
+
+        return extractBoolean(booleanInfo.getAttribute("value"));
     }
 
     private Optional<Boolean> extractBoolean(SerializeInformation booleanSerInfo) throws JDipException {
