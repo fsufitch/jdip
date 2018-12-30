@@ -806,31 +806,17 @@ public class WorldImporter {
         }
         ObjectInformation optionInfo = (ObjectInformation)optionSerInfo;
 
-        String optionName = extractString(optionInfo.getAttribute("name"))
-                .orElseThrow(() -> new JDipException("Expected an option to contain a name"));
-        RuleOptions.OptionValue[] allowed = extractOptionValueArray(optionInfo.getAttribute("allowed"))
-                .orElseThrow(() -> new JDipException("Expected an option to contain an array with allowed values"));
-        RuleOptions.OptionValue defaultValue = extractOptionValue(optionInfo.getAttribute("defaultValue"))
-                .orElseThrow(() -> new JDipException("Expected an option to contain a defaultValue"));
-        return Optional.of(new RuleOptions.Option(optionName, defaultValue, allowed));
-    }
-
-    private Optional<RuleOptions.OptionValue[]> extractOptionValueArray(SerializeInformation optionValuesSerInfo)
-            throws JDipException {
-        if (optionValuesSerInfo == null || !optionValuesSerInfo.isCollection() ||
-                !"dip.world.RuleOptions$OptionValue".equals(optionValuesSerInfo.getClassName())) {
-            return Optional.empty();
+        switch (extractString(optionInfo.getAttribute("name"))
+                .orElseThrow(() -> new JDipException("Expected an option to contain a name"))) {
+            case "Option.builds":
+                return Optional.of(RuleOptions.OPTION_BUILDS);
+            case "Option.wings":
+                return Optional.of(RuleOptions.OPTION_WINGS);
+            case "Option.move.convoyed":
+                return Optional.of(RuleOptions.OPTION_CONVOYED_MOVES);
+            default:
+                return Optional.empty();
         }
-        CollectionInformation optionValuesInfo = (CollectionInformation)optionValuesSerInfo;
-
-        List<RuleOptions.OptionValue> optionValues = new LinkedList<>();
-        for (SerializeInformation optionValueSerInfo: optionValuesInfo.getCollectionEntries()) {
-            Optional<RuleOptions.OptionValue> optionValue = extractOptionValue(optionValueSerInfo);
-            if (optionValue.isPresent()) {
-                optionValues.add(optionValue.get());
-            }
-        }
-        return Optional.of(optionValues.toArray(new RuleOptions.OptionValue[optionValues.size()]));
     }
 
     private Optional<RuleOptions.OptionValue> extractOptionValue(SerializeInformation optionValueSerInfo)
@@ -841,8 +827,27 @@ public class WorldImporter {
         }
         ObjectInformation optionValueInfo = (ObjectInformation)optionValueSerInfo;
 
-        return Optional.of(new RuleOptions.OptionValue(extractString(optionValueInfo.getAttribute("name"))
-                .orElseThrow(() -> new JDipException("Expected an option value to contain a name"))));
+        switch (extractString(optionValueInfo.getAttribute("name"))
+                .orElseThrow(() -> new JDipException("Expected an option value to contain a name"))) {
+            case "OptionValue.home-only":
+                return Optional.of(RuleOptions.VALUE_BUILDS_HOME_ONLY);
+            case "OptionValue.any-owned":
+                return Optional.of(RuleOptions.VALUE_BUILDS_ANY_OWNED);
+            case "OptionValue.any-if-home-owned":
+                return Optional.of(RuleOptions.VALUE_BUILDS_ANY_IF_HOME_OWNED);
+            case "OptionValue.wings-enabled":
+                return Optional.of(RuleOptions.VALUE_WINGS_ENABLED);
+            case "OptionValue.wings-disabled":
+                return Optional.of(RuleOptions.VALUE_WINGS_DISABLED);
+            case "OptionValue.explicit-paths":
+                return Optional.of(RuleOptions.VALUE_PATHS_EXPLICIT);
+            case "OptionValue.implicit-paths":
+                return Optional.of(RuleOptions.VALUE_PATHS_IMPLICIT);
+            case "OptionValue.either-path":
+                return Optional.of(RuleOptions.VALUE_PATHS_EITHER);
+            default:
+                return Optional.empty();
+        }
     }
 
     private Optional<VictoryConditions> extractVictoryConditions(SerializeInformation victoryConditionsSerInfo)
