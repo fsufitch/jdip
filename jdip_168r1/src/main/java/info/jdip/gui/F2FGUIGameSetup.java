@@ -40,6 +40,20 @@ public class F2FGUIGameSetup implements GUIGameSetup {
     private F2FOrderDisplayPanel.F2FState state = null;    // only null if never saved
 
     /**
+     * Default constructor for creating a new game.
+     */
+    public F2FGUIGameSetup() {}
+
+    /**
+     * Constructor for restoring a saved game.
+     *
+     * @param state the saved game state.
+     */
+    public F2FGUIGameSetup(F2FOrderDisplayPanel.F2FState state) {
+        this.state = state;
+    }
+
+    /**
      * Setup the game.
      */
     public void setup(ClientFrame cf, World world) {
