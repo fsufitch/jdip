@@ -36,4 +36,8 @@ public class JsonWorld {
     @JsonProperty
     private JsonMap map;
 
+    public JsonMap getMap() {
+        return map;
+    }
+
 }

@@ -39,7 +39,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 
 public class JsonWorldTest {
 
-    private World createWorld() throws InvalidWorldException {
+    private World createEmptyWorld() throws InvalidWorldException {
         Variant variant = new Variant();
         variant.setName("WorldPersistVariant");
 
@@ -73,21 +73,23 @@ public class JsonWorldTest {
         ObjectMapper mapper = new ObjectMapper();
         StringWriter writer = new StringWriter();
         mapper.writeValue(writer, world);
-        JSONAssert.assertEquals("{\"map\":null}", writer.toString(), false);
+        JSONAssert.assertEquals("{\"map\":null}", writer.toString(), JSONCompareMode.STRICT);
     }
 
     @Test
     public void testPersistWorld() throws IOException, JSONException, InvalidWorldException {
-        JsonWorld world = new JsonWorld(createWorld());
+        JsonWorld world = new JsonWorld(createEmptyWorld());
         ObjectMapper mapper = new ObjectMapper();
         StringWriter writer = new StringWriter();
         mapper.writeValue(writer, world);
-        JSONAssert.assertEquals(
-                "{" +
-                    "\"map\":{" +
-                        "\"powers\":[]" +
-                    "}" +
-                "}",
+        JSONAssert.assertEquals(new StringBuilder()
+                    .append("{")
+                    .append(  "\"map\":{")
+                    .append(    "\"$id\":\"").append(world.getMap().getId()).append("\",")
+                    .append(    "\"powers\":[]")
+                    .append(  "}")
+                    .append("}")
+                    .toString(),
                 writer.toString(), JSONCompareMode.STRICT);
     }
 
