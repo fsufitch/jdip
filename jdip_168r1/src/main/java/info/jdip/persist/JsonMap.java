@@ -17,28 +17,43 @@
  */
 package info.jdip.persist;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import info.jdip.world.Map;
 import info.jdip.world.Power;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  *
  * @author Uwe Plonus
  */
+@JsonPropertyOrder({"$id", "powers"})
 public class JsonMap {
 
     public JsonMap() {
+        id = UUID.randomUUID().toString();
     }
 
     public JsonMap(Map map) {
+        this();
         for (Power power: map.getPowers()) {
-            powers.add(new JsonPower());
+            powers.add(new JsonPower(power));
         }
     }
 
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class)
+    @JsonProperty(value = "$id")
+    private String id;
+
     @JsonProperty
     private List<JsonPower> powers = new LinkedList<>();
+
+    public String getId() {
+        return id;
+    }
 
 }
