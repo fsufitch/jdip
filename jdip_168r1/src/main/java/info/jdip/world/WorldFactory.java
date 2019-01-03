@@ -98,6 +98,7 @@ public class WorldFactory {
 
         // gather all province data, and create provinces
         ProvinceData[] provinceDataArray = variant.getProvinceData();
+        // TODO add null check for provinceDataArray
         for (int i = 0; i < provinceDataArray.length; i++) {
             ProvinceData provinceData = provinceDataArray[i];
 
@@ -179,6 +180,7 @@ public class WorldFactory {
         HashMap<String, Border> borderMap = new HashMap<>(11);
         try {
             BorderData[] borderDataArray = variant.getBorderData();
+            // TODO add null check for borderDataArray
             for (BorderData bd : borderDataArray) {
                 Location fromLocs[] = makeBorderLocations(bd.getFrom(), provNameMap);
 
@@ -244,6 +246,7 @@ public class WorldFactory {
 
         // define supply centers
         SupplyCenter[] supplyCenters = variant.getSupplyCenters();
+        // TODO add null check for supplyCenters
         for (SupplyCenter supplyCenter : supplyCenters) {
             Province province = map.getProvince(supplyCenter.getProvinceName());
             if (province == null) {
@@ -277,6 +280,7 @@ public class WorldFactory {
 
         // set initial state [derived from INITIALSTATE elements in XML file]
         InitialState[] initStates = variant.getInitialStates();
+        // TODO add null check for initStates
         for (InitialState initState : initStates) {
             // a province and power is required, no matter what, unless
             // we are ONLY setting the supply center (which we do above)

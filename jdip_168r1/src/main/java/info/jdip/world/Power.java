@@ -39,6 +39,7 @@ public class Power implements Comparable, java.io.Serializable {
     // immutable fields
     private final String[] names;        // length >= 1
     private final boolean isActive;
+    // TODO adjective is not a property of the power but only of the translations of a power
     private final String adjective;
 
 

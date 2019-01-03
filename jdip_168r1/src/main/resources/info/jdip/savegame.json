@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "definitions": {
+
+  },
+  "properties": {
+    "map": {
+      "type": "object",
+      "properties": {
+        "powers": {
+          "type": "array"
+        },
+        "provinces": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}
