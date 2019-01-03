@@ -101,6 +101,7 @@ public class Map implements Serializable {
     private void createMappings() {
         // create powerNameMap
         powerNameMap = new HashMap<>(POWER_SIZE);
+        // TODO add null check for powers
         for (Power power : powers) {
             String[] tmp = power.getNames();
             for (String name : tmp) {
