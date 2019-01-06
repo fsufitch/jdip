@@ -34,6 +34,13 @@ import java.util.UUID;
 @JsonPropertyOrder({"$id", "powers"})
 public class JsonMap {
 
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class)
+    @JsonProperty(value = "$id")
+    private String id;
+
+    @JsonProperty
+    private List<JsonPower> powers = new LinkedList<>();
+
     public JsonMap() {
         id = UUID.randomUUID().toString();
     }
@@ -44,13 +51,6 @@ public class JsonMap {
             powers.add(new JsonPower(power));
         }
     }
-
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class)
-    @JsonProperty(value = "$id")
-    private String id;
-
-    @JsonProperty
-    private List<JsonPower> powers = new LinkedList<>();
 
     public String getId() {
         return id;

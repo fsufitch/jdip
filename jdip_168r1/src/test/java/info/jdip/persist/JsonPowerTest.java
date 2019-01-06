@@ -18,22 +18,88 @@
 package info.jdip.persist;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import info.jdip.world.Power;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.UUID;
 import org.json.JSONException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 public class JsonPowerTest {
 
+    private ObjectMapper mapper;
+
+    private StringWriter writer;
+
+    @BeforeEach
+    public void setUp() {
+        mapper = new ObjectMapper();
+        writer = new StringWriter();
+    }
+
+    private Power createPower() {
+        return new Power(new String[]{"Test"}, "Testish", true);
+    }
+
     @Test
     public void testCreatePower() throws IOException, JSONException {
         JsonPower power = new JsonPower();
-        ObjectMapper mapper = new ObjectMapper();
-        StringWriter writer = new StringWriter();
         mapper.writeValue(writer, power);
-        JSONAssert.assertEquals("{\"names\":[]}", writer.toString(), JSONCompareMode.STRICT);
+        JSONAssert.assertEquals(new StringBuilder()
+                .append("{")
+                .append(  "\"$id\":\"").append(power.getId()).append("\",")
+                .append(  "\"names\":[")
+                .append(  "],")
+                .append(  "\"adjective\":null,")
+                .append(  "\"isActive\":false")
+                .append("}")
+                .toString(),
+                writer.toString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void testPersistPower() throws IOException, JSONException {
+        JsonPower power = new JsonPower(createPower());
+        mapper.writeValue(writer, power);
+        JSONAssert.assertEquals(new StringBuilder()
+                .append("{")
+                .append(  "\"$id\":\"").append(power.getId()).append("\",")
+                .append(  "\"names\":[")
+                .append(    "\"Test\"")
+                .append(  "],")
+                .append(  "\"adjective\":\"Testish\",")
+                .append(  "\"isActive\":true")
+                .append("}")
+                .toString(),
+                writer.toString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void testLoadPower() throws IOException, JSONException {
+        UUID id = UUID.randomUUID();
+        String jsonPower = new StringBuilder()
+                .append("{")
+                .append(  "\"$id\":\"").append(id).append("\",")
+                .append(  "\"names\":[")
+                .append(    "\"Test\"")
+                .append(  "],")
+                .append(  "\"adjective\":\"Testish\",")
+                .append(  "\"isActive\":true")
+                .append("}")
+                .toString();
+        JsonPower power = mapper.readValue(new StringReader(jsonPower), JsonPower.class);
+
+        Assertions.assertEquals(id.toString(), power.getId());
+        Power loadedPower = power.getPower();
+        Assertions.assertNotNull(loadedPower);
+        Assertions.assertArrayEquals(new String[]{"Test"}, loadedPower.getNames());
+        Assertions.assertEquals("Testish", loadedPower.getAdjective());
+        Assertions.assertTrue(loadedPower.isActive());
     }
 
 }

@@ -17,22 +17,59 @@
  */
 package info.jdip.persist;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import info.jdip.world.Power;
+import java.util.UUID;
 
 /**
  *
  * @author Uwe Plonus
  */
+@JsonPropertyOrder({"$id", "names", "adjective", "isActive"})
 public class JsonPower {
 
-    public JsonPower() {
-    }
-
-    public JsonPower(Power power) {
-    }
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class)
+    @JsonProperty(value = "$id")
+    private String id;
 
     @JsonProperty
     private String[] names = new String[0];
+
+    @JsonProperty
+    private String adjective;
+
+    @JsonProperty
+    private boolean isActive;
+
+    private Power power;
+
+    public JsonPower() {
+        id = UUID.randomUUID().toString();
+    }
+
+    public JsonPower(Power power) {
+        this();
+        names = power.getNames();
+        adjective = power.getAdjective();
+        isActive = power.isActive();
+        this.power = power;
+    }
+
+    @JsonIgnore
+    public String getId() {
+        return id;
+    }
+
+    @JsonIgnore
+    public synchronized Power getPower() {
+        if (power == null) {
+            power = new Power(names, adjective, isActive);
+        }
+        return power;
+    }
 
 }
