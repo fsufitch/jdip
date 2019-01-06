@@ -19,6 +19,7 @@ package info.jdip.persist;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -30,6 +31,7 @@ import java.util.UUID;
  * @author Uwe Plonus
  */
 @JsonPropertyOrder({"$id", "names", "adjective", "isActive"})
+@JsonIgnoreProperties({"power"})
 public class JsonPower {
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class)
@@ -59,12 +61,10 @@ public class JsonPower {
         this.power = power;
     }
 
-    @JsonIgnore
     public String getId() {
         return id;
     }
 
-    @JsonIgnore
     public synchronized Power getPower() {
         if (power == null) {
             power = new Power(names, adjective, isActive);
