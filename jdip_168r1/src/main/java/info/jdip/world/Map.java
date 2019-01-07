@@ -69,7 +69,8 @@ public class Map implements Serializable {
     /**
      * Constructs a Map object.
      */
-    protected Map(Power[] powerArray, Province[] provinceArray) {
+    // u.plonus@gmail.com Changed visibility to public to be able to create a Map during deserialize
+    public Map(Power[] powerArray, Province[] provinceArray) {
         // define constant arrays.
         powers = powerArray;
         provinces = provinceArray;

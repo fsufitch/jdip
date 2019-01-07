@@ -18,11 +18,13 @@
 package info.jdip.persist;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import info.jdip.world.Map;
 import info.jdip.world.Power;
+import info.jdip.world.Province;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +34,7 @@ import java.util.UUID;
  * @author Uwe Plonus
  */
 @JsonPropertyOrder({"$id", "powers"})
+@JsonIgnoreProperties({"map"})
 public class JsonMap {
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class)
@@ -54,6 +57,19 @@ public class JsonMap {
 
     public String getId() {
         return id;
+    }
+
+    public List<JsonPower> getPowers() {
+        return powers;
+    }
+
+    public Map getMap() {
+        Power[] mapPowers = new Power[powers.size()];
+        for (int i = 0; i < mapPowers.length; i++) {
+            mapPowers[i] = powers.get(i).getPower();
+        }
+        Map map = new Map(mapPowers, new Province[0]);
+        return map;
     }
 
 }

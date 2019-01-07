@@ -42,8 +42,15 @@ public class JsonPowerTest {
         writer = new StringWriter();
     }
 
-    private Power createPower() {
-        return new Power(new String[]{"Test"}, "Testish", true);
+    private Power createPower(int countNames) {
+        if (countNames < 1) {
+            throw new IllegalArgumentException("Expected to create at least a single name");
+        }
+        String[] names = new String[countNames];
+        for (int i = 0; i < countNames; i++) {
+            names[i] = new StringBuilder("Test").append(i).toString();
+        }
+        return new Power(names, "Testish", true);
     }
 
     @Test
@@ -64,13 +71,31 @@ public class JsonPowerTest {
 
     @Test
     public void testPersistPower() throws IOException, JSONException {
-        JsonPower power = new JsonPower(createPower());
+        JsonPower power = new JsonPower(createPower(1));
         mapper.writeValue(writer, power);
         JSONAssert.assertEquals(new StringBuilder()
                 .append("{")
                 .append(  "\"$id\":\"").append(power.getId()).append("\",")
                 .append(  "\"names\":[")
-                .append(    "\"Test\"")
+                .append(    "\"Test0\"")
+                .append(  "],")
+                .append(  "\"adjective\":\"Testish\",")
+                .append(  "\"isActive\":true")
+                .append("}")
+                .toString(),
+                writer.toString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void testPersistPowerWith2Names() throws IOException, JSONException {
+        JsonPower power = new JsonPower(createPower(2));
+        mapper.writeValue(writer, power);
+        JSONAssert.assertEquals(new StringBuilder()
+                .append("{")
+                .append(  "\"$id\":\"").append(power.getId()).append("\",")
+                .append(  "\"names\":[")
+                .append(    "\"Test0\",")
+                .append(    "\"Test1\"")
                 .append(  "],")
                 .append(  "\"adjective\":\"Testish\",")
                 .append(  "\"isActive\":true")
